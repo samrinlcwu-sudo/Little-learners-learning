@@ -5,15 +5,26 @@ import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
-import { learningCategoryGroups } from "@/config/learning-categories";
+import { learningCategoryGroups, getAllLearningCategories } from "@/config/learning-categories";
+import { LearningCard } from "@/components/patterns/learning-card";
+import { LearningContentBrowser } from "@/components/patterns/learning-content-browser";
+import { SAMPLE_CONTENT } from "@/lib/content/sample-content";
+import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Learn",
   description:
     "Browse Little Learners Learning's subject areas — English & literacy, math, life skills, creativity, and foundational Qur'an & Arabic learning.",
+  alternates: { canonical: `${siteConfig.url}/learn` },
 };
 
+const categoryNameBySlug = new Map(
+  getAllLearningCategories().map((c) => [c.slug, c.name] as const),
+);
+
 export default function LearnPage() {
+  const featured = SAMPLE_CONTENT.filter((item) => item.featured);
+
   return (
     <Section>
       <Container>
@@ -27,7 +38,29 @@ export default function LearnPage() {
           content is added.
         </p>
 
-        <div className="mt-10 space-y-10">
+        {featured.length > 0 && (
+          <div className="mt-12">
+            <Heading level="h4" as="h2" className="text-neutral-500">
+              Featured
+            </Heading>
+            <p className="mt-1 text-sm text-neutral-500">
+              A preview of the content model — these are sample records, not a
+              published library yet.
+            </p>
+            <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.map((item) => (
+                <LearningCard
+                  key={item.id}
+                  content={item}
+                  categoryName={categoryNameBySlug.get(item.category) ?? item.category}
+                  isSample
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-12 space-y-10">
           {learningCategoryGroups.map((group) => (
             <div key={group.group}>
               <Heading level="h4" as="h2" className="text-neutral-500">
@@ -53,6 +86,18 @@ export default function LearnPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-12">
+          <Heading level="h4" as="h2" className="text-neutral-500">
+            Browse all content
+          </Heading>
+          <p className="mt-1 text-sm text-neutral-500">
+            Search and filter across every sample record above.
+          </p>
+          <div className="mt-4">
+            <LearningContentBrowser items={SAMPLE_CONTENT} showCategoryFilter />
+          </div>
         </div>
       </Container>
     </Section>

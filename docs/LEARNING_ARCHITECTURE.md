@@ -40,16 +40,34 @@ to display text.
 
 ## Route strategy
 
-- `/learn` — index of all categories (real content, not a stub: names,
-  descriptions, age ranges, linked to each category page).
+- `/learn` — the Learning Hub: category grid, a small "Featured" row, and
+  a full search/filter browser (see below).
 - `/learn/[category]` — one page per category (`generateStaticParams`
   builds all 16 at build time — no runtime lookup, no huge client-side
   data load). Shows the category's scope (age range, expected content
-  types) and an honest empty state, since no content has been published.
-  404s via `notFound()` for any slug that isn't a real category.
+  types), its learning objectives, that category's content (if any), and
+  a "Related categories" list for internal linking. 404s via
+  `notFound()` for any slug that isn't a real category.
 - Both are plain, readable URLs (`/learn/mathematics`, not
   `/learn?id=2`), which is what makes each category independently
-  indexable by search engines.
+  indexable by search engines. Each has a self-referencing canonical URL.
+
+## Sample content (Prompt 8)
+
+`src/lib/content/sample-content.ts` holds exactly 4 hand-written
+`LearningContent` records — enough to prove the model, cards, and filters
+work end to end, not a content library. Every card rendered from this file
+carries a visible "Sample" badge (`LearningCard`'s `isSample` prop) so
+nothing is mistaken for a real, published resource. None are in a
+Qur'an/Arabic category — those pages show only the empty state until real,
+human-reviewed content exists.
+
+## Card system
+
+`src/components/patterns/learning-card.tsx` — the one card for any content
+item anywhere it's listed: title, category, age, content type, difficulty,
+and an action (a real link once content exists; a disabled "coming soon"
+button for samples, since there's nowhere real for it to lead yet).
 
 ## Search strategy
 
@@ -60,6 +78,12 @@ every future search/filter UI (global search, category search, age
 filtering, etc.) targets one stable shape. Once real content lives in
 Supabase, the body of `filterContent` becomes a SQL query using the same
 `ContentFilters` input — calling code doesn't change.
+
+`src/components/patterns/learning-content-browser.tsx` is the first real
+UI built on that contract: a client-side search box plus age/content-type
+(and, on the hub, category) filters over whatever `items` array it's
+given. It's genuinely functional today against the 4 samples — not a
+placeholder — and needs no changes when real content replaces them.
 
 ## SEO strategy
 

@@ -28,6 +28,8 @@ export interface LearningCategory {
   ageRange: AgeRange;
   /** Which content types this category is expected to eventually contain. */
   contentTypes: ContentType[];
+  /** The platform's own stated goals for the category — short, plain, non-promotional. */
+  learningObjectives: string[];
 }
 
 export interface LearningCategoryGroup {
@@ -52,6 +54,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: BookOpen,
         ageRange: { minYears: 3, maxYears: 6 },
         contentTypes: ["lesson", "worksheet", "activity", "ebook"],
+        learningObjectives: ["Recognize letters and their sounds", "Build early reading confidence"],
       },
       {
         slug: "mathematics",
@@ -60,6 +63,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Calculator,
         ageRange: { minYears: 3, maxYears: 6 },
         contentTypes: ["lesson", "worksheet", "activity", "game"],
+        learningObjectives: ["Understand numbers and counting", "Recognize shapes and simple patterns"],
       },
       {
         slug: "early-writing",
@@ -68,6 +72,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: PenLine,
         ageRange: { minYears: 4, maxYears: 7 },
         contentTypes: ["worksheet", "writing-practice"],
+        learningObjectives: ["Develop pencil grip and control", "Form letters correctly"],
       },
       {
         slug: "world-around-us",
@@ -76,6 +81,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Globe2,
         ageRange: { minYears: 3, maxYears: 7 },
         contentTypes: ["lesson", "ebook", "activity"],
+        learningObjectives: ["Explore nature and everyday environments", "Understand seasons and time"],
       },
       {
         slug: "science-discovery",
@@ -84,6 +90,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: FlaskConical,
         ageRange: { minYears: 4, maxYears: 7 },
         contentTypes: ["lesson", "activity", "ebook"],
+        learningObjectives: ["Ask questions and observe closely", "Explore simple cause and effect"],
       },
       {
         slug: "life-skills",
@@ -92,6 +99,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Heart,
         ageRange: { minYears: 2, maxYears: 6 },
         contentTypes: ["lesson", "activity"],
+        learningObjectives: ["Build everyday independence", "Practice self-care routines"],
       },
       {
         slug: "social-emotional-learning",
@@ -100,6 +108,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Smile,
         ageRange: { minYears: 2, maxYears: 6 },
         contentTypes: ["lesson", "activity", "ebook"],
+        learningObjectives: ["Name and understand feelings", "Practice sharing and kindness"],
       },
       {
         slug: "creativity",
@@ -108,6 +117,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Palette,
         ageRange: { minYears: 2, maxYears: 7 },
         contentTypes: ["activity", "coloring"],
+        learningObjectives: ["Express ideas through art", "Build confidence through imaginative play"],
       },
     ],
   },
@@ -121,6 +131,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: BookMarked,
         ageRange: { minYears: 4, maxYears: 8 },
         contentTypes: ["lesson"],
+        learningObjectives: ["Introduce foundational Qur'an reading practice", "Build familiarity at a comfortable pace"],
       },
       {
         slug: "arabic-letters",
@@ -129,6 +140,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Languages,
         ageRange: { minYears: 3, maxYears: 6 },
         contentTypes: ["lesson", "worksheet", "activity"],
+        learningObjectives: ["Recognize the Arabic alphabet", "Practice letter formation"],
       },
       {
         slug: "foundational-quran-reading",
@@ -137,6 +149,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: BookOpenCheck,
         ageRange: { minYears: 5, maxYears: 8 },
         contentTypes: ["lesson"],
+        learningObjectives: ["Learn harakat and short vowels", "Practice basic letter combinations"],
       },
     ],
   },
@@ -150,6 +163,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: ClipboardList,
         ageRange: { minYears: 3, maxYears: 7 },
         contentTypes: ["activity"],
+        learningObjectives: ["Reinforce learning through hands-on tasks", "Build focus and follow-through"],
       },
       {
         slug: "puzzles",
@@ -158,6 +172,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Puzzle,
         ageRange: { minYears: 3, maxYears: 7 },
         contentTypes: ["puzzle"],
+        learningObjectives: ["Develop problem-solving skills", "Build patience and persistence"],
       },
       {
         slug: "mazes",
@@ -166,6 +181,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Route,
         ageRange: { minYears: 4, maxYears: 7 },
         contentTypes: ["maze"],
+        learningObjectives: ["Practice visual tracking and focus", "Build fine-motor coordination"],
       },
       {
         slug: "coloring",
@@ -174,6 +190,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Paintbrush,
         ageRange: { minYears: 2, maxYears: 7 },
         contentTypes: ["coloring"],
+        learningObjectives: ["Practice color recognition", "Build fine-motor control"],
       },
       {
         slug: "learning-games",
@@ -182,6 +199,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         icon: Gamepad2,
         ageRange: { minYears: 3, maxYears: 7 },
         contentTypes: ["game"],
+        learningObjectives: ["Reinforce subject learning through play", "Build engagement and motivation"],
       },
     ],
   },
@@ -194,4 +212,11 @@ export function getAllLearningCategories(): LearningCategory[] {
 
 export function getLearningCategoryBySlug(slug: string): LearningCategory | undefined {
   return getAllLearningCategories().find((category) => category.slug === slug);
+}
+
+/** Other categories from the same group — for a "Related categories" section. */
+export function getRelatedCategories(slug: string, limit = 3): LearningCategory[] {
+  const group = learningCategoryGroups.find((g) => g.categories.some((c) => c.slug === slug));
+  if (!group) return [];
+  return group.categories.filter((c) => c.slug !== slug).slice(0, limit);
 }
