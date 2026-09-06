@@ -44,6 +44,9 @@ Qur'an-content safeguards) is documented in
 library (worksheets/activities/ebooks/teacher & parent resources, access
 tiers, downloads) is documented in
 [docs/RESOURCE_LIBRARY_ARCHITECTURE.md](docs/RESOURCE_LIBRARY_ARCHITECTURE.md).
+The Games Hub (game data model, the reusable choice-game engine, child
+safety) is documented in
+[docs/GAMES_HUB_ARCHITECTURE.md](docs/GAMES_HUB_ARCHITECTURE.md).
 
 ## Installation
 
