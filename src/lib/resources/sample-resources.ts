@@ -1,0 +1,111 @@
+import type { Resource } from "./types";
+
+/**
+ * A handful of clearly-marked SAMPLE resources — not a real library. They
+ * exist to prove the model, cards, filters, and detail pages work end to
+ * end. None has a real `downloadFile`, so no UI should ever show a working
+ * download action for these (see `canDownload` in ./types.ts).
+ *
+ * One entry (`arabic-letters-tracing-pack`) is deliberately unverified
+ * religious-adjacent content, included specifically to prove
+ * `isResourcePublished` hides it — see sample-resources.test.ts.
+ */
+export const SAMPLE_RESOURCES: Resource[] = [
+  {
+    id: "resource-1",
+    slug: "counting-animals-worksheet",
+    title: "Counting Animals Worksheet",
+    description: "A printable worksheet practicing counting groups of farm animals up to ten.",
+    resourceType: "worksheet",
+    category: "mathematics",
+    ageRange: { minYears: 3, maxYears: 5 },
+    difficulty: "beginner",
+    learningObjective: "Count a group of up to ten objects.",
+    tags: ["counting", "numbers"],
+    author: { name: "Little Learners Learning", role: "platform" },
+    accessTier: "free",
+    featured: true,
+    publicationStatus: "published",
+    religiousReview: "not-applicable",
+    createdAt: "2026-02-01",
+    updatedAt: "2026-02-01",
+  },
+  {
+    id: "resource-2",
+    slug: "first-shapes-ebook",
+    title: "First Shapes",
+    description: "A short illustrated ebook introducing circles, squares, and triangles.",
+    resourceType: "ebook",
+    category: "mathematics",
+    ageRange: { minYears: 2, maxYears: 4 },
+    difficulty: "beginner",
+    learningObjective: "Name basic shapes on sight.",
+    tags: ["shapes"],
+    author: { name: "Little Learners Learning", role: "platform" },
+    accessTier: "premium",
+    featured: true,
+    publicationStatus: "published",
+    religiousReview: "not-applicable",
+    createdAt: "2026-02-03",
+    updatedAt: "2026-02-03",
+  },
+  {
+    id: "resource-3",
+    slug: "classroom-circle-time-ideas",
+    title: "Classroom Circle Time Ideas",
+    description: "A short list of circle-time routines for early-years classrooms.",
+    resourceType: "teacher-resource",
+    subject: "Classroom Management",
+    ageRange: { minYears: 3, maxYears: 6 },
+    difficulty: "beginner",
+    learningObjective: "Give teachers a repeatable circle-time structure.",
+    tags: ["classroom", "routines"],
+    author: { name: "Little Learners Learning", role: "platform" },
+    accessTier: "free",
+    featured: false,
+    publicationStatus: "published",
+    religiousReview: "not-applicable",
+    createdAt: "2026-02-05",
+    updatedAt: "2026-02-05",
+  },
+  {
+    id: "resource-4",
+    slug: "screen-time-conversation-starters",
+    title: "Screen-Time Conversation Starters",
+    description: "A short set of questions parents can use to talk with their child about screen time.",
+    resourceType: "parent-resource",
+    subject: "Family Routines",
+    ageRange: { minYears: 3, maxYears: 7 },
+    difficulty: "beginner",
+    learningObjective: "Help parents open a conversation about screen time.",
+    tags: ["parenting"],
+    author: { name: "Little Learners Learning", role: "platform" },
+    accessTier: "free",
+    featured: false,
+    publicationStatus: "published",
+    religiousReview: "not-applicable",
+    createdAt: "2026-02-06",
+    updatedAt: "2026-02-06",
+  },
+  {
+    id: "resource-5",
+    slug: "arabic-letters-tracing-pack",
+    title: "Arabic Letters Tracing Pack",
+    description: "A tracing worksheet pack for the first few letters of the Arabic alphabet.",
+    resourceType: "worksheet",
+    category: "arabic-letters",
+    ageRange: { minYears: 3, maxYears: 5 },
+    difficulty: "beginner",
+    learningObjective: "Trace and recognize the first Arabic letters.",
+    tags: ["arabic", "tracing"],
+    author: { name: "Little Learners Learning", role: "platform" },
+    accessTier: "free",
+    featured: false,
+    publicationStatus: "published",
+    // Not yet reviewed — isResourcePublished() must hide this from every
+    // public listing until a qualified person marks it "verified".
+    religiousReview: "pending-review",
+    createdAt: "2026-02-08",
+    updatedAt: "2026-02-08",
+  },
+];

@@ -40,7 +40,10 @@ Visual design system (colors, typography, components) is documented in
 [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) and rendered live at `/style-guide`.
 The subject/content model (categories, age ranges, content types, search and
 Qur'an-content safeguards) is documented in
-[docs/LEARNING_ARCHITECTURE.md](docs/LEARNING_ARCHITECTURE.md).
+[docs/LEARNING_ARCHITECTURE.md](docs/LEARNING_ARCHITECTURE.md). The resource
+library (worksheets/activities/ebooks/teacher & parent resources, access
+tiers, downloads) is documented in
+[docs/RESOURCE_LIBRARY_ARCHITECTURE.md](docs/RESOURCE_LIBRARY_ARCHITECTURE.md).
 
 ## Installation
 

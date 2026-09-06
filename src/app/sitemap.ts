@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
 import { primaryNav } from "@/config/nav";
 import { getAllLearningCategories } from "@/config/learning-categories";
+import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
+import { isResourcePublished } from "@/lib/resources/types";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -20,6 +22,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.5,
+    })),
+    ...SAMPLE_RESOURCES.filter(isResourcePublished).map((resource) => ({
+      url: `${siteConfig.url}/resources/${resource.slug}`,
+      lastModified: resource.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
     })),
   ];
 }
