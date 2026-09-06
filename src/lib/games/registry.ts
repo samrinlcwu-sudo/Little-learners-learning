@@ -1,10 +1,3 @@
-import type { ComponentType } from "react";
-import { LetterMatchGame } from "@/components/games/letter-match-game";
-import { CountingGame } from "@/components/games/counting-game";
-import { ShapeMatchGame } from "@/components/games/shape-match-game";
-import { ColorMatchGame } from "@/components/games/color-match-game";
-import { NumberMemoryGame } from "@/components/games/number-memory-game";
-
 export interface GameComponentProps {
   /** The Game record's own `skill` — passed down so the completion screen can say what was practiced. */
   skill: string;
@@ -14,16 +7,17 @@ export interface GameComponentProps {
  * Only a slug listed here has a real, playable implementation. Every other
  * published Game record is a legitimate roadmap entry — real metadata,
  * honestly labeled "Coming soon" — never a Play button pointing at
- * nothing. Add an entry here the same day the game component ships.
+ * nothing. Add an entry here (and to GAME_LOADERS in
+ * src/components/games/game-player.tsx) the same day the game ships.
  */
-export const GAME_COMPONENTS: Record<string, ComponentType<GameComponentProps>> = {
-  "letter-match": LetterMatchGame,
-  "count-the-fruits": CountingGame,
-  "shape-match": ShapeMatchGame,
-  "color-match": ColorMatchGame,
-  "number-memory": NumberMemoryGame,
-};
+const PLAYABLE_GAME_SLUGS = new Set([
+  "letter-match",
+  "count-the-fruits",
+  "shape-match",
+  "color-match",
+  "number-memory",
+]);
 
 export function isGamePlayable(slug: string): boolean {
-  return slug in GAME_COMPONENTS;
+  return PLAYABLE_GAME_SLUGS.has(slug);
 }

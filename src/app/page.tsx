@@ -6,10 +6,6 @@ import {
   Library,
   Layers,
   ShieldCheck,
-  Baby,
-  UserCircle,
-  GraduationCap,
-  Sparkles,
   Users,
   Accessibility,
   Gamepad2,
@@ -23,6 +19,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DecorativeBlob } from "@/components/ui/decorative-blob";
 import { IconFeature } from "@/components/patterns/icon-feature";
 import { learningCategoryGroups } from "@/config/learning-categories";
+import { parentValuePoints, teacherValuePoints } from "@/config/audience-value-points";
 
 export const metadata: Metadata = {
   description:
@@ -44,42 +41,6 @@ const resourceFormats = [
     name: "Ebooks",
     description: "Age-appropriate reading material for early learners.",
     icon: Library,
-  },
-];
-
-const parentPoints = [
-  {
-    icon: Layers,
-    title: "Organized by subject",
-    description: "Learning is grouped clearly by subject, so it's easy to find what fits your child right now.",
-  },
-  {
-    icon: Baby,
-    title: "Built for early years",
-    description: "Designed specifically around how young children learn — not adapted from older-kids content.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Careful with Qur'an content",
-    description: "Religious content is reviewed by a qualified person before publishing — never generated automatically.",
-  },
-];
-
-const teacherPoints = [
-  {
-    icon: UserCircle,
-    title: "Professional profiles",
-    description: "A profile for your experience, subjects, age groups, and areas of expertise.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Share your expertise",
-    description: "Contribute resources and be discoverable by families looking for your specialties.",
-  },
-  {
-    icon: Sparkles,
-    title: "Room to grow",
-    description: "Professional development opportunities are planned as the platform develops.",
   },
 ];
 
@@ -254,7 +215,7 @@ export default function Home() {
             </Button>
           </div>
           <div className="grid gap-6 sm:grid-cols-2">
-            {parentPoints.map((point) => (
+            {parentValuePoints.map((point) => (
               <IconFeature key={point.title} {...point} />
             ))}
           </div>
@@ -280,7 +241,7 @@ export default function Home() {
             </div>
           </div>
           <div className="grid gap-6 sm:grid-cols-2">
-            {teacherPoints.map((point) => (
+            {teacherValuePoints.map((point) => (
               <IconFeature key={point.title} {...point} />
             ))}
           </div>

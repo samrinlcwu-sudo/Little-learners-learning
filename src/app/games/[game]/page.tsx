@@ -9,9 +9,10 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GameCard } from "@/components/patterns/game-card";
+import { GamePlayer } from "@/components/games/game-player";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
-import { GAME_COMPONENTS, isGamePlayable } from "@/lib/games/registry";
+import { isGamePlayable } from "@/lib/games/registry";
 import { GAME_TYPE_LABELS, isGamePublished, type Game } from "@/lib/games/types";
 import { siteConfig } from "@/config/site";
 
@@ -55,7 +56,6 @@ export default async function GameDetailPage({
 
   const category = game.category ? getLearningCategoryBySlug(game.category) : undefined;
   const playable = isGamePlayable(game.slug);
-  const PlayableGame = GAME_COMPONENTS[game.slug];
   const canonicalUrl = `${siteConfig.url}/games/${game.slug}`;
 
   const related = SAMPLE_GAMES.filter(
@@ -151,8 +151,8 @@ export default async function GameDetailPage({
         </div>
 
         <div className="mt-8 max-w-2xl">
-          {playable && PlayableGame ? (
-            <PlayableGame skill={game.skill} />
+          {playable ? (
+            <GamePlayer slug={game.slug} skill={game.skill} />
           ) : (
             <EmptyState
               title="This game is coming soon"
