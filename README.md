@@ -28,8 +28,16 @@ no homepage or product features have been built yet.
 - **Vitest** — unit testing, colocated with source files (`*.test.ts`).
 - **ESLint** (flat config) with `eslint-plugin-jsx-a11y` — linting and
   accessibility checks.
+- **Radix UI primitives** (Dialog, Tabs, Dropdown Menu) — correct focus
+  trapping, keyboard navigation, and ARIA for the interactive components the
+  brief requires, instead of hand-rolled accessibility logic.
+- **class-variance-authority** — typed variant styling for Button/Badge/Alert,
+  one source of truth per component instead of ad hoc conditional classes.
+- **lucide-react** — the icon set used across alerts, buttons, and states.
 
 Full rationale for each choice is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Visual design system (colors, typography, components) is documented in
+[docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) and rendered live at `/style-guide`.
 
 ## Installation
 
@@ -71,12 +79,18 @@ that decision is executed.
 ```
 src/
   app/                 Next.js App Router — routes, layouts, metadata files
+                          style-guide/  internal design-system reference page
+  components/
+    ui/                  Design-system primitives (Button, Card, Modal, ...)
+    layout/                Site chrome (SiteHeader, SiteFooter)
   config/               Site-wide constants (name, URL, etc.)
   lib/
     supabase/            Supabase client factories (browser + server)
     validations/          Shared Zod schemas
     utils/                 Shared utilities (colocated with their tests)
-docs/                       Architecture and decision records
+public/
+  brand/                    Official logo (used unmodified)
+docs/                       Architecture and design-system decision records
 ```
 
 Feature areas listed in the architecture doc (learning content, teacher
@@ -100,8 +114,9 @@ file is added, to avoid empty-directory clutter.
 - This project is intentionally independent from any earlier "Little
   Learners" website or codebase. Do not merge or copy from prior projects
   into this one without explicit instruction.
-- The official brand logo has not yet been added to this project — do not
-  invent or generate a placeholder logo.
+- The official brand logo (`public/brand/little-learners-learning-logo.png`)
+  must never be redesigned, recolored, distorted, or replaced without
+  explicit approval — treat it as immutable.
 - AI assistant, WhatsApp integration, and payment processing are **not**
   connected. Their planned architecture is documented but no credentials or
   SDKs are wired up.

@@ -1,11 +1,17 @@
+import { Container } from "@/components/ui/container";
+import { Section } from "@/components/ui/section";
+import { Heading } from "@/components/ui/heading";
+
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-2 p-16 text-center">
-      <h1 className="text-2xl font-semibold">Little Learners Learning</h1>
-      <p className="text-zinc-500">
-        Technical foundation in place. Homepage design and content land in a
-        later build phase.
-      </p>
-    </main>
+    <Section className="flex flex-1 items-center">
+      <Container className="text-center">
+        <Heading level="display">Little Learners Learning</Heading>
+        <p className="mx-auto mt-4 max-w-xl text-neutral-600">
+          Visual foundation in place. Homepage content lands in a later build
+          phase.
+        </p>
+      </Container>
+    </Section>
   );
 }

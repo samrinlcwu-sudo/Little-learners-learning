@@ -1,26 +1,166 @@
 @import "tailwindcss";
+@plugin "tailwindcss-animate";
 
+/*
+  Design tokens for Little Learners Learning.
+  Light-mode only for now — dark mode is deferred until requested, rather
+  than shipping a half-verified second palette.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces & text */
+  --color-surface: #ffffff;
+  --color-surface-sunken: #faf8f4;
+  --color-ink: #211c17;
+
+  /* Neutral — warm-tinted gray scale (echoes the logo's cream, not blue-gray) */
+  --color-neutral-50: #faf8f4;
+  --color-neutral-100: #f3f0e9;
+  --color-neutral-200: #e7e2d6;
+  --color-neutral-300: #d3ccbc;
+  --color-neutral-400: #afa692;
+  --color-neutral-500: #8b8272;
+  --color-neutral-600: #6b6355;
+  --color-neutral-700: #4f493f;
+  --color-neutral-800: #362f28;
+  --color-neutral-900: #211c17;
+  --color-neutral-950: #14100d;
+
+  /* Primary — deep teal. Trust, calm, education. */
+  --color-primary-50: #eff7f7;
+  --color-primary-100: #dceeee;
+  --color-primary-200: #b9dddd;
+  --color-primary-300: #8cc5c6;
+  --color-primary-400: #57a3a5;
+  --color-primary-500: #2e8083;
+  --color-primary-600: #206669;
+  --color-primary-700: #1a5153;
+  --color-primary-800: #163f41;
+  --color-primary-900: #123234;
+
+  /* Secondary — warm terracotta. Echoes the logo's warm tones, muted for credibility. */
+  --color-secondary-50: #fdf3ee;
+  --color-secondary-100: #fae4d8;
+  --color-secondary-200: #f3c4a8;
+  --color-secondary-300: #e9a277;
+  --color-secondary-400: #dc7c4c;
+  --color-secondary-500: #c1502b;
+  --color-secondary-600: #a43f21;
+  --color-secondary-700: #82311a;
+  --color-secondary-800: #642614;
+
+  /* Accent — golden. Used sparingly (badges, small highlights), never as a base surface. */
+  --color-accent-50: #fef9ec;
+  --color-accent-100: #fcefc7;
+  --color-accent-200: #f8dd8b;
+  --color-accent-300: #f3c74e;
+  --color-accent-400: #ecaf23;
+  --color-accent-500: #d6960f;
+  --color-accent-800: #714e10;
+
+  /* Semantic */
+  --color-success-100: #def3e7;
+  --color-success-600: #217a4c;
+  --color-success-800: #14432a;
+
+  --color-warning-100: #fdecc8;
+  --color-warning-600: #d97706;
+  --color-warning-800: #7c4a03;
+
+  --color-error-100: #fbe1de;
+  --color-error-600: #dc2626;
+  --color-error-700: #b91c1c;
+  --color-error-800: #7f1616;
+
+  /* Borders & focus */
+  --color-border: var(--color-neutral-200);
+  --color-focus-ring: var(--color-primary-600);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-surface: var(--color-surface);
+  --color-surface-sunken: var(--color-surface-sunken);
+  --color-ink: var(--color-ink);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-neutral-50: var(--color-neutral-50);
+  --color-neutral-100: var(--color-neutral-100);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-400: var(--color-neutral-400);
+  --color-neutral-500: var(--color-neutral-500);
+  --color-neutral-600: var(--color-neutral-600);
+  --color-neutral-700: var(--color-neutral-700);
+  --color-neutral-800: var(--color-neutral-800);
+  --color-neutral-900: var(--color-neutral-900);
+  --color-neutral-950: var(--color-neutral-950);
+
+  --color-primary-50: var(--color-primary-50);
+  --color-primary-100: var(--color-primary-100);
+  --color-primary-200: var(--color-primary-200);
+  --color-primary-300: var(--color-primary-300);
+  --color-primary-400: var(--color-primary-400);
+  --color-primary-500: var(--color-primary-500);
+  --color-primary-600: var(--color-primary-600);
+  --color-primary-700: var(--color-primary-700);
+  --color-primary-800: var(--color-primary-800);
+  --color-primary-900: var(--color-primary-900);
+
+  --color-secondary-50: var(--color-secondary-50);
+  --color-secondary-100: var(--color-secondary-100);
+  --color-secondary-200: var(--color-secondary-200);
+  --color-secondary-300: var(--color-secondary-300);
+  --color-secondary-400: var(--color-secondary-400);
+  --color-secondary-500: var(--color-secondary-500);
+  --color-secondary-600: var(--color-secondary-600);
+  --color-secondary-700: var(--color-secondary-700);
+  --color-secondary-800: var(--color-secondary-800);
+
+  --color-accent-50: var(--color-accent-50);
+  --color-accent-100: var(--color-accent-100);
+  --color-accent-200: var(--color-accent-200);
+  --color-accent-300: var(--color-accent-300);
+  --color-accent-400: var(--color-accent-400);
+  --color-accent-500: var(--color-accent-500);
+  --color-accent-800: var(--color-accent-800);
+
+  --color-success-100: var(--color-success-100);
+  --color-success-600: var(--color-success-600);
+  --color-success-800: var(--color-success-800);
+  --color-warning-100: var(--color-warning-100);
+  --color-warning-600: var(--color-warning-600);
+  --color-warning-800: var(--color-warning-800);
+  --color-error-100: var(--color-error-100);
+  --color-error-600: var(--color-error-600);
+  --color-error-700: var(--color-error-700);
+  --color-error-800: var(--color-error-800);
+
+  --color-border: var(--color-border);
+  --color-focus-ring: var(--color-focus-ring);
+
+  /* Typography */
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+
+  /* Radius — friendly but restrained, not pill-shaped by default */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+
+  /* Shadows — soft, warm-tinted (ink, not pure black), low elevation by default */
+  --shadow-sm: 0 1px 2px 0 rgb(33 28 23 / 0.06);
+  --shadow-md: 0 4px 12px -2px rgb(33 28 23 / 0.10), 0 2px 4px -2px rgb(33 28 23 / 0.06);
+  --shadow-lg: 0 12px 32px -8px rgb(33 28 23 / 0.16), 0 4px 8px -4px rgb(33 28 23 / 0.08);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-surface-sunken);
+  color: var(--color-ink);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Visible, consistent focus state for every interactive element — never rely
+   on color alone, and never suppress the indicator. */
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
 }
