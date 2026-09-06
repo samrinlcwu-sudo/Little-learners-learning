@@ -1,11 +1,18 @@
 import * as React from "react";
 import { cn } from "@/lib/utils/cn";
 
-function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Adds hover elevation + border tint — for cards that are or contain a link/action, never for static display cards. */
+  interactive?: boolean;
+}
+
+function Card({ className, interactive, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-lg border border-neutral-200 bg-surface shadow-sm",
+        "rounded-xl border border-neutral-200 bg-surface shadow-sm transition-[transform,box-shadow,border-color] duration-200 ease-out motion-reduce:transition-none",
+        interactive &&
+          "hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md motion-reduce:hover:translate-y-0",
         className,
       )}
       {...props}

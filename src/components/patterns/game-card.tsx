@@ -26,9 +26,9 @@ function GameCard({ game, categoryName }: GameCardProps) {
   const playable = isGamePlayable(game.slug);
 
   return (
-    <Card className="flex h-full flex-col">
-      <div className="flex items-center gap-3 rounded-t-lg border-b border-neutral-200 bg-surface-sunken px-6 py-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary-100">
+    <Card interactive className="flex h-full flex-col overflow-hidden">
+      <div className="flex items-center gap-3 border-b border-neutral-200 bg-surface-sunken px-6 py-4">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
           <Gamepad2 className="size-5 text-primary-700" aria-hidden="true" />
         </div>
         <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">

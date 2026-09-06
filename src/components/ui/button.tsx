@@ -9,13 +9,21 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        /** Strongest — the one primary action per view. */
         primary:
-          "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800",
+          "bg-primary-600 text-white shadow-sm hover:bg-primary-700 active:bg-primary-800",
+        /** Alternate brand action, similar weight to primary — use for a second, unrelated action, never alongside primary as its equal. */
         secondary:
-          "bg-secondary-600 text-white hover:bg-secondary-700 active:bg-secondary-800",
+          "bg-secondary-600 text-white shadow-sm hover:bg-secondary-700 active:bg-secondary-800",
+        /** Tinted, borderless — a mid-weight action that reads calmer than a solid fill. */
+        soft: "bg-primary-50 text-primary-800 hover:bg-primary-100 active:bg-primary-200",
+        /** Bordered, neutral — a secondary action alongside a primary button. */
         outline:
           "border border-neutral-300 bg-surface text-ink hover:bg-neutral-100",
+        /** Lightest button — icon-only or low-emphasis toolbar actions. */
         ghost: "text-ink hover:bg-neutral-100",
+        /** Text-only action, no button chrome — "skip", "learn more", inline links. */
+        link: "text-primary-700 underline-offset-4 hover:text-primary-800 hover:underline",
         destructive: "bg-error-700 text-white hover:bg-error-800",
       },
       size: {
@@ -24,6 +32,13 @@ const buttonVariants = cva(
         lg: "h-13 px-7 text-base",
       },
     },
+    compoundVariants: [
+      {
+        variant: "link",
+        size: ["sm", "md", "lg"],
+        className: "h-auto px-0 py-0 font-medium",
+      },
+    ],
     defaultVariants: {
       variant: "primary",
       size: "md",

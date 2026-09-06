@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
-import { Heading } from "@/components/ui/heading";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { PageHeader } from "@/components/patterns/page-header";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -101,19 +100,17 @@ export default async function ResourcesPage({
   }
 
   return (
-    <Section>
-      <Container>
-        <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Resources" }]} />
-        <Heading level="h1" className="mt-4">
-          Resources
-        </Heading>
-        <p className="mt-3 max-w-2xl text-neutral-600">
-          Worksheets, activities, ebooks, and resources for parents and
-          teachers. The library is just getting started — search and filters
-          are fully working, even while the catalog is small.
-        </p>
-
-        <form method="get" className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <>
+      <PageHeader
+        breadcrumb={[{ label: "Home", href: "/" }, { label: "Resources" }]}
+        eyebrow="Resource Library"
+        title="Resources"
+        description="Worksheets, activities, ebooks, and resources for parents and teachers. The library is just getting started — search and filters are fully working, even while the catalog is small."
+        surface="tint-secondary"
+      />
+      <Section className="pt-10 sm:pt-12 lg:pt-14">
+        <Container>
+          <form method="get" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2">
             <Label htmlFor="q">Search</Label>
             <Input id="q" name="q" type="search" placeholder="Search titles…" defaultValue={filters.query} />
@@ -239,6 +236,7 @@ export default async function ResourcesPage({
           )}
         </div>
       </Container>
-    </Section>
+      </Section>
+    </>
   );
 }

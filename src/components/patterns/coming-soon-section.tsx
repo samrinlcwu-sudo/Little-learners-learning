@@ -18,13 +18,15 @@ export interface ComingSoonSectionProps {
  */
 function ComingSoonSection({ title, description, breadcrumb }: ComingSoonSectionProps) {
   return (
-    <Section className="flex flex-1 flex-col justify-center">
+    <Section surface="sunken" className="flex flex-1 flex-col justify-center">
       <Container className="max-w-2xl text-center">
         <div className="mb-6 flex justify-center">
           <Breadcrumb items={breadcrumb} />
         </div>
-        <Construction className="mx-auto size-10 text-neutral-400" aria-hidden="true" />
-        <Heading level="h1" className="mt-4">
+        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-neutral-200/70 text-neutral-500">
+          <Construction className="size-7" aria-hidden="true" />
+        </div>
+        <Heading level="h1" className="mt-5">
           {title}
         </Heading>
         <p className="mt-3 text-neutral-600">{description}</p>

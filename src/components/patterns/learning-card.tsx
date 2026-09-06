@@ -23,7 +23,7 @@ const DIFFICULTY_LABELS: Record<LearningContent["difficulty"], string> = {
  */
 function LearningCard({ content, categoryName, isSample }: LearningCardProps) {
   return (
-    <Card className="flex h-full flex-col">
+    <Card interactive className="flex h-full flex-col">
       <CardHeader className="flex-row items-start justify-between gap-2 space-y-0">
         <div>
           <Badge variant="primary">{categoryName}</Badge>

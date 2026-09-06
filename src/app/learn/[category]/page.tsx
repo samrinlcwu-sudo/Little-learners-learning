@@ -58,8 +58,10 @@ export default async function LearnCategoryPage({
               { label: category.name },
             ]}
           />
-          <div className="mt-4 flex items-center gap-3">
-            <category.icon className="size-7 text-primary-600" aria-hidden="true" />
+          <div className="mt-4 flex items-center gap-4">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700">
+              <category.icon className="size-6" aria-hidden="true" />
+            </div>
             <Heading level="h1">{category.name}</Heading>
           </div>
           <p className="mt-3 text-neutral-600">{category.description}</p>

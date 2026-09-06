@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
+import { Eyebrow } from "@/components/ui/eyebrow";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -90,7 +91,15 @@ export default function StyleGuidePage() {
             <Swatch name="Warning 600" className="bg-warning-600" />
             <Swatch name="Error 700" className="bg-error-700" />
             <Swatch name="Surface Sunken" className="bg-surface-sunken border border-neutral-200" textClassName="text-ink" />
+            <Swatch name="Tint Primary" className="bg-surface-tint-primary border border-neutral-200" textClassName="text-ink" />
+            <Swatch name="Tint Secondary" className="bg-surface-tint-secondary border border-neutral-200" textClassName="text-ink" />
+            <Swatch name="Tint Accent" className="bg-surface-tint-accent border border-neutral-200" textClassName="text-ink" />
           </div>
+          <p className="mt-4 max-w-2xl text-sm text-neutral-600">
+            Section backgrounds are a deliberate rotation of White → Cream →
+            Tint → dark brand close, not a different color per section. See
+            the homepage for the full rhythm.
+          </p>
         </Container>
       </Section>
 
@@ -98,11 +107,16 @@ export default function StyleGuidePage() {
       <Section surface="sunken">
         <Container className="space-y-4">
           <Heading level="h2">Typography</Heading>
+          <Eyebrow>Eyebrow label</Eyebrow>
           <Heading level="display">Display heading</Heading>
           <Heading level="h1">Heading 1 — Fraunces</Heading>
           <Heading level="h2">Heading 2 — Fraunces</Heading>
           <Heading level="h3">Heading 3 — Fraunces</Heading>
           <Heading level="h4">Heading 4 — Inter</Heading>
+          <p className="text-lead max-w-2xl text-neutral-600">
+            Lead paragraph — a slightly larger, looser intro line used under a
+            hero or section heading, before body copy narrows back down.
+          </p>
           <p className="max-w-2xl text-base text-ink">
             Body text uses Inter for maximum readability at small sizes across
             forms, cards, and long-form copy. Fraunces is reserved for
@@ -119,12 +133,20 @@ export default function StyleGuidePage() {
       <Section>
         <Container className="space-y-6">
           <Heading level="h2">Buttons</Heading>
+          <p className="max-w-2xl text-sm text-neutral-600">
+            Ordered by visual strength — reach for the first one that fits
+            before dropping to the next tier.
+          </p>
           <div className="flex flex-wrap items-center gap-3">
             <Button variant="primary">Primary</Button>
             <Button variant="secondary">Secondary</Button>
+            <Button variant="soft">Soft</Button>
             <Button variant="outline">Outline</Button>
             <Button variant="ghost">Ghost</Button>
+            <Button variant="link">Text link</Button>
             <Button variant="destructive">Destructive</Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
             <Button variant="primary" isLoading>
               Loading
             </Button>
@@ -236,10 +258,10 @@ export default function StyleGuidePage() {
                 <CardDescription>Used sparingly, never as the focal point.</CardDescription>
               </CardHeader>
             </Card>
-            <Card>
+            <Card interactive>
               <CardHeader>
-                <CardTitle>Third card</CardTitle>
-                <CardDescription>Grid reflows to a single column on mobile.</CardDescription>
+                <CardTitle>Interactive card</CardTitle>
+                <CardDescription>Lifts slightly and tints its border on hover — reserve for cards that link somewhere.</CardDescription>
               </CardHeader>
             </Card>
           </div>
