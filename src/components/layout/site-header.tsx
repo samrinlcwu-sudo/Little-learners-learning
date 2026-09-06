@@ -59,7 +59,7 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
 
   // Close the mobile drawer if the viewport grows past the mobile breakpoint.
   React.useEffect(() => {
-    const query = window.matchMedia("(min-width: 768px)");
+    const query = window.matchMedia("(min-width: 1024px)");
     function onChange(event: MediaQueryListEvent) {
       if (event.matches) setMobileOpen(false);
     }
@@ -85,7 +85,7 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
             />
           </Link>
 
-          <nav aria-label="Primary" className="hidden md:block">
+          <nav aria-label="Primary" className="hidden lg:block">
             <ul className="flex items-center gap-7">
               {links.map((link) => (
                 <li key={link.href}>
@@ -100,12 +100,12 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
             </ul>
           </nav>
 
-          <HeaderActions className="hidden md:flex" />
+          <HeaderActions className="hidden lg:flex" />
 
           <button
             ref={toggleRef}
             type="button"
-            className="inline-flex size-11 items-center justify-center rounded-md text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30 md:hidden"
+            className="inline-flex size-11 items-center justify-center rounded-md text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30 lg:hidden"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             onClick={() => setMobileOpen((open) => !open)}
@@ -121,7 +121,7 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
 
         <div
           className={cn(
-            "grid border-neutral-200 transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none md:hidden",
+            "grid border-neutral-200 transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none lg:hidden",
             mobileOpen ? "grid-rows-[1fr] border-t" : "grid-rows-[0fr]",
           )}
         >

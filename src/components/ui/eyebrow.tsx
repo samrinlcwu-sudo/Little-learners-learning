@@ -7,7 +7,7 @@ const eyebrowVariants = cva("text-eyebrow block", {
     tone: {
       primary: "text-primary-700",
       secondary: "text-secondary-600",
-      accent: "text-accent-600",
+      accent: "text-accent-800",
       neutral: "text-neutral-500",
       inverse: "text-white/80",
     },
