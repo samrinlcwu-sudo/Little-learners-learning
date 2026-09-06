@@ -38,6 +38,9 @@ no homepage or product features have been built yet.
 Full rationale for each choice is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 Visual design system (colors, typography, components) is documented in
 [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) and rendered live at `/style-guide`.
+The subject/content model (categories, age ranges, content types, search and
+Qur'an-content safeguards) is documented in
+[docs/LEARNING_ARCHITECTURE.md](docs/LEARNING_ARCHITECTURE.md).
 
 ## Installation
 

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
 import { primaryNav } from "@/config/nav";
+import { getAllLearningCategories } from "@/config/learning-categories";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -13,6 +14,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.6,
+    })),
+    ...getAllLearningCategories().map((category) => ({
+      url: `${siteConfig.url}/learn/${category.slug}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
     })),
   ];
 }

@@ -46,11 +46,14 @@ No API routes exist yet — none are needed until a real feature calls for one.
 
 ## 6. Content architecture
 
-Structured content (blog posts, learning resource metadata) will live under
-`src/content/` using typed frontmatter/schemas validated with Zod, so content
-authors can't accidentally ship malformed entries. Religious/Quranic content
-gets its own reviewed subtree with an explicit `reviewStatus` field —
-unverified content must never render on a public route.
+The learning-content model (`src/lib/content/types.ts`), category taxonomy
+(`src/config/learning-categories.ts`), and per-category routes
+(`/learn/[category]`) are documented in full in
+[LEARNING_ARCHITECTURE.md](LEARNING_ARCHITECTURE.md). Religious/Qur'anic
+content is gated by a `religiousReview` field enforced in code
+(`isPubliclyVisible()`) — unverified content can never render on a public
+route. Blog-style editorial content (not yet built) will follow the same
+pattern under `src/content/` once it exists.
 
 ## 7. Asset management strategy
 
