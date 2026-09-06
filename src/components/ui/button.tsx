@@ -43,9 +43,23 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     { className, variant, size, asChild, isLoading, disabled, children, ...props },
     ref,
   ) => {
-    const Comp = asChild ? Slot : "button";
+    // `asChild` delegates to a single arbitrary child (e.g. a Link) — Radix
+    // Slot requires exactly one element child, so the loading icon (which
+    // doesn't apply to that case anyway) is only ever added for a real <button>.
+    if (asChild) {
+      return (
+        <Slot
+          ref={ref}
+          className={cn(buttonVariants({ variant, size }), className)}
+          {...props}
+        >
+          {children}
+        </Slot>
+      );
+    }
+
     return (
-      <Comp
+      <button
         ref={ref}
         className={cn(buttonVariants({ variant, size }), className)}
         disabled={disabled || isLoading}
@@ -54,7 +68,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading && <Loader2 className="animate-spin" aria-hidden="true" />}
         {children}
-      </Comp>
+      </button>
     );
   },
 );

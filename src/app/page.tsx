@@ -1,17 +1,330 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import {
+  FileText,
+  NotebookPen,
+  Library,
+  Layers,
+  ShieldCheck,
+  Baby,
+  UserCircle,
+  GraduationCap,
+  Sparkles,
+  Users,
+  Accessibility,
+  Gamepad2,
+} from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { DecorativeBlob } from "@/components/ui/decorative-blob";
+import { IconFeature } from "@/components/patterns/icon-feature";
+import { learningCategoryGroups } from "@/config/learning-categories";
+
+export const metadata: Metadata = {
+  description:
+    "Little Learners Learning is an early-years learning platform bringing literacy, math, life skills, creativity, and foundational Qur'an learning together — built for parents and teachers, not just kids.",
+};
+
+const resourceFormats = [
+  {
+    name: "Worksheets",
+    description: "Printable practice sheets for hands-on learning at home or in the classroom.",
+    icon: FileText,
+  },
+  {
+    name: "Activities",
+    description: "Guided exercises that reinforce a subject through doing, not just reading.",
+    icon: NotebookPen,
+  },
+  {
+    name: "Ebooks",
+    description: "Age-appropriate reading material for early learners.",
+    icon: Library,
+  },
+];
+
+const parentPoints = [
+  {
+    icon: Layers,
+    title: "Organized by subject",
+    description: "Learning is grouped clearly by subject, so it's easy to find what fits your child right now.",
+  },
+  {
+    icon: Baby,
+    title: "Built for early years",
+    description: "Designed specifically around how young children learn — not adapted from older-kids content.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Careful with Qur'an content",
+    description: "Religious content is reviewed by a qualified person before publishing — never generated automatically.",
+  },
+];
+
+const teacherPoints = [
+  {
+    icon: UserCircle,
+    title: "Professional profiles",
+    description: "A profile for your experience, subjects, age groups, and areas of expertise.",
+  },
+  {
+    icon: GraduationCap,
+    title: "Share your expertise",
+    description: "Contribute resources and be discoverable by families looking for your specialties.",
+  },
+  {
+    icon: Sparkles,
+    title: "Room to grow",
+    description: "Professional development opportunities are planned as the platform develops.",
+  },
+];
+
+const whyPillars = [
+  {
+    icon: Layers,
+    title: "One platform, many subjects",
+    description: "Core early-learning subjects and Qur'an & Arabic foundations, organized in one place instead of scattered apps.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Careful with religious content",
+    description: "Qur'an and Islamic content is reviewed by a qualified person before publishing — never generated or altered automatically.",
+  },
+  {
+    icon: Users,
+    title: "Built for the adults too",
+    description: "A shared tool for parents and teachers guiding a child's learning, not only a standalone kids' app.",
+  },
+  {
+    icon: Accessibility,
+    title: "Accessible by design",
+    description: "Built with keyboard navigation, visible focus states, and screen-reader-friendly structure from the start.",
+  },
+];
+
+const ctaLinks = [
+  { label: "Explore Learning", href: "/learn" },
+  { label: "Explore Resources", href: "/resources" },
+  { label: "Explore Games", href: "/games" },
+  { label: "For Parents", href: "/parents" },
+  { label: "For Teachers", href: "/teachers" },
+];
 
 export default function Home() {
   return (
-    <Section className="flex flex-1 items-center">
-      <Container className="text-center">
-        <Heading level="display">Little Learners Learning</Heading>
-        <p className="mx-auto mt-4 max-w-xl text-neutral-600">
-          Visual foundation in place. Homepage content lands in a later build
-          phase.
-        </p>
-      </Container>
-    </Section>
+    <>
+      {/* Hero */}
+      <Section className="relative overflow-hidden">
+        <DecorativeBlob
+          tone="primary"
+          className="pointer-events-none absolute -right-24 -top-24 size-96 opacity-30"
+        />
+        <DecorativeBlob
+          tone="secondary"
+          className="pointer-events-none absolute -bottom-32 -left-16 size-80 opacity-20"
+        />
+        <Container className="relative max-w-3xl text-center">
+          <Badge variant="primary">Early-Years Learning Platform</Badge>
+          <Heading level="display" as="h1" className="mt-5">
+            One place to guide how your child learns.
+          </Heading>
+          <p className="mx-auto mt-5 max-w-xl text-lg text-neutral-600">
+            Little Learners Learning brings early literacy, math, life skills,
+            creativity, and foundational Qur&apos;an learning together —
+            built for parents and teachers, not just kids.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Button size="lg" asChild>
+              <Link href="/learn">Explore Learning</Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/parents">For Parents</Link>
+            </Button>
+          </div>
+          <p className="mt-5 text-sm text-neutral-500">
+            The learning library is being built — explore what&apos;s coming.
+          </p>
+        </Container>
+      </Section>
+
+      {/* Learning categories */}
+      <Section surface="sunken">
+        <Container>
+          <div className="max-w-2xl">
+            <Heading level="h2">What your child can learn</Heading>
+            <p className="mt-3 text-neutral-600">
+              The platform is organized around these subjects and activity
+              types. Content is still being built out — this is the map of
+              where it&apos;s headed.
+            </p>
+          </div>
+
+          <div className="mt-10 space-y-10">
+            {learningCategoryGroups.map((group) => (
+              <div key={group.group}>
+                <Heading level="h4" as="h3" className="text-neutral-500">
+                  {group.group}
+                </Heading>
+                <div className="mt-4 grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {group.categories.map((category) => (
+                    <IconFeature
+                      key={category.name}
+                      icon={category.icon}
+                      title={category.name}
+                      description={category.description}
+                      headingAs="h4"
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      {/* Learning materials */}
+      <Section>
+        <Container>
+          <div className="max-w-2xl">
+            <Heading level="h2">Learning materials</Heading>
+            <p className="mt-3 text-neutral-600">
+              Worksheets, activities, and ebooks — the formats learning will
+              come in, across every subject above.
+            </p>
+          </div>
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            {resourceFormats.map((format) => (
+              <Card key={format.name}>
+                <CardHeader>
+                  <format.icon className="size-6 text-primary-600" aria-hidden="true" />
+                  <CardTitle className="mt-3">{format.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-3">
+                  <p className="text-sm text-neutral-600">{format.description}</p>
+                  <Badge variant="neutral" className="w-fit">
+                    Coming soon
+                  </Badge>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-8">
+            <Button variant="outline" asChild>
+              <Link href="/resources">Explore Resources</Link>
+            </Button>
+          </div>
+        </Container>
+      </Section>
+
+      {/* Games */}
+      <Section surface="sunken">
+        <Container className="max-w-3xl text-center">
+          <Gamepad2 className="mx-auto size-8 text-primary-600" aria-hidden="true" />
+          <Heading level="h2" className="mt-4">
+            The Learning Games Hub
+          </Heading>
+          <p className="mt-3 text-neutral-600">
+            Puzzles, mazes, coloring, and games — each one built around a
+            specific learning goal, not random entertainment. The Games Hub
+            is still being built.
+          </p>
+          <div className="mt-6">
+            <Button variant="outline" asChild>
+              <Link href="/games">Explore Games</Link>
+            </Button>
+          </div>
+        </Container>
+      </Section>
+
+      {/* Parents */}
+      <Section>
+        <Container className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-start">
+          <div>
+            <Heading level="h2">For Parents</Heading>
+            <p className="mt-3 max-w-md text-neutral-600">
+              A tool built to help you guide your child&apos;s early
+              learning — not just another app to hand them.
+            </p>
+            <Button className="mt-6" variant="outline" asChild>
+              <Link href="/parents">For Parents</Link>
+            </Button>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2">
+            {parentPoints.map((point) => (
+              <IconFeature key={point.title} {...point} />
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      {/* Teachers */}
+      <Section surface="sunken">
+        <Container className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-start">
+          <div>
+            <Heading level="h2">For Teachers</Heading>
+            <p className="mt-3 max-w-md text-neutral-600">
+              A future home for professional profiles, teaching resources,
+              and the expertise you bring to early-years education.
+            </p>
+            <Badge variant="neutral" className="mt-4 w-fit">
+              Registration isn&apos;t open yet
+            </Badge>
+            <div className="mt-4">
+              <Button variant="outline" asChild>
+                <Link href="/teachers">For Teachers</Link>
+              </Button>
+            </div>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2">
+            {teacherPoints.map((point) => (
+              <IconFeature key={point.title} {...point} />
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      {/* Why */}
+      <Section>
+        <Container>
+          <Heading level="h2" className="max-w-xl">
+            Why Little Learners Learning
+          </Heading>
+          <div className="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2">
+            {whyPillars.map((pillar) => (
+              <IconFeature key={pillar.title} {...pillar} />
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      {/* CTA */}
+      <Section surface="primary">
+        <Container className="max-w-2xl text-center">
+          <Heading level="h2" className="text-white">
+            See where Little Learners Learning is headed
+          </Heading>
+          <p className="mt-3 text-primary-100">
+            The platform is under active development. Here&apos;s where to
+            look next.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            {ctaLinks.map((link) => (
+              <Button
+                key={link.href}
+                variant="outline"
+                asChild
+                className="border-white/30 bg-transparent text-white hover:bg-white/10"
+              >
+                <Link href={link.href}>{link.label}</Link>
+              </Button>
+            ))}
+          </div>
+        </Container>
+      </Section>
+    </>
   );
 }
