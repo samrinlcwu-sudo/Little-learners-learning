@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Apple } from "lucide-react";
 import { ChoiceGamePlayer } from "@/components/games/choice-game-player";
 import { useChoiceGame, type ChoiceRound } from "@/lib/games/use-choice-game";
+import type { GameComponentProps } from "@/lib/games/registry";
 
 const COUNTS = [1, 2, 3, 4, 5];
 
@@ -30,7 +31,7 @@ function buildRounds(): ChoiceRound[] {
 }
 
 /** Count a group of apples (1–5) and pick the matching number. Reuses the choice-game engine — only the prompt visual differs from Letter Match. */
-function CountingGame() {
+function CountingGame({ skill }: GameComponentProps) {
   const [rounds] = useState(buildRounds);
   const game = useChoiceGame(rounds);
 
@@ -38,6 +39,7 @@ function CountingGame() {
     <ChoiceGamePlayer
       game={game}
       promptLabel="How many apples do you see?"
+      skill={skill}
       renderPrompt={(round) => (
         <div
           className="mt-3 flex flex-wrap items-center justify-center gap-2"

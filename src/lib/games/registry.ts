@@ -5,13 +5,18 @@ import { ShapeMatchGame } from "@/components/games/shape-match-game";
 import { ColorMatchGame } from "@/components/games/color-match-game";
 import { NumberMemoryGame } from "@/components/games/number-memory-game";
 
+export interface GameComponentProps {
+  /** The Game record's own `skill` — passed down so the completion screen can say what was practiced. */
+  skill: string;
+}
+
 /**
  * Only a slug listed here has a real, playable implementation. Every other
  * published Game record is a legitimate roadmap entry — real metadata,
  * honestly labeled "Coming soon" — never a Play button pointing at
  * nothing. Add an entry here the same day the game component ships.
  */
-export const GAME_COMPONENTS: Record<string, ComponentType> = {
+export const GAME_COMPONENTS: Record<string, ComponentType<GameComponentProps>> = {
   "letter-match": LetterMatchGame,
   "count-the-fruits": CountingGame,
   "shape-match": ShapeMatchGame,

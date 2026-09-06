@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChoiceGamePlayer } from "@/components/games/choice-game-player";
 import { useChoiceGame, type ChoiceRound } from "@/lib/games/use-choice-game";
+import type { GameComponentProps } from "@/lib/games/registry";
 
 const SHAPES = ["circle", "square", "triangle", "rectangle"] as const;
 type ShapeName = (typeof SHAPES)[number];
@@ -55,7 +56,7 @@ function buildRounds(): ChoiceRound[] {
 }
 
 /** Identify a shape and pick its name. Reuses the choice-game engine. */
-function ShapeMatchGame() {
+function ShapeMatchGame({ skill }: GameComponentProps) {
   const [rounds] = useState(buildRounds);
   const game = useChoiceGame(rounds);
 
@@ -63,6 +64,7 @@ function ShapeMatchGame() {
     <ChoiceGamePlayer
       game={game}
       promptLabel="What shape is this?"
+      skill={skill}
       renderPrompt={(round) => (
         <div className="mt-3 flex justify-center" role="img" aria-label={SHAPE_LABELS[round.prompt as ShapeName]}>
           <ShapeGraphic shape={round.prompt as ShapeName} />

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChoiceGamePlayer } from "@/components/games/choice-game-player";
 import { useChoiceGame, type ChoiceRound } from "@/lib/games/use-choice-game";
+import type { GameComponentProps } from "@/lib/games/registry";
 
 /**
  * Real, universally-recognized color values — not the site's brand
@@ -51,7 +52,7 @@ function buildRounds(): ChoiceRound[] {
 }
 
 /** Identify a color swatch and pick its name. Reuses the choice-game engine. */
-function ColorMatchGame() {
+function ColorMatchGame({ skill }: GameComponentProps) {
   const [rounds] = useState(buildRounds);
   const game = useChoiceGame(rounds);
 
@@ -59,6 +60,7 @@ function ColorMatchGame() {
     <ChoiceGamePlayer
       game={game}
       promptLabel="What color is this?"
+      skill={skill}
       renderPrompt={(round) => (
         <div className="mt-3 flex justify-center">
           <div

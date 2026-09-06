@@ -13,6 +13,22 @@ export interface MemoryCard {
   label: string;
 }
 
+export interface MemoryGameResult {
+  moves: number;
+  totalPairs: number;
+}
+
+export interface UseMemoryGameOptions {
+  /**
+   * Fires once, the moment the last pair is matched — with the raw
+   * session numbers, nothing else. Not called by NumberMemoryGame today
+   * (there's no child profile yet to record it against); this is the
+   * wiring point a future `GameProgressStore.recordEvent` call attaches
+   * to. See src/lib/games/progress.ts.
+   */
+  onComplete?: (result: MemoryGameResult) => void;
+}
+
 function shuffle<T>(items: T[]): T[] {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i--) {
@@ -41,7 +57,7 @@ function buildDeck(concepts: MemoryConcept[]): MemoryCard[] {
  * changes on screen without the player's own action — easier to follow
  * for young children and for anyone using assistive tech.
  */
-export function useMemoryGame(concepts: MemoryConcept[]) {
+export function useMemoryGame(concepts: MemoryConcept[], options: UseMemoryGameOptions = {}) {
   const [cards] = useState(() => buildDeck(concepts));
   const [flippedIds, setFlippedIds] = useState<string[]>([]);
   const [matchedConceptIds, setMatchedConceptIds] = useState<Set<string>>(new Set());
@@ -62,13 +78,20 @@ export function useMemoryGame(concepts: MemoryConcept[]) {
     setFlippedIds(next);
 
     if (next.length === 2) {
-      setMoves((m) => m + 1);
+      const movesTaken = moves + 1;
+      setMoves(movesTaken);
       const [firstId, secondId] = next;
       const first = cards.find((c) => c.cardId === firstId)!;
       const second = cards.find((c) => c.cardId === secondId)!;
 
       if (first.conceptId === second.conceptId) {
-        setMatchedConceptIds((prev) => new Set(prev).add(first.conceptId));
+        setMatchedConceptIds((prev) => {
+          const updated = new Set(prev).add(first.conceptId);
+          if (updated.size === totalPairs) {
+            options.onComplete?.({ moves: movesTaken, totalPairs });
+          }
+          return updated;
+        });
         setFlippedIds([]);
       } else {
         setPendingMismatch(true);

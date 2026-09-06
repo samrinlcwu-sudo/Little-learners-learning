@@ -1,15 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { HelpCircle, PartyPopper } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { RewardBadge } from "@/components/games/reward-badge";
 import { useMemoryGame, type MemoryConcept } from "@/lib/games/use-memory-game";
+import { getCompletionReward } from "@/lib/games/rewards";
 import { cn } from "@/lib/utils/cn";
 
 export interface MemoryGameProps {
   concepts: MemoryConcept[];
   /** e.g. "number" or "shape" — used only for the completion message and card aria-labels. */
   conceptNoun: string;
+  /** What this game practices — shown on the completion screen (e.g. "Number recognition"). */
+  skill: string;
 }
 
 /**
@@ -17,20 +22,28 @@ export interface MemoryGameProps {
  * recovery, and completion screen. What the cards represent (numbers,
  * shapes, letters, ...) is entirely supplied via `concepts`.
  */
-function MemoryGame({ concepts, conceptNoun }: MemoryGameProps) {
+function MemoryGame({ concepts, conceptNoun, skill }: MemoryGameProps) {
   const game = useMemoryGame(concepts);
 
   if (game.isComplete) {
+    const reward = getCompletionReward();
     return (
-      <Card className="flex flex-col items-center gap-4 p-10 text-center">
+      <Card className="flex flex-col items-center gap-5 p-10 text-center">
         <PartyPopper className="size-10 text-primary-600" aria-hidden="true" />
         <div>
-          <p className="font-display text-xl font-semibold text-ink">Great job!</p>
+          <p className="font-display text-xl font-semibold text-ink">Well done!</p>
           <p className="mt-1 text-neutral-600">
-            You matched all {game.totalPairs} pairs in {game.moves} moves.
+            You practiced <span className="font-medium text-ink">{skill}</span> — all {game.totalPairs} pairs
+            matched in {game.moves} moves.
           </p>
         </div>
-        <Button onClick={game.reset}>Play again</Button>
+        <RewardBadge reward={reward} />
+        <div className="flex flex-wrap justify-center gap-3">
+          <Button onClick={game.reset}>Play again</Button>
+          <Button variant="outline" asChild>
+            <Link href="/games">Back to Games Hub</Link>
+          </Button>
+        </div>
       </Card>
     );
   }

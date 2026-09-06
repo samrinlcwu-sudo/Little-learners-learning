@@ -152,7 +152,7 @@ export default async function GameDetailPage({
 
         <div className="mt-8 max-w-2xl">
           {playable && PlayableGame ? (
-            <PlayableGame />
+            <PlayableGame skill={game.skill} />
           ) : (
             <EmptyState
               title="This game is coming soon"

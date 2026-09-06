@@ -1,9 +1,10 @@
 # Games Hub Architecture
 
-Introduced in Prompt 13; five real games built in Prompt 14. Unlike the
-Resource Library (Prompts 9–12), games aren't "content that needs a real
-file before it can be shown" — a game is working software, so the honest
-move here isn't an empty state, it's actually building one.
+Introduced in Prompt 13; five real games built in Prompt 14; progress and
+reward architecture added in Prompt 15. Unlike the Resource Library
+(Prompts 9–12), games aren't "content that needs a real file before it can
+be shown" — a game is working software, so the honest move here isn't an
+empty state, it's actually building one.
 
 ## Data model
 
@@ -105,15 +106,56 @@ Play button.
   "Coming soon" state, and related games (same category or game type).
   Self-referencing canonical, `schema.org/Game` structured data.
 
+## Rewards (Prompt 15)
+
+`src/lib/games/rewards.ts` — `getAccuracyReward(correct, total)` for
+choice games and `getCompletionReward()` for memory games, both returning
+1–3 stars plus a short title and message. Never 0 stars: finishing is
+worth acknowledging even on an off day. Memory games always award the top
+tier on completion rather than scoring by move count — penalizing a child
+who plays carefully instead of quickly isn't a value this platform wants
+to teach.
+
+Displayed once, on the completion screen, by `RewardBadge`
+(`src/components/games/reward-badge.tsx`) — never stored, never shared,
+never compared between children. The star count is stated in text ("2 out
+of 3 stars"), not conveyed by fill or color alone.
+
+## Progress architecture (Prompt 15, not wired to a backend)
+
+`src/lib/games/progress.ts` defines the future-integration contract:
+`GameProgressEvent` (attempts, correct answers, completion, category,
+skill, timestamp — keyed by an opaque future `childId`, never a name),
+`ChildGameSummary` (what a future parent dashboard would read: games
+played/completed, categories explored, skills practiced), and
+`ClassroomProgressSummary` (what a future teacher dashboard would read:
+a classroom's child summaries plus its assigned games) — all behind one
+`GameProgressStore` interface.
+
+`noopGameProgressStore` is the only implementation today, and every
+method is a genuine no-op (no in-memory array, no `localStorage` — nothing
+that could be mistaken for real tracking). The brief was explicit that a
+fake backend would be worse than no backend, so this file stops at a
+tested contract. Both game engines already expose the hook point this
+attaches to: `useChoiceGame(rounds, { onComplete })` and
+`useMemoryGame(concepts, { onComplete })` fire once, with the raw session
+numbers, the moment a game finishes — verified live (a scripted
+letter-match playthrough correctly reported "5 of 6 correct"). None of the
+five shipped games wires `onComplete` to the store yet, since there's no
+`childId` to record against; doing so once child profiles exist is a
+one-line change per game, not an architecture change.
+
 ## Child safety
 
 No chat, no public profiles, no ads, no external links, and no data
 collection of any kind — every game holds only in-memory React state
 (current round/card flips, score, moves) that's gone on page reload. No
 name prompt, no "who's playing" step, nothing sent anywhere, no
-leaderboard. This isn't a policy note bolted on after the fact — there's
-simply no code path in this feature that reads, stores, or displays
-anything about the child.
+leaderboard, no public ranking of any kind. This isn't a policy note
+bolted on after the fact — there's simply no code path in this feature
+that reads, stores, or displays anything about the child. The progress
+architecture above changes none of this: it's an unused, no-op contract
+until an actual authenticated child profile exists to attach data to.
 
 ## Accessibility
 

@@ -17,6 +17,23 @@ export interface ChoiceRound {
 
 export type RoundFeedback = "correct" | "incorrect" | null;
 
+export interface ChoiceGameResult {
+  correctAnswers: number;
+  totalRounds: number;
+  attempts: number;
+}
+
+export interface UseChoiceGameOptions {
+  /**
+   * Fires once, the moment the last round is answered — with the raw
+   * session numbers, nothing else. Not called by any of the five games
+   * built so far (there's no child profile yet to record it against);
+   * this is the wiring point a future `GameProgressStore.recordEvent`
+   * call attaches to. See src/lib/games/progress.ts.
+   */
+  onComplete?: (result: ChoiceGameResult) => void;
+}
+
 /**
  * The reusable engine for every "show a prompt, pick the right option from
  * a few choices" game — matching, multiple-choice, identification, and
@@ -28,13 +45,14 @@ export type RoundFeedback = "correct" | "incorrect" | null;
  * get it, and only advances to the next round on their own action (no
  * auto-advance timers, which are hard to predict and easy to miss).
  */
-export function useChoiceGame(rounds: ChoiceRound[]) {
+export function useChoiceGame(rounds: ChoiceRound[], options: UseChoiceGameOptions = {}) {
   const [roundIndex, setRoundIndex] = useState(0);
   const [status, setStatus] = useState<"playing" | "completed">("playing");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<RoundFeedback>(null);
   const [missedThisRound, setMissedThisRound] = useState(false);
   const [score, setScore] = useState(0);
+  const [attempts, setAttempts] = useState(0);
 
   const currentRound = rounds[roundIndex];
   const isLastRound = roundIndex === rounds.length - 1;
@@ -42,6 +60,7 @@ export function useChoiceGame(rounds: ChoiceRound[]) {
   function selectOption(option: ChoiceOption) {
     if (feedback === "correct") return; // already answered correctly — wait for Next
     setSelectedId(option.id);
+    setAttempts((a) => a + 1);
     if (option.isCorrect) {
       setFeedback("correct");
       if (!missedThisRound) setScore((s) => s + 1);
@@ -54,6 +73,7 @@ export function useChoiceGame(rounds: ChoiceRound[]) {
   function nextRound() {
     if (isLastRound) {
       setStatus("completed");
+      options.onComplete?.({ correctAnswers: score, totalRounds: rounds.length, attempts });
       return;
     }
     setRoundIndex((i) => i + 1);
@@ -69,6 +89,7 @@ export function useChoiceGame(rounds: ChoiceRound[]) {
     setFeedback(null);
     setMissedThisRound(false);
     setScore(0);
+    setAttempts(0);
   }
 
   return {
@@ -79,6 +100,7 @@ export function useChoiceGame(rounds: ChoiceRound[]) {
     selectedId,
     feedback,
     score,
+    attempts,
     selectOption,
     nextRound,
     reset,

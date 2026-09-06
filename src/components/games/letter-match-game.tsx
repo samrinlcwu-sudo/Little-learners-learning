@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChoiceGamePlayer } from "@/components/games/choice-game-player";
 import { useChoiceGame, type ChoiceRound } from "@/lib/games/use-choice-game";
+import type { GameComponentProps } from "@/lib/games/registry";
 
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
 
@@ -32,7 +33,7 @@ function buildRounds(): ChoiceRound[] {
  * The first real game — proves the engine end to end. Uses only the real
  * English alphabet and the shared ChoiceGamePlayer UI.
  */
-function LetterMatchGame() {
+function LetterMatchGame({ skill }: GameComponentProps) {
   const [rounds] = useState(buildRounds);
   const game = useChoiceGame(rounds);
 
@@ -40,6 +41,7 @@ function LetterMatchGame() {
     <ChoiceGamePlayer
       game={game}
       promptLabel="Find the lowercase match for"
+      skill={skill}
       renderPrompt={(round) => (
         <>
           <p className="font-display text-6xl font-bold text-primary-700" aria-hidden="true">

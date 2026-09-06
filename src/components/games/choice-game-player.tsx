@@ -11,6 +11,8 @@ export interface ChoiceGamePlayerProps {
   game: ReturnType<typeof useChoiceGame>;
   /** The instruction line above the prompt — e.g. "Find the lowercase match for". */
   promptLabel: string;
+  /** What this game practices — shown on the completion screen (e.g. "Letter recognition"). */
+  skill: string;
   /** How this specific game visualizes its round's prompt — a letter, a row of objects, a shape, a color swatch. */
   renderPrompt: (round: ChoiceRound) => ReactNode;
 }
@@ -22,13 +24,14 @@ export interface ChoiceGamePlayerProps {
  * own prompt looks — everything else (state, scoring, progress,
  * completion, accessibility) is identical and lives here once.
  */
-function ChoiceGamePlayer({ game, promptLabel, renderPrompt }: ChoiceGamePlayerProps) {
+function ChoiceGamePlayer({ game, promptLabel, skill, renderPrompt }: ChoiceGamePlayerProps) {
   return (
     <GameShell
       status={game.status}
       roundNumber={game.roundNumber}
       totalRounds={game.totalRounds}
       score={game.score}
+      skill={skill}
       onPlayAgain={game.reset}
     >
       <div className="text-center">
