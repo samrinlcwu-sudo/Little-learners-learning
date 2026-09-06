@@ -395,11 +395,11 @@ export default function StyleGuidePage() {
             </p>
             <DashboardShellLayout
               title="Parent Dashboard"
-              activeHref="/dashboard/children"
+              activeHref="#children"
               navItems={[
-                { label: "Overview", href: "/dashboard" },
-                { label: "Children", href: "/dashboard/children" },
-                { label: "Progress", href: "/dashboard/progress" },
+                { label: "Overview", href: "#overview" },
+                { label: "Children", href: "#children" },
+                { label: "Progress", href: "#progress" },
               ]}
             >
               <p className="text-sm text-neutral-500">Content area slot.</p>
