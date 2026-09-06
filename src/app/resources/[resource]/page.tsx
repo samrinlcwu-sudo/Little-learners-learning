@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ImageOff } from "lucide-react";
+import { ImageOff, BookOpen } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -16,6 +16,7 @@ import {
   ACCESS_TIER_LABELS,
   RESOURCE_TYPE_LABELS,
   canDownload,
+  getResourceObjectives,
   isResourcePublished,
   type Resource,
 } from "@/lib/resources/types";
@@ -59,7 +60,9 @@ export default async function ResourceDetailPage({
   const downloadable = canDownload(resource);
   const canonicalUrl = `${siteConfig.url}/resources/${resource.slug}`;
   const isActivity = resource.resourceType === "activity";
+  const isEbook = resource.resourceType === "ebook";
   const instructionsLabel = isActivity ? "Steps" : "Instructions";
+  const objectives = getResourceObjectives(resource);
 
   const publishedOthers = SAMPLE_RESOURCES.filter(
     (r) => r.slug !== resource.slug && isResourcePublished(r),
@@ -89,18 +92,20 @@ export default async function ResourceDetailPage({
   // ratings, review counts, or other social-proof properties, since none exist.
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "LearningResource",
+    "@type": isEbook ? ["LearningResource", "Book"] : "LearningResource",
     name: resource.title,
+    ...(resource.subtitle ? { alternateName: resource.subtitle } : {}),
     description: resource.description,
     url: canonicalUrl,
     learningResourceType: RESOURCE_TYPE_LABELS[resource.resourceType],
-    teaches: resource.learningObjective,
+    teaches: objectives,
     typicalAgeRange: `${resource.ageRange.minYears}-${resource.ageRange.maxYears}`,
     inLanguage: "en",
     isAccessibleForFree: resource.accessTier === "free",
     author: { "@type": "Organization", name: resource.author.name },
     datePublished: resource.createdAt,
     dateModified: resource.updatedAt,
+    ...(resource.pageCount ? { numberOfPages: resource.pageCount } : {}),
   };
 
   return (
@@ -119,10 +124,35 @@ export default async function ResourceDetailPage({
               { label: resource.title },
             ]}
           />
-          <Heading level="h1" className="mt-4">
-            {resource.title}
-          </Heading>
-          <p className="mt-3 text-neutral-600">{resource.description}</p>
+          {isEbook ? (
+            <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-start">
+              {resource.thumbnail ? (
+                // eslint-disable-next-line @next/next/no-img-element -- cover URLs are arbitrary/external, not part of the optimized asset pipeline
+                <img
+                  src={resource.thumbnail}
+                  alt={`Cover of ${resource.title}`}
+                  className="h-44 w-32 shrink-0 rounded-md border border-neutral-200 object-cover"
+                />
+              ) : (
+                <div className="flex h-44 w-32 shrink-0 flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-neutral-300 text-center">
+                  <BookOpen className="size-6 text-neutral-400" aria-hidden="true" />
+                  <p className="px-2 text-xs text-neutral-500">No cover yet</p>
+                </div>
+              )}
+              <div>
+                <Heading level="h1">{resource.title}</Heading>
+                {resource.subtitle && <p className="mt-1 text-base text-neutral-500">{resource.subtitle}</p>}
+                <p className="mt-3 text-neutral-600">{resource.description}</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Heading level="h1" className="mt-4">
+                {resource.title}
+              </Heading>
+              <p className="mt-3 text-neutral-600">{resource.description}</p>
+            </>
+          )}
 
           <div className="mt-5 flex flex-wrap gap-2">
             {category ? (
@@ -159,9 +189,21 @@ export default async function ResourceDetailPage({
           </div>
 
           <dl className="mt-8 grid gap-4 border-y border-neutral-200 py-6 sm:grid-cols-2">
-            <div>
-              <dt className="text-sm font-semibold text-neutral-500">Learning objective</dt>
-              <dd className="mt-1 text-sm text-ink">{resource.learningObjective}</dd>
+            <div className={objectives.length > 1 ? "sm:col-span-2" : undefined}>
+              <dt className="text-sm font-semibold text-neutral-500">
+                Learning objective{objectives.length > 1 ? "s" : ""}
+              </dt>
+              {objectives.length > 1 ? (
+                <dd className="mt-1 text-sm text-ink">
+                  <ul className="list-disc space-y-1 pl-5">
+                    {objectives.map((objective) => (
+                      <li key={objective}>{objective}</li>
+                    ))}
+                  </ul>
+                </dd>
+              ) : (
+                <dd className="mt-1 text-sm text-ink">{objectives[0]}</dd>
+              )}
             </div>
             <div>
               <dt className="text-sm font-semibold text-neutral-500">Age group</dt>
@@ -177,6 +219,12 @@ export default async function ResourceDetailPage({
               <dt className="text-sm font-semibold text-neutral-500">Resource type</dt>
               <dd className="mt-1 text-sm text-ink">{RESOURCE_TYPE_LABELS[resource.resourceType]}</dd>
             </div>
+            {resource.pageCount && (
+              <div>
+                <dt className="text-sm font-semibold text-neutral-500">Length</dt>
+                <dd className="mt-1 text-sm text-ink">{resource.pageCount} pages</dd>
+              </div>
+            )}
             {resource.skillsDeveloped && resource.skillsDeveloped.length > 0 && (
               <div className="sm:col-span-2">
                 <dt className="text-sm font-semibold text-neutral-500">Skills developed</dt>

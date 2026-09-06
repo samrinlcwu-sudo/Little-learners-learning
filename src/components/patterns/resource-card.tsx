@@ -68,6 +68,7 @@ function ResourceCard({ resource, categoryName, isSample }: ResourceCardProps) {
           {categoryName ?? resource.subject ?? "General"}
         </Badge>
         <CardTitle className="mt-2">{resource.title}</CardTitle>
+        {resource.subtitle && <p className="mt-0.5 text-sm text-neutral-500">{resource.subtitle}</p>}
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-3">
         <p className="text-sm text-neutral-600">{resource.description}</p>
@@ -79,6 +80,11 @@ function ResourceCard({ resource, categoryName, isSample }: ResourceCardProps) {
             Ages {resource.ageRange.minYears}–{resource.ageRange.maxYears}
           </Badge>
           <Badge variant="neutral">{DIFFICULTY_LABELS[resource.difficulty]}</Badge>
+          {resource.pageCount && (
+            <Badge variant="neutral">
+              {resource.pageCount} page{resource.pageCount === 1 ? "" : "s"}
+            </Badge>
+          )}
           <Badge variant={TIER_BADGE_VARIANT[resource.accessTier]}>
             {ACCESS_TIER_LABELS[resource.accessTier]}
           </Badge>

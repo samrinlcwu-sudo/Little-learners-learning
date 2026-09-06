@@ -56,6 +56,32 @@ Supabase table keyed by `resource.id` plus a future `teacher_id`/`child_id`
 (e.g. `saved_resources`, `assignments`, `resource_usage_events`) — additive
 tables, no change to the `Resource` model itself.
 
+## Ebooks & Digital Resources (Prompt 12)
+
+Prompt 12's "supported digital resources" list (ebooks, booklets, activity/
+coloring/puzzle books, educational guides) isn't a new taxonomy — every one
+of these is `resourceType: "ebook"` (or occasionally `teacher-resource`/
+`parent-resource`) distinguished by its existing `category`, `tags`, and
+the three fields added this prompt: `subtitle`, `pageCount`, and
+`learningObjectives` (plural — a booklet can have several distinct goals;
+`getResourceObjectives()` returns the plural list when set, otherwise the
+single required `learningObjective` sentence as a one-item list, so
+detail-page rendering never has to branch on which field is populated).
+
+The detail page gives ebooks a **Cover** slot (the real `thumbnail` image
+if set, otherwise an honest "No cover yet" placeholder — visually and
+semantically distinct from the **Preview** section below it, which is
+about sample page content, not the book's identity). Structured data for
+an ebook uses `@type: ["LearningResource", "Book"]` and adds
+`numberOfPages` when `pageCount` is set — still built only from real model
+fields.
+
+Two samples now exist: `first-shapes-ebook` (premium, no file — the
+existing sample, enhanced) and `my-first-letters-booklet` (free, no file —
+new, to exercise the free-ebook messaging path). Neither has a real
+`downloadFile`, so `canDownload()` correctly keeps both on the
+informational "Not available yet" path — no fake download ever appears.
+
 ## Downloads — what's real and what isn't
 
 No resource has a real `downloadFile`. `canDownload()` is the single gate

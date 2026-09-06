@@ -108,6 +108,8 @@ export interface Resource {
   /** URL-safe, unique across the whole library — drives /resources/[slug]. */
   slug: string;
   title: string;
+  /** Book-style resources (ebooks, booklets, guides) only, in practice. */
+  subtitle?: string;
   description: string;
   resourceType: ResourceType;
   activitySubtype?: ActivitySubtype;
@@ -118,9 +120,14 @@ export interface Resource {
   subject?: string;
   ageRange: AgeRange;
   difficulty: DifficultyLevel;
+  /** The one-sentence summary goal — always required. For a multi-page resource with several distinct goals, also set `learningObjectives`. */
   learningObjective: string;
-  /** Discrete skills this builds — shown as a short list alongside the single learningObjective sentence. */
+  /** Multiple distinct goals (a booklet spanning several skills) — when set, the detail page lists these instead of the single sentence above. */
+  learningObjectives?: string[];
+  /** Discrete skills this builds — shown as a short list alongside the objective(s). */
   skillsDeveloped?: string[];
+  /** Book-style resources (ebooks, booklets, activity/coloring/puzzle books) only. Absent for a single-sheet worksheet or standalone puzzle. */
+  pageCount?: number;
   /** Ordered steps — labeled "Instructions" for a worksheet, "Steps" for an activity, on the detail page. */
   instructions?: string[];
   /** Physical items needed — activities only, in practice. */
@@ -156,6 +163,13 @@ export function isResourcePublished(resource: Resource): boolean {
   }
 
   return true;
+}
+
+/** The objective(s) to display: the plural list when set, otherwise the single required sentence as a one-item list. */
+export function getResourceObjectives(resource: Resource): string[] {
+  return resource.learningObjectives && resource.learningObjectives.length > 0
+    ? resource.learningObjectives
+    : [resource.learningObjective];
 }
 
 /**
