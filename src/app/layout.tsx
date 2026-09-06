@@ -3,6 +3,7 @@ import { Fraunces, Inter } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { SkipLink } from "@/components/ui/skip-link";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -35,8 +36,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <SkipLink />
         <SiteHeader />
-        <div className="flex flex-1 flex-col">{children}</div>
+        <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col focus:outline-none">
+          {children}
+        </main>
         <SiteFooter />
       </body>
     </html>

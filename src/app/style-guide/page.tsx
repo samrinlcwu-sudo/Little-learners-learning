@@ -32,6 +32,9 @@ import {
   ModalClose,
 } from "@/components/ui/modal";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ContentLayout } from "@/components/layouts/content-layout";
+import { ResourceLayout } from "@/components/layouts/resource-layout";
+import { DashboardShellLayout } from "@/components/layouts/dashboard-shell-layout";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -334,6 +337,73 @@ export default function StyleGuidePage() {
                 </Button>
               }
             />
+          </div>
+        </Container>
+      </Section>
+
+      {/* Layout system */}
+      <Section surface="sunken">
+        <Container className="space-y-10">
+          <div>
+            <Heading level="h2">Layout system</Heading>
+            <p className="mt-2 max-w-2xl text-neutral-600">
+              Reusable page shapes — not routed anywhere yet, previewed here
+              in isolation so the structure can be validated before real
+              pages adopt them.
+            </p>
+          </div>
+
+          <div>
+            <p className="mb-2 text-sm font-semibold text-neutral-500">
+              ContentLayout — reading-width pages (articles, resource detail)
+            </p>
+            <div className="overflow-hidden rounded-lg border border-neutral-200 bg-surface">
+              <ContentLayout
+                breadcrumb={[{ label: "Resources", href: "/resources" }, { label: "Example" }]}
+                title="Example article title"
+                description="A one-line summary shown beneath the title."
+              >
+                <p>Body copy renders in a comfortable reading width, not full-bleed.</p>
+              </ContentLayout>
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-sm font-semibold text-neutral-500">
+              ResourceLayout — browsing/listing pages, with an optional filter rail
+            </p>
+            <div className="overflow-hidden rounded-lg border border-neutral-200 bg-surface">
+              <ResourceLayout
+                breadcrumb={[{ label: "Resources" }]}
+                title="Example listing title"
+                filters={
+                  <div className="rounded-md border border-dashed border-neutral-300 p-4 text-sm text-neutral-500">
+                    Filter controls slot
+                  </div>
+                }
+              >
+                <div className="rounded-md border border-dashed border-neutral-300 p-4 text-sm text-neutral-500">
+                  Result grid slot
+                </div>
+              </ResourceLayout>
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-sm font-semibold text-neutral-500">
+              DashboardShellLayout — shared shape for future parent/teacher/admin areas (no route exists yet)
+            </p>
+            <DashboardShellLayout
+              title="Parent Dashboard"
+              activeHref="/dashboard/children"
+              navItems={[
+                { label: "Overview", href: "/dashboard" },
+                { label: "Children", href: "/dashboard/children" },
+                { label: "Progress", href: "/dashboard/progress" },
+              ]}
+            >
+              <p className="text-sm text-neutral-500">Content area slot.</p>
+            </DashboardShellLayout>
           </div>
         </Container>
       </Section>

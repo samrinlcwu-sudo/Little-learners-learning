@@ -70,12 +70,31 @@ import directly, matching the shadcn/ui convention this system follows):
 `modal` (Radix Dialog), `tabs` (Radix Tabs), `dropdown-menu` (Radix Dropdown),
 `breadcrumb`, `container`, `section`, `heading`, `loading` (Spinner +
 Skeleton), `empty-state` (empty/error variants — one component, not two, per
-"don't duplicate"), `decorative-blob` (restrained illustrative accent).
+"don't duplicate"), `decorative-blob` (restrained illustrative accent),
+`skip-link` (first focusable element on every page).
 
-Layout chrome lives in `src/components/layout/`: `site-header`, `site-footer`.
-`SiteHeader` renders nav links only when a real `links` prop is passed — an
-empty nav with a mobile-menu toggle would be a broken affordance, so today's
-deployed header shows just the brand mark until real destinations exist.
+**Global shell** (`src/components/layout/`): `site-header`, `site-footer`.
+Primary and footer navigation share one source of truth,
+[src/config/nav.ts](../src/config/nav.ts) — the header, footer, and
+`sitemap.ts` all read from it so they can't drift out of sync. "Home" is
+deliberately left out of the visible nav (the logo already links there) to
+avoid overcrowding. Search and Log in/Sign up are rendered *disabled* with a
+"coming soon" label — reserving the layout space without pretending auth or
+search exist.
+
+**Page layouts** (`src/components/layouts/`): `ContentLayout` (narrow reading
+column — articles, resource detail), `ResourceLayout` (full-width with an
+optional filter rail — browsing/listing pages), `DashboardShellLayout` (one
+shared sidebar+content shell for the future parent/teacher/admin areas,
+parametrized by `navItems` rather than three near-duplicate components — not
+wired to any route yet since there's no auth to gate it). All three are
+previewed in isolation on `/style-guide`.
+
+Nav destinations that don't have real content yet (`/learn`, `/resources`,
+`/games`, `/parents`, `/teachers`, `/about`, `/support`, `/privacy`,
+`/terms`) render `ComingSoonSection`
+(`src/components/patterns/coming-soon-section.tsx`) — real pages that say
+plainly they aren't built, so the nav has no dead/404 links.
 
 ## Accessibility
 
@@ -86,6 +105,14 @@ deployed header shows just the brand mark until real destinations exist.
 - Modal, Tabs, and Dropdown use Radix UI primitives for correct focus
   trapping, keyboard navigation, and ARIA roles rather than hand-rolled
   behavior.
+- Every page has one `<header>`, one `<main id="main-content">`, one
+  `<footer>`, and a "Skip to main content" link as the first focusable
+  element. Exactly one `<h1>` per page.
+- The mobile nav drawer closes on Escape (returning focus to the toggle
+  button) and is marked `inert` while collapsed, so its links aren't
+  keyboard-focusable or screen-reader-visible when hidden. The open/close
+  transition is CSS-only (no JS animation) and respects
+  `prefers-reduced-motion`.
 - `eslint-plugin-jsx-a11y` (recommended rules) runs in CI-equivalent local
   linting; the two rules that don't apply to generic wrapper components
   (`CardTitle`, `Label`) are suppressed with an inline comment explaining why,
