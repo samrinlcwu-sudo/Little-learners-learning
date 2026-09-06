@@ -5,13 +5,13 @@ does not reuse, merge, or derive from any prior "Little Learners" project.
 
 ## Project purpose
 
-Little Learners Learning is being built as a scalable educational platform for
-young children and their families/teachers, eventually spanning a public
-website, a learning resource library (worksheets, activities, ebooks, games),
-parent and child accounts, teacher profiles, admissions workflows, and more.
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full architecture and
-roadmap. This repository currently contains the technical foundation only —
-no homepage or product features have been built yet.
+Little Learners Learning is an early-years learning platform for young
+children and the parents/teachers guiding them. The public site — homepage,
+Learning Hub, Resource Library, Games Hub, About, Parents, Teachers, Support,
+FAQ — is live and functional today, on real (if still-small) sample content.
+Accounts, progress tracking, teacher registration, downloads, and payments
+are the next layer, deliberately not faked in the meantime — see
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full roadmap.
 
 ## Technology stack
 
@@ -87,25 +87,75 @@ that decision is executed.
 
 ```
 src/
-  app/                 Next.js App Router — routes, layouts, metadata files
-                          style-guide/  internal design-system reference page
+  app/                       Next.js App Router — one folder per route
+    page.tsx                   Homepage (/)
+    learn/page.tsx              Learning Hub (/learn)
+    learn/[category]/page.tsx    One subject's page (/learn/mathematics, ...)
+    resources/page.tsx          Resource Library (/resources)
+    resources/[resource]/page.tsx  One resource's detail page
+    games/page.tsx               Games Hub (/games)
+    games/[game]/page.tsx         One game's page (loads the actual game)
+    parents/, teachers/,         Audience landing pages
+    about/, support/, faq/,      Informational pages
+    privacy/, terms/
+    style-guide/page.tsx         Internal design-system reference (not public nav)
+    globals.css                  Design tokens: colors, fonts, radius, shadows
+    not-found.tsx, error.tsx     Friendly 404 / error screens
   components/
-    ui/                  Design-system primitives (Button, Card, Modal, ...)
-    layout/                Site chrome (SiteHeader, SiteFooter)
-  config/               Site-wide constants (name, URL, etc.)
+    ui/                        Design-system primitives — Button, Card, Badge,
+                                  Input, Modal, Accordion, Heading, Section, ...
+    patterns/                  Compositions built from ui/ for one purpose —
+                                  ResourceCard, GameCard, PageHeader, SiteSearch, ...
+    layout/                    Site chrome — SiteHeader, SiteFooter
+  config/                     Small, hand-written site data — nav links,
+                                the 16 subject/learning categories, site name/URL
   lib/
-    supabase/            Supabase client factories (browser + server)
-    validations/          Shared Zod schemas
-    utils/                 Shared utilities (colocated with their tests)
+    content/, resources/,      Sample data + types for lessons, resources, and
+    games/                       games (see "Adding content" below)
+    search/                    The site search index, built from the above
+    supabase/                  Supabase client factories (browser + server)
+    validations/                Shared Zod schemas
+    utils/                       Shared utilities (colocated with their tests)
 public/
-  brand/                    Official logo (used unmodified)
-docs/                       Architecture and design-system decision records
+  brand/                      Official logo (used unmodified)
+docs/                         Deeper architecture notes for each subsystem
 ```
 
-Feature areas listed in the architecture doc (learning content, teacher
-profiles, parent/child accounts, admin, AI assistant, etc.) are deliberately
-**not** scaffolded as empty folders yet — each is created when its first real
-file is added, to avoid empty-directory clutter.
+## Common tasks (for anyone new to this codebase)
+
+**Add a new page.** Create `src/app/my-page/page.tsx`. Copy the shape of an
+existing simple page (`src/app/about/page.tsx` is a good example) — wrap
+content in `<Section>` and `<Container>`, use `<Heading level="h1">` for the
+title, and `<PageHeader>` (`src/components/patterns/page-header.tsx`) if the
+page needs a breadcrumb + title band like the hub pages do. Next.js turns the
+folder name into the URL automatically — no routing config to touch. If the
+page should appear in the header or footer, add it to
+`src/config/nav.ts`.
+
+**Add a new learning resource, game, or lesson.** These aren't in a database
+yet — each one is an object in a plain array:
+
+- Resources (worksheets, ebooks, activities): `src/lib/resources/sample-resources.ts`
+- Games: `src/lib/games/sample-games.ts`
+- Lessons/learning content: `src/lib/content/sample-content.ts`
+
+Copy an existing entry's shape (see the `Resource`/`Game`/`LearningContent`
+types in the matching `types.ts` file for what every field means), fill it
+in, and set `publicationStatus: "published"`. It appears on the site
+immediately — no other file needs to change. A resource only shows a working
+download button once it has a real `downloadFile`; a game only becomes
+playable once it also has a real component wired into
+`src/components/games/game-player.tsx` — everything else honestly shows
+"Coming soon" rather than a broken link.
+
+**Change a color, font, spacing, or shadow.** All of it lives in one file:
+`src/app/globals.css`, inside the `:root` and `@theme inline` blocks. Change
+a value there and it updates everywhere that token is used — nothing is
+hardcoded per-component. The full palette and type scale are also visible
+live at `/style-guide`.
+
+**Run the project locally** — see [Development commands](#development-commands)
+below. **Run automated checks before committing:** `npm run typecheck && npm run lint && npm run test`.
 
 ## Development principles
 

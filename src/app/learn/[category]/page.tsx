@@ -12,8 +12,14 @@ import {
   getRelatedCategories,
 } from "@/config/learning-categories";
 import { LearningContentBrowser } from "@/components/patterns/learning-content-browser";
+import { GameCard } from "@/components/patterns/game-card";
+import { ResourceCard } from "@/components/patterns/resource-card";
 import { SAMPLE_CONTENT } from "@/lib/content/sample-content";
 import { CONTENT_TYPE_LABELS } from "@/lib/content/types";
+import { SAMPLE_GAMES } from "@/lib/games/sample-games";
+import { isGamePublished } from "@/lib/games/types";
+import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
+import { isResourcePublished } from "@/lib/resources/types";
 import { siteConfig } from "@/config/site";
 
 export function generateStaticParams() {
@@ -45,6 +51,10 @@ export default async function LearnCategoryPage({
   }
 
   const categoryContent = SAMPLE_CONTENT.filter((item) => item.category === category.slug);
+  const categoryGames = SAMPLE_GAMES.filter((g) => g.category === category.slug && isGamePublished(g));
+  const categoryResources = SAMPLE_RESOURCES.filter(
+    (r) => r.category === category.slug && isResourcePublished(r),
+  );
   const relatedCategories = getRelatedCategories(category.slug);
 
   return (
@@ -97,6 +107,32 @@ export default async function LearnCategoryPage({
             <LearningContentBrowser items={categoryContent} />
           </div>
         </div>
+
+        {categoryGames.length > 0 && (
+          <div className="mt-12 border-t border-neutral-200 pt-8">
+            <Heading level="h4" as="h2" className="text-neutral-500">
+              Games for this subject
+            </Heading>
+            <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {categoryGames.map((game) => (
+                <GameCard key={game.id} game={game} categoryName={category.name} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {categoryResources.length > 0 && (
+          <div className="mt-12 border-t border-neutral-200 pt-8">
+            <Heading level="h4" as="h2" className="text-neutral-500">
+              Resources for this subject
+            </Heading>
+            <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {categoryResources.map((resource) => (
+                <ResourceCard key={resource.id} resource={resource} categoryName={category.name} isSample />
+              ))}
+            </div>
+          </div>
+        )}
 
         {relatedCategories.length > 0 && (
           <div className="mt-12 border-t border-neutral-200 pt-8">

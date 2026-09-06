@@ -29,7 +29,7 @@ export const footerNav: { title: string; links: NavLink[] }[] = [
     ],
   },
   {
-    title: "Community",
+    title: "Who It's For",
     links: [
       { label: "For Parents", href: "/parents" },
       { label: "For Teachers", href: "/teachers" },
