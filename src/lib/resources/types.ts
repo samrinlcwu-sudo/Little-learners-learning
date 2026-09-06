@@ -1,4 +1,16 @@
 import {
+  FileText,
+  NotebookPen,
+  Library,
+  Puzzle,
+  Route,
+  Paintbrush,
+  PenLine,
+  GraduationCap,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import {
   RELIGIOUS_REVIEW_REQUIRED_CATEGORIES,
   type AgeRange,
   type ContentAuthor,
@@ -37,6 +49,19 @@ export const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
   "writing-practice": "Writing Practice",
   "teacher-resource": "Teacher Resource",
   "parent-resource": "Parent Resource",
+};
+
+/** Same icon vocabulary already used for resource formats elsewhere on the site (homepage, header) — nothing new introduced. */
+export const RESOURCE_TYPE_ICONS: Record<ResourceType, LucideIcon> = {
+  worksheet: FileText,
+  activity: NotebookPen,
+  ebook: Library,
+  puzzle: Puzzle,
+  maze: Route,
+  coloring: Paintbrush,
+  "writing-practice": PenLine,
+  "teacher-resource": GraduationCap,
+  "parent-resource": Users,
 };
 
 /**

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ImageOff } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -56,6 +57,7 @@ export default async function ResourceDetailPage({
 
   const category = resource.category ? getLearningCategoryBySlug(resource.category) : undefined;
   const downloadable = canDownload(resource);
+  const canonicalUrl = `${siteConfig.url}/resources/${resource.slug}`;
 
   const related = SAMPLE_RESOURCES.filter(
     (r) =>
@@ -64,9 +66,32 @@ export default async function ResourceDetailPage({
       (r.category === resource.category || r.resourceType === resource.resourceType),
   ).slice(0, 3);
 
+  // Structured data reflects only fields the model actually carries — no
+  // ratings, review counts, or other social-proof properties, since none exist.
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    name: resource.title,
+    description: resource.description,
+    url: canonicalUrl,
+    learningResourceType: RESOURCE_TYPE_LABELS[resource.resourceType],
+    teaches: resource.learningObjective,
+    typicalAgeRange: `${resource.ageRange.minYears}-${resource.ageRange.maxYears}`,
+    inLanguage: "en",
+    isAccessibleForFree: resource.accessTier === "free",
+    author: { "@type": "Organization", name: resource.author.name },
+    datePublished: resource.createdAt,
+    dateModified: resource.updatedAt,
+  };
+
   return (
     <Section>
       <Container>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+
         <div className="max-w-3xl">
           <Breadcrumb
             items={[
@@ -95,10 +120,43 @@ export default async function ResourceDetailPage({
             <Badge variant="neutral">{ACCESS_TIER_LABELS[resource.accessTier]}</Badge>
           </div>
 
+          <div className="mt-8">
+            <Heading level="h4" as="h2" className="text-neutral-500">
+              Preview
+            </Heading>
+            {resource.preview ? (
+              // eslint-disable-next-line @next/next/no-img-element -- resource preview URLs are arbitrary/external, not part of the optimized asset pipeline
+              <img
+                src={resource.preview}
+                alt={`Preview of ${resource.title}`}
+                className="mt-3 w-full rounded-lg border border-neutral-200"
+              />
+            ) : (
+              <div className="mt-3 flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 py-12 text-center">
+                <ImageOff className="size-8 text-neutral-400" aria-hidden="true" />
+                <p className="text-sm text-neutral-500">No preview available yet.</p>
+              </div>
+            )}
+          </div>
+
           <dl className="mt-8 grid gap-4 border-y border-neutral-200 py-6 sm:grid-cols-2">
             <div>
               <dt className="text-sm font-semibold text-neutral-500">Learning objective</dt>
               <dd className="mt-1 text-sm text-ink">{resource.learningObjective}</dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-neutral-500">Age group</dt>
+              <dd className="mt-1 text-sm text-ink">
+                {resource.ageRange.minYears}–{resource.ageRange.maxYears} years
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-neutral-500">Category</dt>
+              <dd className="mt-1 text-sm text-ink">{category?.name ?? resource.subject ?? "General"}</dd>
+            </div>
+            <div>
+              <dt className="text-sm font-semibold text-neutral-500">Resource type</dt>
+              <dd className="mt-1 text-sm text-ink">{RESOURCE_TYPE_LABELS[resource.resourceType]}</dd>
             </div>
             <div>
               <dt className="text-sm font-semibold text-neutral-500">Creator</dt>

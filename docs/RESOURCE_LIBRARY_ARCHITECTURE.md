@@ -43,7 +43,10 @@ function that needs to grow (checking a real entitlement instead of just
 ## Routes
 
 - `/resources` — the library index. **Server-rendered and URL-driven**
-  (query params: `q`, `category`, `type`, `age`, `tier`, `sort`, `page`),
+  (query params: `q`, `category`, `type`, `age`, `difficulty`, `tier`,
+  `sort`, `page` — the Prompt 9 build shipped without `age`/`difficulty`
+  controls in the form despite the filter logic supporting them; Prompt 10
+  added the missing inputs),
   not client-state like the Learning Hub's browser. This is a deliberate
   difference: the Learning Hub holds a small, fixed set of categories, so
   instant client-side filtering is fine; a resource library is designed to
@@ -53,8 +56,22 @@ function that needs to grow (checking a real entitlement instead of just
   works with JavaScript disabled.
 - `/resources/[resource]` — one detail page per resource
   (`generateStaticParams` from the currently-published sample set).
-  Breadcrumb, full detail, an honest download/access section, and related
-  resources (same category or same type).
+  Breadcrumb, full detail, a Preview area (the real `preview` image if set,
+  otherwise an honest "No preview available yet" placeholder — never a
+  fabricated image), a structured metadata list (objective, age, category,
+  type, creator), an honest download/access section, and related resources
+  (same category or same type). Each also emits `schema.org/LearningResource`
+  JSON-LD built only from real model fields — no ratings, reviews, or other
+  social-proof properties, since none exist.
+
+## Card visual language (Prompt 10)
+
+`ResourceCard` gained an icon-tile header — the resource type's icon
+(`RESOURCE_TYPE_ICONS`, reusing icons already used elsewhere on the site
+for the same resource formats, e.g. `FileText` for worksheets) in a
+`primary-100` tile — plus a "Learn to: …" line surfacing the learning
+objective at a glance. Every color and spacing value used is an existing
+design token; nothing new was introduced.
 
 ## Filtering, sorting, pagination
 

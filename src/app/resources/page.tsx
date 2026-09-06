@@ -20,6 +20,7 @@ import {
   type ResourceSort,
 } from "@/lib/resources/filters";
 import { RESOURCE_TYPE_LABELS, type ResourceType } from "@/lib/resources/types";
+import type { DifficultyLevel } from "@/lib/content/types";
 import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -34,6 +35,12 @@ export const metadata: Metadata = {
 const categoryNameBySlug = new Map(
   getAllLearningCategories().map((c) => [c.slug, c.name] as const),
 );
+
+const DIFFICULTY_LABELS: Record<DifficultyLevel, string> = {
+  beginner: "Beginner",
+  intermediate: "Intermediate",
+  advanced: "Advanced",
+};
 
 /**
  * Server-rendered and URL-driven (query params, not client state) on
@@ -57,6 +64,7 @@ export default async function ResourcesPage({
     category: getParam("category") || undefined,
     resourceType: (getParam("type") as ResourceType) || undefined,
     ageYears: getParam("age") ? Number(getParam("age")) : undefined,
+    difficulty: (getParam("difficulty") as DifficultyLevel) || undefined,
     accessTier: (getParam("tier") as ResourceFilters["accessTier"]) || undefined,
   };
   const sort = (getParam("sort") as ResourceSort) || "newest";
@@ -65,7 +73,12 @@ export default async function ResourcesPage({
   const filtered = sortResources(filterResources(SAMPLE_RESOURCES, filters), sort);
   const { items, pageCount, totalCount } = paginateResources(filtered, page);
   const hasActiveFilters = Boolean(
-    filters.query || filters.category || filters.resourceType || filters.ageYears || filters.accessTier,
+    filters.query ||
+      filters.category ||
+      filters.resourceType ||
+      filters.ageYears ||
+      filters.difficulty ||
+      filters.accessTier,
   );
 
   const availableCategories = getAllLearningCategories().filter((c) =>
@@ -79,6 +92,7 @@ export default async function ResourcesPage({
     if (filters.category) next.set("category", filters.category);
     if (filters.resourceType) next.set("type", filters.resourceType);
     if (filters.ageYears) next.set("age", String(filters.ageYears));
+    if (filters.difficulty) next.set("difficulty", filters.difficulty);
     if (filters.accessTier) next.set("tier", filters.accessTier);
     if (sort !== "newest") next.set("sort", sort);
     if (targetPage > 1) next.set("page", String(targetPage));
@@ -99,8 +113,8 @@ export default async function ResourcesPage({
           are fully working, even while the catalog is small.
         </p>
 
-        <form method="get" className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-          <div className="sm:col-span-2 lg:col-span-2">
+        <form method="get" className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="sm:col-span-2">
             <Label htmlFor="q">Search</Label>
             <Input id="q" name="q" type="search" placeholder="Search titles…" defaultValue={filters.query} />
           </div>
@@ -116,12 +130,34 @@ export default async function ResourcesPage({
             </Select>
           </div>
           <div>
-            <Label htmlFor="type">Type</Label>
+            <Label htmlFor="type">Resource type</Label>
             <Select id="type" name="type" defaultValue={filters.resourceType ?? ""}>
               <option value="">All types</option>
               {availableTypes.map((type) => (
                 <option key={type} value={type}>
                   {RESOURCE_TYPE_LABELS[type]}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="age">Age</Label>
+            <Select id="age" name="age" defaultValue={filters.ageYears ? String(filters.ageYears) : ""}>
+              <option value="">Any age</option>
+              {[2, 3, 4, 5, 6, 7, 8].map((age) => (
+                <option key={age} value={age}>
+                  {age} years
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="difficulty">Difficulty</Label>
+            <Select id="difficulty" name="difficulty" defaultValue={filters.difficulty ?? ""}>
+              <option value="">Any difficulty</option>
+              {(Object.keys(DIFFICULTY_LABELS) as DifficultyLevel[]).map((level) => (
+                <option key={level} value={level}>
+                  {DIFFICULTY_LABELS[level]}
                 </option>
               ))}
             </Select>
@@ -143,7 +179,7 @@ export default async function ResourcesPage({
               <option value="title-asc">Title A–Z</option>
             </Select>
           </div>
-          <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-6">
+          <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
             <Button type="submit">Apply filters</Button>
             {hasActiveFilters && (
               <Button variant="outline" asChild>
