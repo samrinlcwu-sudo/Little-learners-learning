@@ -1,10 +1,9 @@
 # Games Hub Architecture
 
-Introduced in Prompt 13. Unlike the Resource Library (Prompts 9–12), games
-aren't "content that needs a real file before it can be shown" — a game is
-working software, so the honest move here isn't an empty state, it's
-actually building one. `letter-match` is fully playable; two more are real,
-unimplemented roadmap entries.
+Introduced in Prompt 13; five real games built in Prompt 14. Unlike the
+Resource Library (Prompts 9–12), games aren't "content that needs a real
+file before it can be shown" — a game is working software, so the honest
+move here isn't an empty state, it's actually building one.
 
 ## Data model
 
@@ -30,47 +29,69 @@ Covered by `types.test.ts`; verified live (`/games/arabic-letter-match`
 
 Ten, exactly as specified (matching, memory, sorting, drag-drop,
 multiple-choice, sequencing, counting, identification, word-letter,
-pattern). Only "matching" (and by extension multiple-choice/
-identification/counting, which share the same "prompt + pick the right
-option" shape) has a built-in engine so far — see below. Sorting/drag-drop/
+pattern). Two engines exist so far — see below. Sorting/drag-drop/
 sequencing/pattern games need their own state shape and aren't built yet;
-adding them means writing a new hook alongside `useChoiceGame`, not
-changing the `Game` model.
+adding them means writing a new hook, not changing the `Game` model.
 
-## Game engine — separated concerns
+## Engine 1 — choice games (matching / counting / identification)
 
-- **Game shell** (`src/components/games/game-shell.tsx`): the chrome every
-  choice-style game shares — round counter, live score, and the completion
-  screen. Knows nothing about any specific game's content.
-- **Game instructions**: plain data (`game.instructions`), rendered by the
-  detail page above the shell — not part of the engine itself.
+The shared shape for "show a prompt, pick the right option": `Letter
+Match`, `Count the Fruits`, `Shape Match`, and `Color Match` all use it —
+only how each renders its own prompt differs.
+
+- **Game shell** (`src/components/games/game-shell.tsx`): round counter,
+  live score, and the completion screen. Knows nothing about any
+  specific game's content.
+- **Choice player** (`src/components/games/choice-game-player.tsx`,
+  added in Prompt 14): the options grid, feedback line, and Next button —
+  extracted out of `LetterMatchGame` once three more games needed the
+  exact same UI, so it's written once instead of four times. Takes a
+  `renderPrompt(round)` function as its only per-game customization point.
 - **Game state + logic** (`src/lib/games/use-choice-game.ts`):
   `useChoiceGame(rounds)` — a plain hook, no UI. Tracks round index,
   status, selection, feedback, and score.
 - **Scoring**: a round only counts if answered correctly on the first
-  try — wrong answers can be retried (no penalty, no failure state), which
-  keeps the tone encouraging for young children while still measuring
-  something meaningful.
+  try — wrong answers can be retried (no penalty, no failure state).
 - **Progress**: in-session only ("Round 3 of 6"), shown by the shell.
-  Nothing is persisted anywhere — no accounts exist, and persisting a
-  score without one would mean storing it against no one in particular.
-- **Accessibility**: real `<button>` elements (keyboard-operable by
-  default), `aria-live="polite"` on both the score and the feedback
-  message, feedback that pairs an icon (check/X) with text — never color
-  alone — and `motion-reduce:transition-none` on the only transition in
-  the game.
+  Nothing is persisted anywhere — no accounts exist.
 - **Completion state**: the shell's second render branch — score summary
-  and a "Play again" button that calls the hook's `reset()`.
+  and "Play again" (`reset()`).
+
+Each specific game is now just: build a `ChoiceRound[]` and pass a
+`renderPrompt`. E.g. `CountingGame` renders N Apple icons for prompt `"3"`;
+`ShapeMatchGame` renders a hand-drawn shape (not an icon set, so all four
+shapes share identical fill/weight) for prompt `"circle"`; `ColorMatchGame`
+renders a swatch using real color hex values — not the brand palette,
+since teaching "this is red" has to use an actual red.
+
+## Engine 2 — memory games
+
+A genuinely different interaction (flip, remember, match pairs), so it
+gets its own hook rather than being forced into the choice-game shape.
+
+- **State + logic** (`src/lib/games/use-memory-game.ts`):
+  `useMemoryGame(concepts)` builds a shuffled deck (each concept appears
+  twice), tracks which cards are face-up/matched, and counts moves.
+  Deliberately un-timed: a non-matching pair stays face-up until the
+  player clicks "Continue" — no `setTimeout` auto-flip-back, so nothing
+  changes on screen without the player's own action.
+- **UI** (`src/components/games/memory-game.tsx`): the card grid,
+  mismatch-recovery button, and completion screen. Generic over
+  `concepts: {id, label}[]` — `NumberMemoryGame` supplies the digits 1–4;
+  a future shape- or letter-memory game would supply different concepts
+  and reuse everything else.
 
 ## Playable vs. roadmap games
 
 `src/lib/games/registry.ts` maps a slug to its real component
 (`GAME_COMPONENTS`). `isGamePlayable(slug)` is the single honesty check —
-`GameCard` and the detail page both use it: a registered slug gets a real
-"Play now" link and renders the actual game; every other published `Game`
-record still shows its full real metadata and instructions, just with a
-"Coming soon" empty state instead of a fake Play button. Verified live for
-`shape-sorter`.
+`GameCard` and the detail page both use it. Five slugs are registered
+(`letter-match`, `count-the-fruits`, `shape-match`, `color-match`,
+`number-memory`) and fully playable, verified live end to end (correct
+answers, incorrect-answer retry, completion, Play Again reset). Every
+other published `Game` record still shows its full real metadata and
+instructions, just with a "Coming soon" empty state instead of a fake
+Play button.
 
 ## Routes
 
@@ -87,15 +108,30 @@ record still shows its full real metadata and instructions, just with a
 ## Child safety
 
 No chat, no public profiles, no ads, no external links, and no data
-collection of any kind — the game holds only in-memory React state
-(current round, score) that's gone on page reload. No name prompt, no
-"who's playing" step, nothing sent anywhere. This isn't a policy note
-bolted on after the fact — there's simply no code path in this feature
-that reads or stores anything about the child.
+collection of any kind — every game holds only in-memory React state
+(current round/card flips, score, moves) that's gone on page reload. No
+name prompt, no "who's playing" step, nothing sent anywhere, no
+leaderboard. This isn't a policy note bolted on after the fact — there's
+simply no code path in this feature that reads, stores, or displays
+anything about the child.
+
+## Accessibility
+
+Both engines share the same commitments: real `<button>` elements
+(keyboard-operable by default), `aria-live="polite"` on score/progress and
+feedback, feedback that pairs an icon or state with text — never color
+alone — large interaction targets (96px option buttons; memory cards scale
+with the grid and stay well above the 44px minimum on mobile, verified at
+375px), and `motion-reduce:transition-none` on every transition. Color
+Match's one honest limitation is documented in its own `accessibilityNotes`
+rather than glossed over: identifying a color swatch by sight is that
+game's entire subject, so it isn't meaningfully playable without color
+vision — there's no code fix for that, it's intrinsic to what the game
+teaches.
 
 ## Performance
 
-Zero new dependencies. `useChoiceGame` and `GameShell` are plain React —
-no game engine, no animation library, no canvas/WebGL. The only
-transition (`transition-colors` on option buttons) is CSS, disabled under
+Zero new dependencies across both prompts. Every hook and component is
+plain React — no game engine, no animation library, no canvas/WebGL. The
+only transitions are CSS (`transition-colors`), disabled under
 `prefers-reduced-motion`.
