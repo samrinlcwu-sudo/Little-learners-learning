@@ -65,6 +65,32 @@ export const RESOURCE_TYPE_ICONS: Record<ResourceType, LucideIcon> = {
 };
 
 /**
+ * A finer-grained classification for worksheet/activity resources — e.g. a
+ * "worksheet" or "activity" might specifically be a tracing sheet, a
+ * matching game, etc. Optional and independent of `resourceType`: a
+ * tracing exercise might ship as either a worksheet or an activity, so
+ * this doesn't replace or gate on that field.
+ */
+export type ActivitySubtype =
+  | "matching"
+  | "tracing"
+  | "sorting"
+  | "counting"
+  | "letter"
+  | "coloring"
+  | "general";
+
+export const ACTIVITY_SUBTYPE_LABELS: Record<ActivitySubtype, string> = {
+  matching: "Matching",
+  tracing: "Tracing",
+  sorting: "Sorting",
+  counting: "Counting",
+  letter: "Letter Practice",
+  coloring: "Coloring",
+  general: "General",
+};
+
+/**
  * The future business model this architecture supports — no payment
  * processing exists yet (Prompt 9 explicitly excludes it), but every
  * resource already declares which tier it belongs to.
@@ -84,6 +110,7 @@ export interface Resource {
   title: string;
   description: string;
   resourceType: ResourceType;
+  activitySubtype?: ActivitySubtype;
   /** A learning-category slug (src/config/learning-categories.ts), when this resource belongs to one of the 16 subjects. */
   category?: string;
   subcategory?: string;
@@ -92,6 +119,12 @@ export interface Resource {
   ageRange: AgeRange;
   difficulty: DifficultyLevel;
   learningObjective: string;
+  /** Discrete skills this builds — shown as a short list alongside the single learningObjective sentence. */
+  skillsDeveloped?: string[];
+  /** Ordered steps — labeled "Instructions" for a worksheet, "Steps" for an activity, on the detail page. */
+  instructions?: string[];
+  /** Physical items needed — activities only, in practice. */
+  materialsRequired?: string[];
   tags: string[];
   thumbnail?: string;
   preview?: string;

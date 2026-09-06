@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ACCESS_TIER_LABELS,
+  ACTIVITY_SUBTYPE_LABELS,
   RESOURCE_TYPE_ICONS,
   RESOURCE_TYPE_LABELS,
   canDownload,
@@ -50,6 +51,9 @@ function ResourceCard({ resource, categoryName, isSample }: ResourceCardProps) {
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
             {RESOURCE_TYPE_LABELS[resource.resourceType]}
+            {resource.activitySubtype && resource.activitySubtype !== "general"
+              ? ` · ${ACTIVITY_SUBTYPE_LABELS[resource.activitySubtype]}`
+              : ""}
           </p>
           {isSample && (
             <Badge variant="warning" className="mt-1">

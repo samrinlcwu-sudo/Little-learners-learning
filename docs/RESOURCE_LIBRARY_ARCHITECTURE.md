@@ -24,6 +24,38 @@ tenth later is a one-line change to the `Extract<>` list in
 `src/lib/resources/types.ts` (assuming it's already a member of
 `ContentType`) — nothing else needs updating.
 
+## Worksheets & Activities (Prompt 11)
+
+Prompt 11 asked for matching/tracing/sorting/counting/letter/coloring
+activities as if they were separate top-level types — they aren't, because
+a tracing exercise, say, can just as easily ship as a `worksheet` as an
+`activity`. Instead, `activitySubtype` (`matching | tracing | sorting |
+counting | letter | coloring | general`) is an independent, optional
+classification on top of `resourceType`, so it composes rather than forking
+the type system. `ResourceCard` shows it as "Worksheet · Tracing" etc. when
+set.
+
+Three more optional fields support the worksheet/activity detail
+experience: `skillsDeveloped` (a short list, distinct from the single
+`learningObjective` sentence), `instructions` (ordered steps — labeled
+"Instructions" for a worksheet, "Steps" for an activity, on the detail
+page), and `materialsRequired` (activities only, in practice — physical
+items needed, shown under "What you'll need").
+
+The detail page also splits "Related resources" into **Related worksheets**
+and **Related activities** (same category, matching type) specifically
+when the current resource is a worksheet or an activity; every other
+resource type keeps the single generic related list, since the split
+doesn't make sense for e.g. an ebook.
+
+### Future teacher functionality (not implemented)
+
+Save resource, assign resource, create resource, and track resource usage
+all require accounts, which don't exist yet. When they do, each is a
+Supabase table keyed by `resource.id` plus a future `teacher_id`/`child_id`
+(e.g. `saved_resources`, `assignments`, `resource_usage_events`) — additive
+tables, no change to the `Resource` model itself.
+
 ## Downloads — what's real and what isn't
 
 No resource has a real `downloadFile`. `canDownload()` is the single gate

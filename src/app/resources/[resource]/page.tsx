@@ -58,13 +58,32 @@ export default async function ResourceDetailPage({
   const category = resource.category ? getLearningCategoryBySlug(resource.category) : undefined;
   const downloadable = canDownload(resource);
   const canonicalUrl = `${siteConfig.url}/resources/${resource.slug}`;
+  const isActivity = resource.resourceType === "activity";
+  const instructionsLabel = isActivity ? "Steps" : "Instructions";
 
-  const related = SAMPLE_RESOURCES.filter(
-    (r) =>
-      r.slug !== resource.slug &&
-      isResourcePublished(r) &&
-      (r.category === resource.category || r.resourceType === resource.resourceType),
-  ).slice(0, 3);
+  const publishedOthers = SAMPLE_RESOURCES.filter(
+    (r) => r.slug !== resource.slug && isResourcePublished(r),
+  );
+
+  // Worksheets and activities get their two own related lists (per the
+  // brief); every other resource type keeps one generic "Related resources"
+  // list, since splitting doesn't make sense for e.g. an ebook.
+  const showsSplitRelated = resource.resourceType === "worksheet" || isActivity;
+  const relatedWorksheets = showsSplitRelated
+    ? publishedOthers
+        .filter((r) => r.resourceType === "worksheet" && r.category === resource.category)
+        .slice(0, 3)
+    : [];
+  const relatedActivities = showsSplitRelated
+    ? publishedOthers
+        .filter((r) => r.resourceType === "activity" && r.category === resource.category)
+        .slice(0, 3)
+    : [];
+  const relatedGeneric = showsSplitRelated
+    ? []
+    : publishedOthers
+        .filter((r) => r.category === resource.category || r.resourceType === resource.resourceType)
+        .slice(0, 3);
 
   // Structured data reflects only fields the model actually carries — no
   // ratings, review counts, or other social-proof properties, since none exist.
@@ -158,11 +177,49 @@ export default async function ResourceDetailPage({
               <dt className="text-sm font-semibold text-neutral-500">Resource type</dt>
               <dd className="mt-1 text-sm text-ink">{RESOURCE_TYPE_LABELS[resource.resourceType]}</dd>
             </div>
+            {resource.skillsDeveloped && resource.skillsDeveloped.length > 0 && (
+              <div className="sm:col-span-2">
+                <dt className="text-sm font-semibold text-neutral-500">Skills developed</dt>
+                <dd className="mt-1.5 flex flex-wrap gap-2">
+                  {resource.skillsDeveloped.map((skill) => (
+                    <Badge key={skill} variant="neutral">
+                      {skill}
+                    </Badge>
+                  ))}
+                </dd>
+              </div>
+            )}
             <div>
               <dt className="text-sm font-semibold text-neutral-500">Creator</dt>
               <dd className="mt-1 text-sm text-ink">{resource.author.name}</dd>
             </div>
           </dl>
+
+          {resource.materialsRequired && resource.materialsRequired.length > 0 && (
+            <div className="mt-8">
+              <Heading level="h4" as="h2" className="text-neutral-500">
+                What you&apos;ll need
+              </Heading>
+              <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-ink">
+                {resource.materialsRequired.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {resource.instructions && resource.instructions.length > 0 && (
+            <div className="mt-8">
+              <Heading level="h4" as="h2" className="text-neutral-500">
+                {instructionsLabel}
+              </Heading>
+              <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-ink">
+                {resource.instructions.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+            </div>
+          )}
 
           <div className="mt-8">
             {downloadable ? (
@@ -179,22 +236,61 @@ export default async function ResourceDetailPage({
           </div>
         </div>
 
-        {related.length > 0 && (
-          <div className="mt-12 border-t border-neutral-200 pt-8">
-            <Heading level="h4" as="h2" className="text-neutral-500">
-              Related resources
-            </Heading>
-            <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((r) => (
-                <ResourceCard
-                  key={r.id}
-                  resource={r}
-                  categoryName={r.category ? getLearningCategoryBySlug(r.category)?.name : undefined}
-                  isSample
-                />
-              ))}
+        {showsSplitRelated ? (
+          <>
+            {relatedWorksheets.length > 0 && (
+              <div className="mt-12 border-t border-neutral-200 pt-8">
+                <Heading level="h4" as="h2" className="text-neutral-500">
+                  Related worksheets
+                </Heading>
+                <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {relatedWorksheets.map((r) => (
+                    <ResourceCard
+                      key={r.id}
+                      resource={r}
+                      categoryName={r.category ? getLearningCategoryBySlug(r.category)?.name : undefined}
+                      isSample
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            {relatedActivities.length > 0 && (
+              <div className={relatedWorksheets.length > 0 ? "mt-10" : "mt-12 border-t border-neutral-200 pt-8"}>
+                <Heading level="h4" as="h2" className="text-neutral-500">
+                  Related activities
+                </Heading>
+                <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {relatedActivities.map((r) => (
+                    <ResourceCard
+                      key={r.id}
+                      resource={r}
+                      categoryName={r.category ? getLearningCategoryBySlug(r.category)?.name : undefined}
+                      isSample
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          relatedGeneric.length > 0 && (
+            <div className="mt-12 border-t border-neutral-200 pt-8">
+              <Heading level="h4" as="h2" className="text-neutral-500">
+                Related resources
+              </Heading>
+              <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {relatedGeneric.map((r) => (
+                  <ResourceCard
+                    key={r.id}
+                    resource={r}
+                    categoryName={r.category ? getLearningCategoryBySlug(r.category)?.name : undefined}
+                    isSample
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )
         )}
       </Container>
     </Section>
