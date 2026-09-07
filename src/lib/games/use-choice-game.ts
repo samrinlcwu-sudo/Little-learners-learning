@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export interface ChoiceOption {
   id: string;
@@ -52,15 +52,23 @@ export function useChoiceGame(rounds: ChoiceRound[], options: UseChoiceGameOptio
   const [missedThisRound, setMissedThisRound] = useState(false);
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(0);
+  // React state updates are batched, so a burst of clicks within the same
+  // tick (a fast double-click, an eager tap) can all read the same stale
+  // `feedback` value and each pass the "already answered" guard below,
+  // inflating the score. A ref is mutated synchronously and immediately,
+  // so it closes that gap — the score can never be higher than the number
+  // of rounds actually answered correctly.
+  const answeredCorrectlyRef = useRef(false);
 
   const currentRound = rounds[roundIndex];
   const isLastRound = roundIndex === rounds.length - 1;
 
   function selectOption(option: ChoiceOption) {
-    if (feedback === "correct") return; // already answered correctly — wait for Next
+    if (answeredCorrectlyRef.current) return; // already answered correctly — wait for Next
     setSelectedId(option.id);
     setAttempts((a) => a + 1);
     if (option.isCorrect) {
+      answeredCorrectlyRef.current = true;
       setFeedback("correct");
       if (!missedThisRound) setScore((s) => s + 1);
     } else {
@@ -79,6 +87,7 @@ export function useChoiceGame(rounds: ChoiceRound[], options: UseChoiceGameOptio
     setSelectedId(null);
     setFeedback(null);
     setMissedThisRound(false);
+    answeredCorrectlyRef.current = false;
   }
 
   function reset() {
@@ -89,6 +98,7 @@ export function useChoiceGame(rounds: ChoiceRound[], options: UseChoiceGameOptio
     setMissedThisRound(false);
     setScore(0);
     setAttempts(0);
+    answeredCorrectlyRef.current = false;
   }
 
   return {
