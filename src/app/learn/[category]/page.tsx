@@ -14,6 +14,7 @@ import {
 import { LearningContentBrowser } from "@/components/patterns/learning-content-browser";
 import { GameCard } from "@/components/patterns/game-card";
 import { ResourceCard } from "@/components/patterns/resource-card";
+import { TrackPageView } from "@/components/patterns/track-page-view";
 import { SAMPLE_CONTENT } from "@/lib/content/sample-content";
 import { CONTENT_TYPE_LABELS } from "@/lib/content/types";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
@@ -60,6 +61,12 @@ export default async function LearnCategoryPage({
   return (
     <Section>
       <Container>
+        <TrackPageView
+          type="topic_explored"
+          topic={category.slug}
+          activityLabel={category.name}
+          activityHref={`/learn/${category.slug}`}
+        />
         <div className="max-w-3xl">
           <Breadcrumb
             items={[

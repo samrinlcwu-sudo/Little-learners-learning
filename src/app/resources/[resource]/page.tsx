@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { ResourceCard } from "@/components/patterns/resource-card";
+import { TrackPageView } from "@/components/patterns/track-page-view";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
 import {
@@ -114,6 +115,12 @@ export default async function ResourceDetailPage({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        <TrackPageView
+          type="resource_viewed"
+          topic={resource.category}
+          activityLabel={resource.title}
+          activityHref={`/resources/${resource.slug}`}
         />
 
         <div className="max-w-3xl">

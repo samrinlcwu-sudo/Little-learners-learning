@@ -1,6 +1,12 @@
 export interface GameComponentProps {
   /** The Game record's own `skill` — passed down so the completion screen can say what was practiced. */
   skill: string;
+  /** The Game record's own `slug` — needed to record progress events against the right activity. */
+  slug: string;
+  /** The Game record's own `title` — the human-readable label progress events show a parent. */
+  title: string;
+  /** The Game record's own `category`, when it has one — lets a progress event say which subject this practiced. */
+  category?: string;
 }
 
 /**

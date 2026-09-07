@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChoiceGamePlayer } from "@/components/games/choice-game-player";
 import { useChoiceGame, type ChoiceRound } from "@/lib/games/use-choice-game";
+import { recordProgressEvent } from "@/lib/progress/local-progress";
 import type { GameComponentProps } from "@/lib/games/registry";
 
 const SHAPES = ["circle", "square", "triangle", "rectangle"] as const;
@@ -56,9 +57,18 @@ function buildRounds(): ChoiceRound[] {
 }
 
 /** Identify a shape and pick its name. Reuses the choice-game engine. */
-function ShapeMatchGame({ skill }: GameComponentProps) {
+function ShapeMatchGame({ skill, slug, title, category }: GameComponentProps) {
   const [rounds] = useState(buildRounds);
-  const game = useChoiceGame(rounds);
+  const game = useChoiceGame(rounds, {
+    onComplete: (result) =>
+      recordProgressEvent({
+        type: "game_completed",
+        topic: category,
+        activityLabel: title,
+        activityHref: `/games/${slug}`,
+        score: { correct: result.correctAnswers, total: result.totalRounds },
+      }),
+  });
 
   return (
     <ChoiceGamePlayer

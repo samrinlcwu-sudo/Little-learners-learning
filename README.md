@@ -49,7 +49,10 @@ safety) is documented in
 [docs/GAMES_HUB_ARCHITECTURE.md](docs/GAMES_HUB_ARCHITECTURE.md). Accounts
 and authentication (roles, the planned schema, what's real today versus
 prepared for later) are documented in
-[docs/ACCOUNTS_ARCHITECTURE.md](docs/ACCOUNTS_ARCHITECTURE.md).
+[docs/ACCOUNTS_ARCHITECTURE.md](docs/ACCOUNTS_ARCHITECTURE.md). Learning
+progress tracking (what's recorded, why some activity types are
+deliberately never tracked, and the parent/child views) is documented in
+[docs/PROGRESS_ARCHITECTURE.md](docs/PROGRESS_ARCHITECTURE.md).
 
 ## Installation
 

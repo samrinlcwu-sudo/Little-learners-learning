@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, BookOpen, Gamepad2, Library, Compass } from "lucide-react";
+import { ArrowLeft, BookOpen, Gamepad2, Library, Sparkles, Star } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -11,6 +11,10 @@ import { Button } from "@/components/ui/button";
 import { DecorativeBlob } from "@/components/ui/decorative-blob";
 import { ChildAvatar } from "@/components/patterns/child-avatar";
 import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
+import { useChildProgressEvents } from "@/lib/progress/use-progress-events";
+import { setActiveChild } from "@/lib/progress/local-progress";
+import { getAccuracyReward } from "@/lib/games/rewards";
+import { cn } from "@/lib/utils/cn";
 
 const bigActions = [
   { icon: BookOpen, label: "Learn", href: "/learn", tone: "bg-primary-500" },
@@ -27,13 +31,17 @@ const bigActions = [
  */
 function ChildExperience() {
   const params = useParams<{ childId: string }>();
-  const { children, ready } = useChildProfiles();
+  const { children, ready: childrenReady } = useChildProfiles();
+  const child = children.find((c) => c.id === params.childId);
+  const { events, ready: progressReady } = useChildProgressEvents(child?.id);
 
-  if (!ready) {
+  React.useEffect(() => {
+    if (child) setActiveChild(child.id);
+  }, [child]);
+
+  if (!childrenReady) {
     return <Section className="min-h-[60vh]" />;
   }
-
-  const child = children.find((c) => c.id === params.childId);
 
   if (!child) {
     return (
@@ -51,6 +59,8 @@ function ChildExperience() {
       </Section>
     );
   }
+
+  const completedGames = events.filter((event) => event.type === "game_completed").slice(-5).reverse();
 
   return (
     <Section surface="tint-accent" className="relative min-h-[85vh] overflow-hidden">
@@ -87,10 +97,44 @@ function ChildExperience() {
           ))}
         </div>
 
-        <div className="mt-12 flex items-center justify-center gap-2 text-sm text-neutral-500">
-          <Compass className="size-4" aria-hidden="true" />
-          Nothing finished yet — but that&apos;s coming soon!
-        </div>
+        {progressReady && (
+          <div className="mt-12 rounded-2xl bg-white/60 p-6">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-5 text-accent-600" aria-hidden="true" />
+              <p className="font-display text-lg font-semibold text-ink">Your learning journey</p>
+            </div>
+            {completedGames.length === 0 ? (
+              <p className="mt-2 text-sm text-neutral-600">
+                Nothing finished yet — pick something above to get started!
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-3">
+                {completedGames.map((event) => {
+                  const reward = event.score ? getAccuracyReward(event.score.correct, event.score.total) : null;
+                  return (
+                    <li key={event.id} className="flex items-center justify-between gap-3 text-sm">
+                      <span className="font-medium text-ink">{event.activityLabel}</span>
+                      {reward && (
+                        <span className="flex items-center gap-0.5" aria-label={`${reward.stars} out of 3 stars`}>
+                          {[1, 2, 3].map((position) => (
+                            <Star
+                              key={position}
+                              className={cn(
+                                "size-4",
+                                position <= reward.stars ? "fill-accent-400 text-accent-500" : "fill-none text-neutral-300",
+                              )}
+                              aria-hidden="true"
+                            />
+                          ))}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        )}
       </Container>
     </Section>
   );

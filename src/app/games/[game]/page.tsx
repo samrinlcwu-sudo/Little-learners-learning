@@ -152,7 +152,7 @@ export default async function GameDetailPage({
 
         <div className="mt-8 max-w-2xl">
           {playable ? (
-            <GamePlayer slug={game.slug} skill={game.skill} />
+            <GamePlayer slug={game.slug} skill={game.skill} title={game.title} category={game.category} />
           ) : (
             <EmptyState
               title="This game is coming soon"

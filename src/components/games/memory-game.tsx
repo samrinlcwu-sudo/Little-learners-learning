@@ -5,7 +5,7 @@ import { HelpCircle, PartyPopper } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RewardBadge } from "@/components/games/reward-badge";
-import { useMemoryGame, type MemoryConcept } from "@/lib/games/use-memory-game";
+import { useMemoryGame, type MemoryConcept, type MemoryGameResult } from "@/lib/games/use-memory-game";
 import { getCompletionReward } from "@/lib/games/rewards";
 import { cn } from "@/lib/utils/cn";
 
@@ -15,6 +15,8 @@ export interface MemoryGameProps {
   conceptNoun: string;
   /** What this game practices — shown on the completion screen (e.g. "Number recognition"). */
   skill: string;
+  /** Fires once, the moment every pair is matched — the wiring point for recording a real progress event. */
+  onComplete?: (result: MemoryGameResult) => void;
 }
 
 /**
@@ -22,8 +24,8 @@ export interface MemoryGameProps {
  * recovery, and completion screen. What the cards represent (numbers,
  * shapes, letters, ...) is entirely supplied via `concepts`.
  */
-function MemoryGame({ concepts, conceptNoun, skill }: MemoryGameProps) {
-  const game = useMemoryGame(concepts);
+function MemoryGame({ concepts, conceptNoun, skill, onComplete }: MemoryGameProps) {
+  const game = useMemoryGame(concepts, { onComplete });
 
   if (game.isComplete) {
     const reward = getCompletionReward();

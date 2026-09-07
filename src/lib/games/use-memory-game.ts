@@ -21,10 +21,9 @@ export interface MemoryGameResult {
 export interface UseMemoryGameOptions {
   /**
    * Fires once, the moment the last pair is matched — with the raw
-   * session numbers, nothing else. Not called by NumberMemoryGame today
-   * (there's no child profile yet to record it against); this is the
-   * wiring point a future `GameProgressStore.recordEvent` call attaches
-   * to. See src/lib/games/progress.ts.
+   * session numbers, nothing else. NumberMemoryGame passes this to call
+   * recordProgressEvent (src/lib/progress/local-progress.ts) with a real
+   * result, attributed to whichever child is currently active.
    */
   onComplete?: (result: MemoryGameResult) => void;
 }

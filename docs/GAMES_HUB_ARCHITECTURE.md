@@ -121,41 +121,33 @@ Displayed once, on the completion screen, by `RewardBadge`
 never compared between children. The star count is stated in text ("2 out
 of 3 stars"), not conveyed by fill or color alone.
 
-## Progress architecture (Prompt 15, not wired to a backend)
+## Progress architecture (Prompt 15 defined the contract; Prompt 23 connected it)
 
-`src/lib/games/progress.ts` defines the future-integration contract:
-`GameProgressEvent` (attempts, correct answers, completion, category,
-skill, timestamp — keyed by an opaque future `childId`, never a name),
-`ChildGameSummary` (what a future parent dashboard would read: games
-played/completed, categories explored, skills practiced), and
-`ClassroomProgressSummary` (what a future teacher dashboard would read:
-a classroom's child summaries plus its assigned games) — all behind one
-`GameProgressStore` interface.
-
-`noopGameProgressStore` is the only implementation today, and every
-method is a genuine no-op (no in-memory array, no `localStorage` — nothing
-that could be mistaken for real tracking). The brief was explicit that a
-fake backend would be worse than no backend, so this file stops at a
-tested contract. Both game engines already expose the hook point this
-attaches to: `useChoiceGame(rounds, { onComplete })` and
-`useMemoryGame(concepts, { onComplete })` fire once, with the raw session
-numbers, the moment a game finishes — verified live (a scripted
-letter-match playthrough correctly reported "5 of 6 correct"). None of the
-five shipped games wires `onComplete` to the store yet, since there's no
-`childId` to record against; doing so once child profiles exist is a
-one-line change per game, not an architecture change.
+Prompt 15 deliberately stopped at a tested but unconnected contract
+(`GameProgressStore`, a genuine no-op) because no child profile existed
+yet to record events against. Prompt 22 added real (if browser-local)
+child profiles, and Prompt 23 connected the wire: every game now calls
+`recordProgressEvent` (`src/lib/progress/local-progress.ts`) from its
+`onComplete` callback, with the real session numbers `useChoiceGame` and
+`useMemoryGame` already computed — nothing estimated or invented. That
+superseded the old game-only `GameProgressEvent`/`GameProgressStore`
+types (`src/lib/games/progress.ts`, now removed) with one model that also
+covers non-game activity (topic browsing, resource views) — see
+docs/PROGRESS_ARCHITECTURE.md for the full design, including exactly why
+"game_played" fires from `GamePlayer` on mount while "game_completed"
+fires from each game's own `onComplete`.
 
 ## Child safety
 
-No chat, no public profiles, no ads, no external links, and no data
-collection of any kind — every game holds only in-memory React state
-(current round/card flips, score, moves) that's gone on page reload. No
-name prompt, no "who's playing" step, nothing sent anywhere, no
-leaderboard, no public ranking of any kind. This isn't a policy note
-bolted on after the fact — there's simply no code path in this feature
-that reads, stores, or displays anything about the child. The progress
-architecture above changes none of this: it's an unused, no-op contract
-until an actual authenticated child profile exists to attach data to.
+No chat, no public profiles, no ads, no external links, no accounts, and
+no data leaving the browser. In-round state (current card flips, score,
+moves) is still in-memory only, gone on reload. What Prompt 23 added is a
+completion event — game slug, real score, timestamp, and whichever child
+profile is active — written to this browser's own `localStorage`, never
+to a server (see docs/PROGRESS_ARCHITECTURE.md). No name prompt, no
+"who's playing" step beyond the parent opening a child's profile once, no
+leaderboard, no public ranking, no cross-child comparison anywhere in the
+UI.
 
 ## Accessibility
 

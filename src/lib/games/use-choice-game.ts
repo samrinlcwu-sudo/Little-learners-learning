@@ -26,10 +26,9 @@ export interface ChoiceGameResult {
 export interface UseChoiceGameOptions {
   /**
    * Fires once, the moment the last round is answered — with the raw
-   * session numbers, nothing else. Not called by any of the five games
-   * built so far (there's no child profile yet to record it against);
-   * this is the wiring point a future `GameProgressStore.recordEvent`
-   * call attaches to. See src/lib/games/progress.ts.
+   * session numbers, nothing else. Every choice game passes this to call
+   * recordProgressEvent (src/lib/progress/local-progress.ts) with a real
+   * score, attributed to whichever child is currently active.
    */
   onComplete?: (result: ChoiceGameResult) => void;
 }

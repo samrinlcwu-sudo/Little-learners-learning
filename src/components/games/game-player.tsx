@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 import { Spinner } from "@/components/ui/loading";
+import { recordProgressEvent } from "@/lib/progress/local-progress";
 import type { GameComponentProps } from "@/lib/games/registry";
 
 /**
@@ -49,10 +51,23 @@ export interface GamePlayerProps extends GameComponentProps {
   slug: string;
 }
 
-function GamePlayer({ slug, skill }: GamePlayerProps) {
+function GamePlayer({ slug, skill, title, category }: GamePlayerProps) {
   const Game = GAME_LOADERS[slug];
+
+  useEffect(() => {
+    recordProgressEvent({
+      type: "game_played",
+      topic: category,
+      activityLabel: title,
+      activityHref: `/games/${slug}`,
+    });
+    // Record once per real game visit — re-firing on every render would
+    // count one visit as many.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
   if (!Game) return null;
-  return <Game skill={skill} />;
+  return <Game skill={skill} slug={slug} title={title} category={category} />;
 }
 
 export { GamePlayer };

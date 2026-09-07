@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Apple } from "lucide-react";
 import { ChoiceGamePlayer } from "@/components/games/choice-game-player";
 import { useChoiceGame, type ChoiceRound } from "@/lib/games/use-choice-game";
+import { recordProgressEvent } from "@/lib/progress/local-progress";
 import type { GameComponentProps } from "@/lib/games/registry";
 
 const COUNTS = [1, 2, 3, 4, 5];
@@ -31,9 +32,18 @@ function buildRounds(): ChoiceRound[] {
 }
 
 /** Count a group of apples (1–5) and pick the matching number. Reuses the choice-game engine — only the prompt visual differs from Letter Match. */
-function CountingGame({ skill }: GameComponentProps) {
+function CountingGame({ skill, slug, title, category }: GameComponentProps) {
   const [rounds] = useState(buildRounds);
-  const game = useChoiceGame(rounds);
+  const game = useChoiceGame(rounds, {
+    onComplete: (result) =>
+      recordProgressEvent({
+        type: "game_completed",
+        topic: category,
+        activityLabel: title,
+        activityHref: `/games/${slug}`,
+        score: { correct: result.correctAnswers, total: result.totalRounds },
+      }),
+  });
 
   return (
     <ChoiceGamePlayer

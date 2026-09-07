@@ -7,12 +7,14 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { ChildCard } from "@/components/patterns/child-card";
 import { ChildProfileForm } from "@/components/patterns/child-profile-form";
+import { ChildAvatar } from "@/components/patterns/child-avatar";
 import {
   Modal,
   ModalContent,
@@ -21,6 +23,10 @@ import {
   ModalDescription,
 } from "@/components/ui/modal";
 import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
+import { useProgressEvents } from "@/lib/progress/use-progress-events";
+import { getEventsForChild } from "@/lib/progress/local-progress";
+import { summarizeChildProgress, describeEvent } from "@/lib/progress/summarize";
+import { formatRelativeTime } from "@/lib/utils/format-relative-time";
 import type { ChildProfileValues } from "@/lib/validations/child-profile";
 import type { ChildProfile } from "@/lib/accounts/types";
 
@@ -64,6 +70,7 @@ const TONE_STYLES = {
  */
 function ParentDashboard() {
   const { children, ready, addChild, updateChild } = useChildProfiles();
+  const { events, ready: progressReady } = useProgressEvents();
   const [modalOpen, setModalOpen] = React.useState(false);
   const [editingChild, setEditingChild] = React.useState<ChildProfile | null>(null);
 
@@ -155,11 +162,70 @@ function ParentDashboard() {
 
           <div className="mt-14">
             <Heading level="h2">Learning progress</Heading>
-            <EmptyState
-              className="mt-6"
-              title="No activity recorded yet"
-              description="Progress tracking isn't connected yet. Once it is, you'll see what each child has been working on here — nothing is invented in the meantime."
-            />
+            <p className="mt-2 text-neutral-600">
+              What each child has actually explored — nothing here is
+              estimated or invented.
+            </p>
+
+            {!ready || !progressReady ? null : children.length === 0 ? (
+              <EmptyState
+                className="mt-6"
+                title="Add a child to see their progress here"
+                description="Once you add a child and they explore the site, what they did shows up here."
+              />
+            ) : (
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                {children.map((child) => {
+                  const childEvents = getEventsForChild(events, child.id);
+                  const summary = summarizeChildProgress(childEvents);
+
+                  return (
+                    <Card key={child.id} className="p-5">
+                      <div className="flex items-center gap-3">
+                        <ChildAvatar avatar={child.avatar} />
+                        <div>
+                          <p className="font-medium text-ink">{child.name}</p>
+                          {summary.lastActiveAt && (
+                            <p className="text-xs text-neutral-500">
+                              Last active {formatRelativeTime(summary.lastActiveAt)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {childEvents.length === 0 ? (
+                        <p className="mt-4 text-sm text-neutral-600">
+                          Nothing recorded yet — progress shows up here once{" "}
+                          {child.name} explores a subject, resource, or game.
+                        </p>
+                      ) : (
+                        <>
+                          {summary.topicsExplored.length > 0 && (
+                            <div className="mt-4 flex flex-wrap gap-1.5">
+                              {summary.topicsExplored.slice(0, 4).map((topic) => (
+                                <Badge key={topic} variant="neutral">
+                                  {topic}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                          <ul className="mt-4 space-y-2">
+                            {summary.recentActivities.slice(0, 3).map((event) => (
+                              <li key={event.id} className="flex items-center justify-between gap-3 text-sm">
+                                <span className="text-neutral-700">{describeEvent(event)}</span>
+                                <span className="shrink-0 text-xs text-neutral-500">
+                                  {formatRelativeTime(event.occurredAt)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="mt-14 flex items-center justify-between gap-4 rounded-xl border border-neutral-200 p-5">
