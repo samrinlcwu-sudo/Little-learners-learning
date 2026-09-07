@@ -10,12 +10,16 @@ import { PageHeader } from "@/components/patterns/page-header";
 import { CapabilityList } from "@/components/patterns/capability-list";
 import { parentValuePoints } from "@/config/audience-value-points";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description =
+  "How Little Learners Learning is built for parents guiding their child's early learning — organized by subject, built for early years, careful with Qur'an content.";
 
 export const metadata: Metadata = {
   title: "For Parents",
-  description:
-    "How Little Learners Learning is built for parents guiding their child's early learning — organized by subject, built for early years, careful with Qur'an content.",
+  description,
   alternates: { canonical: `${siteConfig.url}/parents` },
+  ...buildSocialMetadata("For Parents — " + siteConfig.name, description, "/parents"),
 };
 
 const availableNow = [

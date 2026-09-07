@@ -4,6 +4,8 @@ import { siteConfig } from "@/config/site";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SkipLink } from "@/components/ui/skip-link";
+import { SiteStructuredData } from "@/components/patterns/site-structured-data";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -27,6 +29,11 @@ export const metadata: Metadata = {
   icons: {
     icon: "/brand/little-learners-learning-logo.png",
   },
+  // Site-wide fallback — a page that sets its own `openGraph`/`twitter`
+  // (via buildSocialMetadata) replaces this entirely rather than merging
+  // into it; every page that doesn't still gets a real, professional
+  // preview instead of a blank one. See src/lib/seo/social-metadata.ts.
+  ...buildSocialMetadata(siteConfig.name, siteConfig.description),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -36,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <SiteStructuredData />
         <SkipLink />
         <SiteHeader />
         <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col focus:outline-none">

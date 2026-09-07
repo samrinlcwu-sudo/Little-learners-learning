@@ -5,11 +5,16 @@ import { Heading } from "@/components/ui/heading";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { PageHeader } from "@/components/patterns/page-header";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description =
+  "Answers to common questions about Little Learners Learning — for parents, teachers, and anyone exploring the platform.";
 
 export const metadata: Metadata = {
   title: "FAQ",
-  description: "Answers to common questions about Little Learners Learning — for parents, teachers, and anyone exploring the platform.",
+  description,
   alternates: { canonical: `${siteConfig.url}/faq` },
+  ...buildSocialMetadata("FAQ — " + siteConfig.name, description, "/faq"),
 };
 
 interface FaqItem {
@@ -160,8 +165,27 @@ const faqGroups: FaqGroup[] = [
 ];
 
 export default function FaqPage() {
+  // Built directly from the same faqGroups content rendered below — the
+  // schema can never claim a question exists that isn't actually visible
+  // on the page.
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqGroups.flatMap((group) =>
+      group.items.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: { "@type": "Answer", text: item.answer },
+      })),
+    ),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <PageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "FAQ" }]}
         eyebrow="Questions & Answers"

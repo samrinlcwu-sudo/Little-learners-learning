@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { ComingSoonSection } from "@/components/patterns/coming-soon-section";
+import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   robots: { index: false, follow: true },
+  alternates: { canonical: `${siteConfig.url}/privacy` },
 };
 
 export default function PrivacyPage() {

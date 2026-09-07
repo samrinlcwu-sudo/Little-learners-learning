@@ -13,10 +13,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/patterns/page-header";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description = "Get help with Little Learners Learning, or check the FAQ before writing in.";
 
 export const metadata: Metadata = {
   title: "Support",
-  description: "Get help with Little Learners Learning, or check the FAQ before writing in.",
+  description,
+  ...buildSocialMetadata("Support — " + siteConfig.name, description, "/support"),
   alternates: { canonical: `${siteConfig.url}/support` },
 };
 

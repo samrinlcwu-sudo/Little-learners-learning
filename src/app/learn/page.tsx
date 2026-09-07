@@ -11,12 +11,16 @@ import { LearningCard } from "@/components/patterns/learning-card";
 import { LearningContentBrowser } from "@/components/patterns/learning-content-browser";
 import { SAMPLE_CONTENT } from "@/lib/content/sample-content";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description =
+  "Browse Little Learners Learning's subject areas — English & literacy, math, life skills, creativity, and foundational Qur'an & Arabic learning.";
 
 export const metadata: Metadata = {
   title: "Learn",
-  description:
-    "Browse Little Learners Learning's subject areas — English & literacy, math, life skills, creativity, and foundational Qur'an & Arabic learning.",
+  description,
   alternates: { canonical: `${siteConfig.url}/learn` },
+  ...buildSocialMetadata("Learn — " + siteConfig.name, description, "/learn"),
 };
 
 const categoryNameBySlug = new Map(

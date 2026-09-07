@@ -8,12 +8,16 @@ import { GamesBrowser } from "@/components/patterns/games-browser";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description =
+  "The Little Learners Learning Games Hub — educational games for letter recognition, counting, shapes, and more.";
 
 export const metadata: Metadata = {
   title: "Games",
-  description:
-    "The Little Learners Learning Games Hub — educational games for letter recognition, counting, shapes, and more.",
+  description,
   alternates: { canonical: `${siteConfig.url}/games` },
+  ...buildSocialMetadata("Games — " + siteConfig.name, description, "/games"),
 };
 
 export default function GamesPage() {

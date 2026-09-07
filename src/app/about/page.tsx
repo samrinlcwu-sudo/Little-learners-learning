@@ -13,12 +13,16 @@ import { IconFeature } from "@/components/patterns/icon-feature";
 import { learningCategoryGroups } from "@/config/learning-categories";
 import { parentValuePoints, teacherValuePoints } from "@/config/audience-value-points";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description =
+  "What Little Learners Learning is, who it's for, and the approach behind an early-years learning platform built for parents and teachers.";
 
 export const metadata: Metadata = {
   title: "About",
-  description:
-    "What Little Learners Learning is, who it's for, and the approach behind an early-years learning platform built for parents and teachers.",
+  description,
   alternates: { canonical: `${siteConfig.url}/about` },
+  ...buildSocialMetadata("About — " + siteConfig.name, description, "/about"),
 };
 
 const offerings = [

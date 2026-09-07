@@ -21,10 +21,16 @@ import { DecorativeBlob } from "@/components/ui/decorative-blob";
 import { IconFeature } from "@/components/patterns/icon-feature";
 import { learningCategoryGroups } from "@/config/learning-categories";
 import { parentValuePoints, teacherValuePoints } from "@/config/audience-value-points";
+import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description =
+  "Little Learners Learning is an early-years learning platform bringing literacy, math, life skills, creativity, and foundational Qur'an learning together — built for parents and teachers, not just kids.";
 
 export const metadata: Metadata = {
-  description:
-    "Little Learners Learning is an early-years learning platform bringing literacy, math, life skills, creativity, and foundational Qur'an learning together — built for parents and teachers, not just kids.",
+  description,
+  alternates: { canonical: siteConfig.url },
+  ...buildSocialMetadata(siteConfig.name, description),
 };
 
 const resourceFormats = [

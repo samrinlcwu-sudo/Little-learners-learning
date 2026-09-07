@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: siteConfig.url, lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: `${siteConfig.url}/support`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${siteConfig.url}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     ...primaryNav.map((link) => ({
       url: `${siteConfig.url}${link.href}`,
       lastModified: now,

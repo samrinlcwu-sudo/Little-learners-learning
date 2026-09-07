@@ -52,7 +52,10 @@ prepared for later) are documented in
 [docs/ACCOUNTS_ARCHITECTURE.md](docs/ACCOUNTS_ARCHITECTURE.md). Learning
 progress tracking (what's recorded, why some activity types are
 deliberately never tracked, and the parent/child views) is documented in
-[docs/PROGRESS_ARCHITECTURE.md](docs/PROGRESS_ARCHITECTURE.md).
+[docs/PROGRESS_ARCHITECTURE.md](docs/PROGRESS_ARCHITECTURE.md). SEO and
+AEO (metadata, sitemap, structured data, and how to add a new page
+without hurting search visibility) are documented in
+[docs/SEO_ARCHITECTURE.md](docs/SEO_ARCHITECTURE.md).
 
 ## Installation
 

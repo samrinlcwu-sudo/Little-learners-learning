@@ -11,12 +11,16 @@ import { PageHeader } from "@/components/patterns/page-header";
 import { CapabilityList } from "@/components/patterns/capability-list";
 import { teacherValuePoints } from "@/config/audience-value-points";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description =
+  "How Little Learners Learning is being built for teachers — professional profiles, sharing expertise, and room to grow as the platform develops.";
 
 export const metadata: Metadata = {
   title: "For Teachers",
-  description:
-    "How Little Learners Learning is being built for teachers — professional profiles, sharing expertise, and room to grow as the platform develops.",
+  description,
   alternates: { canonical: `${siteConfig.url}/teachers` },
+  ...buildSocialMetadata("For Teachers — " + siteConfig.name, description, "/teachers"),
 };
 
 const availableNow = [

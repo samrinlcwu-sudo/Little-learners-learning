@@ -21,14 +21,18 @@ import {
 import { RESOURCE_TYPE_LABELS, type ResourceType } from "@/lib/resources/types";
 import type { DifficultyLevel } from "@/lib/content/types";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description =
+  "Browse Little Learners Learning's resource library — worksheets, activities, ebooks, and teacher & parent resources.";
 
 export const metadata: Metadata = {
   title: "Resources",
-  description:
-    "Browse Little Learners Learning's resource library — worksheets, activities, ebooks, and teacher & parent resources.",
+  description,
   // Faceted/paginated views of this page canonicalize back to the base
   // library URL rather than each generating their own indexable page.
   alternates: { canonical: `${siteConfig.url}/resources` },
+  ...buildSocialMetadata("Resources — " + siteConfig.name, description, "/resources"),
 };
 
 const categoryNameBySlug = new Map(

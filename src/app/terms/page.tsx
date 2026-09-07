@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { ComingSoonSection } from "@/components/patterns/coming-soon-section";
+import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
   robots: { index: false, follow: true },
+  alternates: { canonical: `${siteConfig.url}/terms` },
 };
 
 export default function TermsPage() {
