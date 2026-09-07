@@ -46,7 +46,10 @@ tiers, downloads) is documented in
 [docs/RESOURCE_LIBRARY_ARCHITECTURE.md](docs/RESOURCE_LIBRARY_ARCHITECTURE.md).
 The Games Hub (game data model, the reusable choice-game engine, child
 safety) is documented in
-[docs/GAMES_HUB_ARCHITECTURE.md](docs/GAMES_HUB_ARCHITECTURE.md).
+[docs/GAMES_HUB_ARCHITECTURE.md](docs/GAMES_HUB_ARCHITECTURE.md). Accounts
+and authentication (roles, the planned schema, what's real today versus
+prepared for later) are documented in
+[docs/ACCOUNTS_ARCHITECTURE.md](docs/ACCOUNTS_ARCHITECTURE.md).
 
 ## Installation
 

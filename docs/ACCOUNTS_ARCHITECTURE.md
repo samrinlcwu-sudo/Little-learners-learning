@@ -1,0 +1,128 @@
+# Accounts & Authentication Architecture
+
+Introduced in Prompt 21: the foundation for user accounts, not accounts
+themselves. No Supabase project is connected (`NEXT_PUBLIC_SUPABASE_URL`/
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` are blank in `.env.local` — see
+`src/lib/supabase/is-configured.ts`), so nothing in this system creates,
+stores, or authenticates a real user yet. Every screen says so plainly.
+
+## Why no accounts exist yet, deliberately
+
+Building a fake backend (an in-memory "signed in" state, a cookie that
+just says `loggedIn: true`) would be worse than not building one — it
+would look real without any of the guarantees a real auth system has to
+provide (password hashing, session security, email verification). The
+brief for this prompt is explicit about the same tradeoff the Games Hub's
+`noopGameProgressStore` (`src/lib/games/progress.ts`) already made: define
+the contract now, connect a real implementation later, never simulate one
+in between.
+
+## Roles
+
+`src/lib/accounts/types.ts` defines `AccountRole = "parent" | "teacher" |
+"admin"`.
+
+- **Parent** and **Teacher** are the two roles someone can actually sign
+  up as today (see the role picker on `/sign-up`).
+- **Admin** exists in the type so the system doesn't need a breaking
+  change to add it later, but there is no `/admin` route, no admin UI, and
+  no admin sign-up path anywhere in this codebase. When admin
+  functionality is built, it must live behind real server-side role
+  checks, never a client-side flag — "don't expose admin functionality
+  publicly" means the route shouldn't exist for anyone without the role,
+  not just that it's unlinked.
+- **Child** is intentionally not a role. A child doesn't hold their own
+  credentials — a child is a profile a parent account manages (see
+  `ChildProfile`). This matches how every mainstream product handles
+  young children, and avoids the real safety and legal complexity (COPPA
+  and equivalents) of giving a young child their own login.
+
+## Data model (contracts only — no table exists yet)
+
+- `Account` — id, email, name, role, createdAt. Maps to Supabase Auth's
+  `auth.users` plus a `profiles` table for the fields Supabase Auth
+  doesn't hold (name, role) once a project exists.
+- `ChildProfile` — id, parentAccountId, name, ageYears, createdAt. One
+  parent, many children (`parentAccountId` is a foreign key, not an
+  array on `Account`, so a `child_profiles` table can grow independently).
+- `TeacherProfile` — id, accountId, bio, subjects, yearsExperience,
+  verified, createdAt. Separate from `Account` so a teacher's
+  public-facing profile (what `/teachers` describes as "coming later")
+  doesn't mix with private account fields like email. `verified` is
+  set by a human review step, never automatically — same rule the
+  religious-content review gate already follows elsewhere.
+
+When Supabase is connected, each of these becomes a table with Row Level
+Security: a parent account can read/write its own `child_profiles` rows
+and nothing else's; a teacher can read/write its own `teacher_profiles`
+row; `admin` bypasses both policies via a server-side check, never a
+client-visible one.
+
+## Auth screens (real UI, real validation, no live backend)
+
+Six screens, all under `src/app/{sign-up,sign-in,forgot-password,
+reset-password,account}` plus the "sign out" concept described below:
+
+| Screen | Route | Fields |
+|---|---|---|
+| Sign Up | `/sign-up` | Name, Email, Role (Parent/Teacher), Password |
+| Sign In | `/sign-in` | Email, Password |
+| Forgot Password | `/forgot-password` | Email |
+| Reset Password | `/reset-password` | New password |
+| Account | `/account` | — (always shows the signed-out state today) |
+
+Each form (`src/components/patterns/*-form.tsx`) validates with the same
+Zod + React Hook Form pattern the README already documented as the plan
+for "every future form" (`src/lib/validations/auth.ts`) — this is real,
+functional validation: an invalid email, a short password, or a missing
+role selection shows a real inline error. No "confirm password" field
+exists; a show/hide toggle (`src/components/ui/password-input.tsx`) does
+the same job with one fewer field to fill in.
+
+What happens on submit: every form calls `isSupabaseConfigured` (see
+above) and, since it's always `false` today, shows an honest "this isn't
+connected yet, nothing was created" message instead of the real Supabase
+call. The comment at each `onSubmit` names the exact Supabase Auth method
+that call becomes once a project exists (`auth.signUp`,
+`auth.signInWithPassword`, `auth.resetPasswordForEmail`,
+`auth.updateUser`) — connecting a project and removing the
+`isSupabaseConfigured` branch is the entire migration, not a rewrite.
+
+**Sign out** has no dedicated page — it's a button that will call
+`supabase.auth.signOut()` and redirect home. It isn't built yet because
+there's no session to sign out of; adding it is a single header change
+once sessions exist.
+
+## Navigation
+
+`src/components/layout/site-header.tsx`'s `HeaderActions` always renders
+"Sign in" / "Create account" — real links to the real pages above — because
+every visitor is signed out today (no session system exists to be
+otherwise). The comment there marks exactly where a real session check
+replaces this with Account/Dashboard/Sign out for a signed-in visitor.
+`/account` itself already reflects the same honesty: it never invents a
+name or dashboard, it explains plainly that nothing is connected yet.
+
+## Security
+
+- Passwords are never touched by this codebase's own code — Supabase Auth
+  hashes and stores them (bcrypt) once connected. No password ever should
+  reach a custom table or log line.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` is safe for the browser by design;
+  `SUPABASE_SERVICE_ROLE_KEY` (server-only, see `.env.example`) must never
+  be imported into a Client Component or `NEXT_PUBLIC_`-prefixed.
+- `isSupabaseConfigured` reads only `NEXT_PUBLIC_*` values — safe to
+  evaluate in the browser, and it's the only thing gating every form's
+  real submission path.
+
+## SEO / AEO
+
+Every auth page sets `robots: { index: false, follow: false }` in its
+`metadata` export — the standard way to keep a page out of search results
+without blocking it from being crawled at all (a `robots.txt` disallow
+would be the wrong tool here: it can leave a linked, empty listing in
+search results instead of just omitting the page). `src/app/robots.ts` and
+`src/app/sitemap.ts` are both unchanged and untouched by this prompt —
+the sitemap is hand-curated from `primaryNav` plus explicit entries, so
+auth routes were never at risk of being added to it. No FAQ content or
+structured data (`application/ld+json`) exists on any auth page.

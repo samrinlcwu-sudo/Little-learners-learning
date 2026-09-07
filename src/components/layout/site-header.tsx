@@ -15,9 +15,11 @@ export interface SiteHeaderProps {
 }
 
 /**
- * Search opens the real site search dialog. Log in/Sign up stay disabled
- * with an explicit "coming soon" label — reserving the layout space
- * accounts will need without pretending auth already works.
+ * Search opens the real site search dialog. Sign in/Create account link to
+ * real pages — the forms and their validation are fully real, even though
+ * no account is actually created yet (see src/lib/supabase/is-configured.ts).
+ * There's no session system yet, so every visitor is signed out; this is
+ * the one state to show until real auth sessions exist.
  */
 function HeaderActions({ className }: { className?: string }) {
   return (
@@ -31,11 +33,11 @@ function HeaderActions({ className }: { className?: string }) {
           <span className="sr-only">Search</span>
         </button>
       </SiteSearchTrigger>
-      <Button variant="ghost" size="sm" disabled title="Coming soon">
-        Log in
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/sign-in">Sign in</Link>
       </Button>
-      <Button variant="primary" size="sm" disabled title="Coming soon">
-        Sign up
+      <Button variant="primary" size="sm" asChild>
+        <Link href="/sign-up">Create account</Link>
       </Button>
     </div>
   );
@@ -153,11 +155,11 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
                 ))}
               </ul>
               <div className="flex flex-col gap-2 border-t border-neutral-200 px-4 py-4">
-                <Button variant="outline" disabled title="Coming soon" className="w-full">
-                  Log in
+                <Button variant="outline" asChild className="w-full" onClick={() => setMobileOpen(false)}>
+                  <Link href="/sign-in">Sign in</Link>
                 </Button>
-                <Button variant="primary" disabled title="Coming soon" className="w-full">
-                  Sign up
+                <Button variant="primary" asChild className="w-full" onClick={() => setMobileOpen(false)}>
+                  <Link href="/sign-up">Create account</Link>
                 </Button>
               </div>
             </nav>

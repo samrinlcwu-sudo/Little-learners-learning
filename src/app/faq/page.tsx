@@ -29,7 +29,7 @@ const faqGroups: FaqGroup[] = [
       {
         question: "Do I need an account to use Little Learners Learning?",
         answer:
-          "No. The Learning Hub, Resource Library, and Games are all usable today without an account. Accounts haven't been built yet.",
+          "No. The Learning Hub, Resource Library, and Games are all usable today without an account. Sign-up exists, but no account is actually created yet, since no account backend is connected.",
       },
       {
         question: "Is the platform free to use?",
@@ -108,12 +108,12 @@ const faqGroups: FaqGroup[] = [
       {
         question: "Can I sign up or log in?",
         answer:
-          "Not yet. Sign up and log in appear in the navigation so it's clear they're planned, but both are disabled until accounts are actually built.",
+          "You can fill in the sign-up and sign-in forms and see real validation — but no account is actually created or signed in yet, since no account backend is connected. Each form says so plainly before you submit.",
       },
       {
         question: "Will my activity or data be saved anywhere?",
         answer:
-          "No account system exists yet, so there's nothing to save — nothing you do on the site today is tied to an identity.",
+          "No. No account backend exists yet, so nothing you type into a form — or do anywhere else on the site — is saved or tied to an identity.",
       },
     ],
   },
