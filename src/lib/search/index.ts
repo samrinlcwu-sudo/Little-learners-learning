@@ -27,6 +27,7 @@ const STATIC_PAGES: SearchEntry[] = [
   { title: "About", description: "What Little Learners Learning is and why it exists.", href: "/about", group: "Pages" },
   { title: "FAQ", description: "Answers to common questions.", href: "/faq", group: "Pages" },
   { title: "Support", description: "Get help or send a message.", href: "/support", group: "Pages" },
+  { title: "Dashboard", description: "Manage child profiles and jump into learning.", href: "/dashboard", group: "Pages" },
 ];
 
 /**

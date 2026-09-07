@@ -35,6 +35,10 @@ const availableNow = [
     title: "See what each resource actually teaches",
     description: "Every item shows its age range, difficulty, and learning objective before you open it.",
   },
+  {
+    title: "Set up child profiles in your dashboard",
+    description: "Add a name, age, and avatar for each child — saved on this device, no account required.",
+  },
 ];
 
 const comingLater = [
@@ -43,8 +47,8 @@ const comingLater = [
     description: "Most resources today are sample records without an attached file — downloads are added as real content ships.",
   },
   {
-    title: "Parent accounts & child profiles",
-    description: "A way to save a profile for your child and personalize what you see.",
+    title: "Accounts that sync across devices",
+    description: "Child profiles are saved on this device only for now — an account will let them follow you anywhere.",
   },
   {
     title: "Progress tracking",
@@ -86,6 +90,9 @@ export default function ParentsPage() {
 
           <div className="mt-12 flex flex-wrap gap-3 border-t border-neutral-200 pt-8">
             <Button asChild>
+              <Link href="/dashboard">Open your dashboard</Link>
+            </Button>
+            <Button variant="outline" asChild>
               <Link href="/learn">Explore Learning</Link>
             </Button>
             <Button variant="outline" asChild>

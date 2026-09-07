@@ -42,9 +42,13 @@ in between.
 - `Account` — id, email, name, role, createdAt. Maps to Supabase Auth's
   `auth.users` plus a `profiles` table for the fields Supabase Auth
   doesn't hold (name, role) once a project exists.
-- `ChildProfile` — id, parentAccountId, name, ageYears, createdAt. One
-  parent, many children (`parentAccountId` is a foreign key, not an
-  array on `Account`, so a `child_profiles` table can grow independently).
+- `ChildProfile` — id, parentAccountId, name, ageYears, avatar,
+  favoriteCategory (optional), createdAt. One parent, many children
+  (`parentAccountId` is a foreign key, not an array on `Account`, so a
+  `child_profiles` table can grow independently). `avatar` is one of six
+  fixed emoji choices (`CHILD_AVATAR_IDS`) — never a photo upload, which
+  sidesteps needing to secure a real image of a child rather than adding a
+  policy on top of collecting one.
 - `TeacherProfile` — id, accountId, bio, subjects, yearsExperience,
   verified, createdAt. Separate from `Account` so a teacher's
   public-facing profile (what `/teachers` describes as "coming later")
@@ -101,7 +105,66 @@ every visitor is signed out today (no session system exists to be
 otherwise). The comment there marks exactly where a real session check
 replaces this with Account/Dashboard/Sign out for a signed-in visitor.
 `/account` itself already reflects the same honesty: it never invents a
-name or dashboard, it explains plainly that nothing is connected yet.
+name or dashboard, it explains plainly that nothing is connected yet — it
+does point to `/dashboard`, though, since that one works today without an
+account (see below).
+
+## Parent Dashboard & Child Profiles (Prompt 22)
+
+`/dashboard` and `/dashboard/children/[childId]` are a deliberate exception
+to "nothing works until accounts exist": child profiles don't need a
+backend to be useful or safe, because a parent typing in their own child's
+name and age isn't the same problem as authenticating a user. So this one
+piece is real today, not a preview:
+
+- **Storage**: `src/lib/accounts/local-children.ts` reads/writes a plain
+  array of `ChildProfile` rows to this browser's `localStorage`
+  (key `little-learners-learning:child-profiles`), keyed by a fixed
+  placeholder `parentAccountId` since there's no real parent account to
+  attach them to. `src/lib/accounts/use-child-profiles.ts` is the hook
+  every component uses — it loads from storage in `useEffect`, never in
+  the initial render, so server and client agree on an empty list at
+  first paint (the same hydration-safety pattern documented in
+  `docs/GAMES_HUB_ARCHITECTURE.md`).
+- **Add / edit**: `src/components/patterns/child-profile-form.tsx` — real
+  Zod + React Hook Form validation (`src/lib/validations/child-profile.ts`),
+  same pattern as the auth forms, except saving here actually works.
+- **View child-specific learning**: `/dashboard/children/[childId]`
+  (`src/components/patterns/child-experience.tsx`) looks up the id from
+  the same local storage and renders a deliberately different, much
+  simpler screen for a young child to use — three large buttons to
+  `/learn`, `/games`, `/resources`, almost no text. This is the one screen
+  on the site allowed to look "more playful" than the rest, per an
+  explicit exception in the brief.
+- **Progress**: shown nowhere as real numbers. The dashboard's "Learning
+  progress" section and the child view both state plainly that nothing is
+  tracked yet — this is the same honesty rule the Games Hub's
+  `noopGameProgressStore` already follows (`src/lib/games/progress.ts`):
+  don't invent a completed activity or a star count that no system
+  actually recorded.
+- **Migrating later**: once a real parent account exists, the same
+  `ChildProfile` rows move into a `child_profiles` table scoped by the
+  signed-in account's real id (RLS: a parent reads/writes only their own
+  rows) — `local-children.ts` is replaced, nothing else changes shape.
+
+### Why this doesn't violate the privacy requirements
+
+A child's name, age, and avatar choice never leave the browser they were
+entered in — there is no API call, no database row, no analytics event.
+That means "don't expose child information publicly," "don't put private
+information in a public URL," and "don't expose it via page metadata" are
+satisfied by the architecture itself, not by a policy layered on top of a
+server that actually has the data:
+
+- The URL `/dashboard/children/[childId]` uses an opaque, randomly
+  generated id (`crypto.randomUUID()`) — never the child's name — so even
+  the URL itself reveals nothing if shared or logged.
+- `generateMetadata` isn't used on the child route precisely because the
+  server has no way to know the child's name — it's never sent there. The
+  page's `<title>` is the generic "Learning Time," not the child's name.
+- Both `/dashboard` and `/dashboard/children/[childId]` set
+  `robots: { index: false, follow: false }`, same as every auth page —
+  belt-and-suspenders on top of an architecture that has nothing to leak.
 
 ## Security
 

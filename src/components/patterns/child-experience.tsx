@@ -1,0 +1,99 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { ArrowLeft, BookOpen, Gamepad2, Library, Compass } from "lucide-react";
+import { Container } from "@/components/ui/container";
+import { Section } from "@/components/ui/section";
+import { Heading } from "@/components/ui/heading";
+import { Button } from "@/components/ui/button";
+import { DecorativeBlob } from "@/components/ui/decorative-blob";
+import { ChildAvatar } from "@/components/patterns/child-avatar";
+import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
+
+const bigActions = [
+  { icon: BookOpen, label: "Learn", href: "/learn", tone: "bg-primary-500" },
+  { icon: Gamepad2, label: "Games", href: "/games", tone: "bg-accent-400" },
+  { icon: Library, label: "Resources", href: "/resources", tone: "bg-secondary-500" },
+];
+
+/**
+ * The child-facing view — deliberately built differently from the rest of
+ * the site: bigger, bolder, and with almost no text, per Prompt 22's
+ * explicit exception to the site's usual restraint. It still reuses real
+ * data (the child profile from src/lib/accounts) and real destinations
+ * (/learn, /games, /resources) — nothing here is a standalone toy screen.
+ */
+function ChildExperience() {
+  const params = useParams<{ childId: string }>();
+  const { children, ready } = useChildProfiles();
+
+  if (!ready) {
+    return <Section className="min-h-[60vh]" />;
+  }
+
+  const child = children.find((c) => c.id === params.childId);
+
+  if (!child) {
+    return (
+      <Section surface="sunken" className="flex flex-1 flex-col justify-center">
+        <Container className="max-w-md text-center">
+          <Heading level="h1">We couldn&apos;t find that profile</Heading>
+          <p className="mt-3 text-neutral-600">
+            It may have been on a different device or browser — child
+            profiles are only saved on the device they were added on.
+          </p>
+          <Button className="mt-6" asChild>
+            <Link href="/dashboard">Back to dashboard</Link>
+          </Button>
+        </Container>
+      </Section>
+    );
+  }
+
+  return (
+    <Section surface="tint-accent" className="relative min-h-[85vh] overflow-hidden">
+      <DecorativeBlob tone="primary" className="pointer-events-none absolute -right-20 -top-16 size-72 opacity-25" />
+      <DecorativeBlob tone="secondary" className="pointer-events-none absolute -bottom-24 -left-16 size-72 opacity-20" />
+
+      <Container className="relative max-w-2xl">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30 rounded-sm"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          For parents
+        </Link>
+
+        <div className="mt-8 flex flex-col items-center text-center">
+          <ChildAvatar avatar={child.avatar} size="xl" />
+          <Heading level="display" as="h1" className="mt-5">
+            Hi, {child.name}!
+          </Heading>
+          <p className="mt-2 text-lg text-neutral-600">What do you want to do?</p>
+        </div>
+
+        <div className="mt-10 grid gap-5 sm:grid-cols-3">
+          {bigActions.map((action) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className={`flex flex-col items-center gap-3 rounded-3xl ${action.tone} px-6 py-10 text-white shadow-md transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50 motion-reduce:hover:translate-y-0`}
+            >
+              <action.icon className="size-12" aria-hidden="true" />
+              <span className="text-xl font-bold">{action.label}</span>
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-12 flex items-center justify-center gap-2 text-sm text-neutral-500">
+          <Compass className="size-4" aria-hidden="true" />
+          Nothing finished yet — but that&apos;s coming soon!
+        </div>
+      </Container>
+    </Section>
+  );
+}
+
+export { ChildExperience };

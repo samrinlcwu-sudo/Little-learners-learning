@@ -28,15 +28,29 @@ export interface Account {
 }
 
 /**
+ * The fixed set of playful avatar choices a parent picks from — deliberately
+ * not a photo upload. No real image of a child is ever collected or stored,
+ * which sidesteps the privacy question entirely rather than needing to
+ * secure it (see docs/ACCOUNTS_ARCHITECTURE.md).
+ */
+export const CHILD_AVATAR_IDS = ["sun", "star", "flower", "rocket", "dino", "butterfly"] as const;
+export type ChildAvatarId = (typeof CHILD_AVATAR_IDS)[number];
+
+/**
  * One parent account can have many child profiles. A child profile is data
  * the parent controls, not a separate login — appropriate for young
- * children who shouldn't hold their own credentials.
+ * children who shouldn't hold their own credentials. Only what's needed to
+ * personalize the experience is collected — no photo, no date of birth
+ * (just an age in years), no school or location.
  */
 export interface ChildProfile {
   id: string;
   parentAccountId: string;
   name: string;
   ageYears: number;
+  avatar: ChildAvatarId;
+  /** A learning-category slug (src/config/learning-categories.ts) — optional, personalizes what's suggested first. */
+  favoriteCategory?: string;
   createdAt: string;
 }
 

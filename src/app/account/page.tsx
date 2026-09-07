@@ -42,6 +42,14 @@ export default function AccountPage() {
             <Link href="/sign-up">Create account</Link>
           </Button>
         </div>
+        <p className="mt-8 border-t border-neutral-200 pt-6 text-sm text-neutral-500">
+          Don&apos;t want to wait? The{" "}
+          <Link href="/dashboard" className="font-medium text-primary-700 hover:underline">
+            parent dashboard
+          </Link>{" "}
+          already works without signing in — child profiles just stay on
+          this device until accounts are connected.
+        </p>
       </Container>
     </Section>
   );
