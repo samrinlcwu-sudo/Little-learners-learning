@@ -58,7 +58,7 @@ export function calculateProfileCompletion(teacher: TeacherProfile): ProfileComp
     { label: "Subjects / learning areas", complete: teacher.subjects.length > 0 },
     { label: "Languages", complete: teacher.languages.length > 0 },
     { label: "Areas of expertise", complete: teacher.expertise.length > 0 },
-    { label: "Teaching interests", complete: Boolean(teacher.teachingInterests) },
+    { label: "Teaching interests", complete: teacher.teachingInterests.length > 0 },
   ];
 
   const sections: ProfileCompletionSection[] = [

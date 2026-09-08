@@ -14,13 +14,20 @@ import { CapabilityList } from "@/components/patterns/capability-list";
 import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import { calculateProfileCompletion } from "@/lib/accounts/teacher-profile-completion";
 import { getAllLearningCategories } from "@/config/learning-categories";
-import { TEACHER_AGE_GROUP_OPTIONS, TEACHER_LANGUAGE_OPTIONS } from "@/config/teacher-options";
+import {
+  getAllTeacherAgeGroupOptions,
+  getAllTeacherLanguageOptions,
+  getAllTeachingInterestOptions,
+  formatTeacherAgeGroupLabel,
+} from "@/config/teacher-options";
+import { getAllTeacherResourceTypeOptions } from "@/config/teacher-resource-types";
 import type { TeacherProfileVisibility } from "@/lib/accounts/types";
 import { cn } from "@/lib/utils/cn";
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
-const ageGroupLabelById = new Map(TEACHER_AGE_GROUP_OPTIONS.map((o) => [o.id, o.label] as const));
-const languageLabelById = new Map(TEACHER_LANGUAGE_OPTIONS.map((o) => [o.id, o.label] as const));
+const ageGroupOptionById = new Map(getAllTeacherAgeGroupOptions().map((o) => [o.id, o] as const));
+const languageLabelById = new Map(getAllTeacherLanguageOptions().map((o) => [o.id, o.label] as const));
+const interestLabelById = new Map(getAllTeachingInterestOptions().map((o) => [o.id, o.label] as const));
 
 const futureFeatures = [
   {
@@ -231,11 +238,14 @@ function TeacherDashboard() {
                 <p className="mt-1 text-sm text-neutral-500">Not added yet</p>
               ) : (
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {teacher.ageGroupsTaught.map((id) => (
-                    <Badge key={id} variant="primary">
-                      {ageGroupLabelById.get(id) ?? id}
-                    </Badge>
-                  ))}
+                  {teacher.ageGroupsTaught.map((id) => {
+                    const option = ageGroupOptionById.get(id);
+                    return (
+                      <Badge key={id} variant="primary">
+                        {option ? formatTeacherAgeGroupLabel(option) : id}
+                      </Badge>
+                    );
+                  })}
                 </div>
               )}
 
@@ -279,15 +289,31 @@ function TeacherDashboard() {
               )}
 
               <p className="mt-5 text-sm font-medium text-neutral-500">Teaching interests</p>
-              <p className={cn("mt-1", teacher.teachingInterests ? "text-ink" : "text-neutral-500")}>
-                {teacher.teachingInterests || "Not added yet"}
-              </p>
+              {teacher.teachingInterests.length === 0 ? (
+                <p className="mt-1 text-sm text-neutral-500">Not added yet</p>
+              ) : (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {teacher.teachingInterests.map((id) => (
+                    <Badge key={id} variant="primary">
+                      {interestLabelById.get(id) ?? id}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
 
           <div className="mt-14">
             <Heading level="h2">Resources</Heading>
             <p className="mt-2 text-neutral-600">{completion.resourcesNote}</p>
+            <div className="mt-4 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-medium text-neutral-500">Planned resource types:</span>
+              {getAllTeacherResourceTypeOptions().map((option) => (
+                <Badge key={option.id} variant="neutral">
+                  {option.label}
+                </Badge>
+              ))}
+            </div>
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
               <Link href="/resources?type=teacher-resource" className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
                 <Card interactive className="flex h-full flex-col gap-3 p-5">

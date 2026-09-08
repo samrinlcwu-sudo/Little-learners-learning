@@ -18,6 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { AgeRange, ContentType } from "@/lib/content/types";
+import { isActive } from "@/lib/taxonomy/types";
 
 export interface LearningCategory {
   slug: string;
@@ -30,6 +31,13 @@ export interface LearningCategory {
   contentTypes: ContentType[];
   /** The platform's own stated goals for the category — short, plain, non-promotional. */
   learningObjectives: string[];
+  /**
+   * Omitted (or true) means active. No admin UI sets this yet, but
+   * `getAllLearningCategories()` already filters through it — see
+   * docs/TAXONOMY_ARCHITECTURE.md for the same convention used by every
+   * other selectable list in this codebase (src/lib/taxonomy/types.ts).
+   */
+  active?: boolean;
 }
 
 export interface LearningCategoryGroup {
@@ -205,9 +213,9 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
   },
 ];
 
-/** Flattened, for lookups that don't care about grouping. */
+/** Flattened, for lookups that don't care about grouping. Excludes any category an admin has deactivated (`active: false`). */
 export function getAllLearningCategories(): LearningCategory[] {
-  return learningCategoryGroups.flatMap((group) => group.categories);
+  return learningCategoryGroups.flatMap((group) => group.categories).filter(isActive);
 }
 
 export function getLearningCategoryBySlug(slug: string): LearningCategory | undefined {

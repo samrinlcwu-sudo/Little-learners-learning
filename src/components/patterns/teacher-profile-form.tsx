@@ -11,7 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Alert } from "@/components/ui/alert";
-import { TEACHER_AGE_GROUP_OPTIONS, TEACHER_LANGUAGE_OPTIONS } from "@/config/teacher-options";
+import {
+  getAllTeacherAgeGroupOptions,
+  getAllTeacherLanguageOptions,
+  getAllTeachingInterestOptions,
+  formatTeacherAgeGroupLabel,
+} from "@/config/teacher-options";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import { TeacherProfilePreviewModal } from "@/components/patterns/teacher-profile-preview-modal";
 import {
@@ -54,6 +59,14 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
   const [photoError, setPhotoError] = React.useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = React.useState(false);
   const [justSaved, setJustSaved] = React.useState(false);
+  const [interestFilter, setInterestFilter] = React.useState("");
+
+  const filteredInterestOptions = React.useMemo(() => {
+    const query = interestFilter.trim().toLowerCase();
+    const options = getAllTeachingInterestOptions();
+    if (!query) return options;
+    return options.filter((option) => option.label.toLowerCase().includes(query));
+  }, [interestFilter]);
 
   const {
     register,
@@ -71,7 +84,7 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
       ageGroupsTaught: teacher.ageGroupsTaught,
       subjects: teacher.subjects,
       languages: teacher.languages,
-      teachingInterests: teacher.teachingInterests ?? "",
+      teachingInterests: teacher.teachingInterests,
       expertise: teacher.expertise.join(", "),
     },
   });
@@ -246,10 +259,10 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
           <fieldset>
             <legend className="mb-2 block text-sm font-medium text-ink">Age groups</legend>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {TEACHER_AGE_GROUP_OPTIONS.map((option) => (
+              {getAllTeacherAgeGroupOptions().map((option) => (
                 <label key={option.id} className={checkboxLabelClass}>
                   <input type="checkbox" value={option.id} className="sr-only" {...register("ageGroupsTaught")} />
-                  {option.label}
+                  {formatTeacherAgeGroupLabel(option)}
                 </label>
               ))}
             </div>
@@ -270,7 +283,7 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
           <fieldset>
             <legend className="mb-2 block text-sm font-medium text-ink">Languages</legend>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {TEACHER_LANGUAGE_OPTIONS.map((option) => (
+              {getAllTeacherLanguageOptions().map((option) => (
                 <label key={option.id} className={checkboxLabelClass}>
                   <input type="checkbox" value={option.id} className="sr-only" {...register("languages")} />
                   {option.label}
@@ -290,18 +303,31 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
             <p className="mt-1 text-xs text-neutral-500">Separate each one with a comma.</p>
           </div>
 
-          <div>
-            <Label htmlFor="teacher-interests">Teaching interests</Label>
-            <Textarea
-              id="teacher-interests"
-              placeholder="What kinds of topics, projects, or teaching styles are you drawn to?"
-              invalid={!!errors.teachingInterests}
-              {...register("teachingInterests")}
+          <fieldset>
+            <legend className="mb-2 block text-sm font-medium text-ink">Teaching interests</legend>
+            <p className="mb-2 text-xs text-neutral-500">
+              Teaching styles and approaches — pick as many as genuinely apply.
+            </p>
+            <Input
+              type="search"
+              placeholder="Search interests…"
+              value={interestFilter}
+              onChange={(event) => setInterestFilter(event.target.value)}
+              className="mb-3 max-w-xs"
+              aria-label="Search teaching interests"
             />
-            {errors.teachingInterests && (
-              <p className="mt-1.5 text-sm text-error-600">{errors.teachingInterests.message}</p>
-            )}
-          </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {filteredInterestOptions.map((option) => (
+                <label key={option.id} className={checkboxLabelClass}>
+                  <input type="checkbox" value={option.id} className="sr-only" {...register("teachingInterests")} />
+                  {option.label}
+                </label>
+              ))}
+              {filteredInterestOptions.length === 0 && (
+                <p className="col-span-full text-sm text-neutral-500">No interests match &quot;{interestFilter}&quot;.</p>
+              )}
+            </div>
+          </fieldset>
         </div>
       </section>
 

@@ -71,6 +71,34 @@ export const TEACHER_LANGUAGES = ["english", "arabic", "urdu", "french", "spanis
 export type TeacherLanguage = (typeof TEACHER_LANGUAGES)[number];
 
 /**
+ * Teaching *styles and approaches* — distinct from `subjects` (what a
+ * teacher teaches, from src/config/learning-categories.ts) and
+ * `expertise` (a teacher's own free-text specialties). A fixed list
+ * because Prompt 28 Part 4 asks for multi-select, not open text, and a
+ * teacher's approach is realistically drawn from a recognizable set
+ * rather than needing arbitrary new words each time.
+ */
+export const TEACHING_INTERESTS = [
+  "phonics-based-reading",
+  "hands-on-learning",
+  "outdoor-nature-learning",
+  "arts-and-crafts",
+  "storytelling-imaginative-play",
+  "music-and-movement",
+  "stem-inquiry-based",
+  "montessori-inspired",
+  "play-based-learning",
+  "project-based-learning",
+  "special-needs-support",
+  "bilingual-multilingual-teaching",
+  "quran-memorization-support",
+  "social-emotional-focus",
+  "classroom-routines-behavior",
+  "family-engagement",
+] as const;
+export type TeachingInterest = (typeof TEACHING_INTERESTS)[number];
+
+/**
  * Who can see a teacher's public profile page (/teachers/p/[slug]).
  * Defaults to "private" on every new account — a profile is never public
  * just because it exists. See docs/TEACHER_ARCHITECTURE.md, "Privacy &
@@ -114,7 +142,8 @@ export interface TeacherProfile {
   /** Learning-category slugs from src/config/learning-categories.ts. */
   subjects: string[];
   languages: TeacherLanguage[];
-  teachingInterests?: string;
+  /** Selected from TEACHING_INTERESTS — teaching styles/approaches, not subject matter. */
+  teachingInterests: TeachingInterest[];
   /** Free-text professional specialties, distinct from the fixed `subjects` list — e.g. "Special needs support," "Bilingual education." */
   expertise: string[];
   visibility: TeacherProfileVisibility;

@@ -59,7 +59,11 @@ without hurting search visibility) are documented in
 registration (the account → verify → profile → dashboard flow, what's
 real versus prepared, and why it's a dedicated flow rather than a role
 picker) is documented in
-[docs/TEACHER_ARCHITECTURE.md](docs/TEACHER_ARCHITECTURE.md).
+[docs/TEACHER_ARCHITECTURE.md](docs/TEACHER_ARCHITECTURE.md). The shared
+subject/age-group/language/resource-type taxonomy — where each category
+list lives, and how it stays consistent across learning content,
+resources, games, and teacher profiles — is documented in
+[docs/TAXONOMY_ARCHITECTURE.md](docs/TAXONOMY_ARCHITECTURE.md).
 
 ## Installation
 

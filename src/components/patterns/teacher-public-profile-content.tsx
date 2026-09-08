@@ -4,11 +4,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heading } from "@/components/ui/heading";
 import { getAllLearningCategories } from "@/config/learning-categories";
-import { TEACHER_AGE_GROUP_OPTIONS } from "@/config/teacher-options";
+import { getAllTeacherAgeGroupOptions, formatTeacherAgeGroupLabel } from "@/config/teacher-options";
 import type { PublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
-const ageGroupLabelById = new Map(TEACHER_AGE_GROUP_OPTIONS.map((o) => [o.id, o.label] as const));
+const ageGroupOptionById = new Map(getAllTeacherAgeGroupOptions().map((o) => [o.id, o] as const));
 
 function ProfileSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -87,11 +87,14 @@ function TeacherPublicProfileContent({ profile }: { profile: PublicTeacherProfil
         {profile.ageGroupsTaught.length > 0 && (
           <ProfileSection title="Age Groups">
             <div className="flex flex-wrap gap-1.5">
-              {profile.ageGroupsTaught.map((id) => (
-                <Badge key={id} variant="primary">
-                  {ageGroupLabelById.get(id) ?? id}
-                </Badge>
-              ))}
+              {profile.ageGroupsTaught.map((id) => {
+                const option = ageGroupOptionById.get(id);
+                return (
+                  <Badge key={id} variant="primary">
+                    {option ? formatTeacherAgeGroupLabel(option) : id}
+                  </Badge>
+                );
+              })}
             </div>
           </ProfileSection>
         )}

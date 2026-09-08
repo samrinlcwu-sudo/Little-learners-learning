@@ -2,9 +2,12 @@
 
 Introduced in Prompt 26 (registration) and extended in Prompt 27 (the
 profile editor, profile completion, and public/private profile
-architecture), on top of the account foundation from Prompt 21
+architecture) and Prompt 28 (the shared expertise/resource taxonomy), on
+top of the account foundation from Prompt 21
 (`docs/ACCOUNTS_ARCHITECTURE.md`). Read that doc first — this one only
-covers what's specific to teachers.
+covers what's specific to teachers. Where a category list comes from and
+how it stays consistent across the rest of the site is covered separately
+in `docs/TAXONOMY_ARCHITECTURE.md`.
 
 ## Why a dedicated flow, not a role picker
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { emailSchema, nameSchema } from "./common";
 import { passwordSchema } from "./auth";
-import { TEACHER_AGE_GROUPS, TEACHER_LANGUAGES } from "@/lib/accounts/types";
+import { TEACHER_AGE_GROUPS, TEACHER_LANGUAGES, TEACHING_INTERESTS } from "@/lib/accounts/types";
 
 export const countryRegionSchema = z
   .string()
@@ -48,7 +48,7 @@ export const teacherProfileSchema = z.object({
   ageGroupsTaught: z.array(z.enum(TEACHER_AGE_GROUPS)).default([]),
   subjects: z.array(z.string()).default([]),
   languages: z.array(z.enum(TEACHER_LANGUAGES)).default([]),
-  teachingInterests: z.string().trim().max(400, "Must be 400 characters or fewer").optional(),
+  teachingInterests: z.array(z.enum(TEACHING_INTERESTS)).default([]),
   // Entered as one comma-separated line in the UI, stored as a real array —
   // simpler than another checkbox grid for something that's genuinely
   // free-text ("Special needs support," "Bilingual education," ...).

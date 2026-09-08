@@ -8,6 +8,7 @@ import {
   PenLine,
   GraduationCap,
   Users,
+  BookOpenText,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -35,6 +36,7 @@ export type ResourceType = Extract<
   | "maze"
   | "coloring"
   | "writing-practice"
+  | "lesson"
   | "teacher-resource"
   | "parent-resource"
 >;
@@ -47,6 +49,7 @@ export const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
   maze: "Maze",
   coloring: "Coloring",
   "writing-practice": "Writing Practice",
+  lesson: "Lesson Resource",
   "teacher-resource": "Teacher Resource",
   "parent-resource": "Parent Resource",
 };
@@ -60,6 +63,7 @@ export const RESOURCE_TYPE_ICONS: Record<ResourceType, LucideIcon> = {
   maze: Route,
   coloring: Paintbrush,
   "writing-practice": PenLine,
+  lesson: BookOpenText,
   "teacher-resource": GraduationCap,
   "parent-resource": Users,
 };

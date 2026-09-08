@@ -43,20 +43,27 @@ function isBrowser(): boolean {
 }
 
 /**
- * Fills in defaults for fields added after a record may have been created
- * (expertise, visibility, slug — added in Prompt 27) so a profile saved
- * before those fields existed doesn't crash the rest of the app on read.
- * A missing slug is generated and persisted immediately, since every
- * other piece of this system assumes one exists.
+ * Fills in defaults for fields added or reshaped after a record may have
+ * been created, so a profile saved before those changes doesn't crash the
+ * rest of the app on read. A missing slug is generated and persisted
+ * immediately, since every other piece of this system assumes one exists.
  */
 function normalize(profile: TeacherProfile): TeacherProfile {
   // `profile` is parsed JSON asserted as TeacherProfile — the type says
-  // these fields always exist, but a record saved before Prompt 27 won't
-  // actually have them, so each is read defensively rather than assumed.
+  // these fields always exist, but an older record won't actually have
+  // them (or, for teachingInterests, will have the pre-Prompt-28 string
+  // shape), so each is read defensively rather than assumed.
   const withDefaults: TeacherProfile = {
     ...profile,
     expertise: profile.expertise ?? [],
     visibility: profile.visibility ?? "private",
+    // Prompt 28 changed this from free text to a fixed multi-select.
+    // Old free text can't be safely auto-mapped onto the new options
+    // without guessing at what the teacher meant — the same "don't invent
+    // expertise" rule this prompt states outright — so it's dropped
+    // rather than converted, and the teacher can reselect from the real
+    // list next time they edit their profile.
+    teachingInterests: Array.isArray(profile.teachingInterests) ? profile.teachingInterests : [],
   };
   if (!withDefaults.slug) {
     withDefaults.slug = `${slugify(withDefaults.name) || "teacher"}-${randomSlugSuffix()}`;
@@ -137,6 +144,7 @@ export function createLocalTeacherAccount(account: NewTeacherAccount): TeacherPr
     ageGroupsTaught: [],
     subjects: [],
     languages: [],
+    teachingInterests: [],
     expertise: [],
     visibility: "private",
     verified: false,
