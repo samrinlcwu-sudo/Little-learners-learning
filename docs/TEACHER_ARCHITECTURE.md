@@ -2,12 +2,14 @@
 
 Introduced in Prompt 26 (registration) and extended in Prompt 27 (the
 profile editor, profile completion, and public/private profile
-architecture) and Prompt 28 (the shared expertise/resource taxonomy), on
-top of the account foundation from Prompt 21
-(`docs/ACCOUNTS_ARCHITECTURE.md`). Read that doc first — this one only
-covers what's specific to teachers. Where a category list comes from and
-how it stays consistent across the rest of the site is covered separately
-in `docs/TAXONOMY_ARCHITECTURE.md`.
+architecture), Prompt 28 (the shared expertise/resource taxonomy), and
+Prompt 29 (the searchable teacher directory), on top of the account
+foundation from Prompt 21 (`docs/ACCOUNTS_ARCHITECTURE.md`). Read that
+doc first — this one only covers what's specific to teachers. Where a
+category list comes from and how it stays consistent across the rest of
+the site is covered separately in `docs/TAXONOMY_ARCHITECTURE.md`; the
+public directory, search, filters, and moderation states are covered in
+`docs/TEACHER_DIRECTORY_ARCHITECTURE.md`.
 
 ## Why a dedicated flow, not a role picker
 
@@ -195,14 +197,15 @@ show the *browser's own* profile:
 **The public field allowlist is deliberately narrower than "everything
 that isn't obviously sensitive."** `toPublicTeacherProfile()` passes
 through exactly: name, photo, headline, bio, education, certifications,
-years of experience, age groups, subjects, expertise, and verification
-status. Email, country, languages, teaching interests, and every other
-private-dashboard field are never passed to it — not because they're
-each independently dangerous, but because Part 4 named a specific,
-focused list, and Part 6 asks for a professional page, not "everything a
-teacher has ever typed." The same function backs both the real route and
-the editor's Preview modal, so a preview can never show more than the
-real page would.
+years of experience, country/region, age groups, subjects, languages,
+expertise, and verification status. Email, teaching interests, and every
+other private-dashboard field are never passed to it. Country and
+languages were added in Prompt 29 specifically because its directory
+search (Part 2) asks to search by language and "region where
+appropriate" — both are low-sensitivity, unlike an exact address — see
+`docs/TEACHER_DIRECTORY_ARCHITECTURE.md` for the full reasoning. The same
+function backs the real route, the directory card, and the editor's
+Preview modal, so none of them can ever show more than the others would.
 
 ### Privacy & visibility (Prompt 27, Part 5)
 
@@ -215,14 +218,13 @@ changes it. This is kept as a dedicated function, separate from the
 general profile-update path, so the editor's Save can never accidentally
 publish a profile as a side effect of saving unrelated content changes.
 
-The brief also asks for moderation as a possible gate. There's no
-`moderationStatus` field yet, deliberately: with no reviewers and no
-review process, adding one would be an inert field that does nothing but
-add complexity. The extension point is already in place without it —
-once real moderation exists, the public route's visibility check becomes
-`visibility === "public" && moderationStatus !== "rejected"` (one added
-condition on the same boolean gate), not a rewrite of this page's
-rendering logic.
+Prompt 29 added the moderation half of this: `TeacherProfile.moderationStatus`
+(`"pending" | "approved" | "rejected" | "hidden"`, defaulting to
+`"pending"`) is the platform's independent gate alongside the teacher's
+own `visibility` toggle. See `docs/TEACHER_DIRECTORY_ARCHITECTURE.md`,
+"Two gates," for exactly how they combine
+(`src/lib/accounts/teacher-visibility.ts`) and why no profile can reach
+`"approved"` automatically.
 
 ## SEO / AEO
 
@@ -257,8 +259,8 @@ that:
   canonical URL — the same `buildSocialMetadata()` helper every other
   page uses (`src/lib/seo/social-metadata.ts`).
 - Sets `robots: { index: true, follow: true }` **only** when
-  `visibility === "public"` (and, once it exists, the moderation check
-  above) — never unconditionally.
+  `canViewTeacherProfile()` (`src/lib/accounts/teacher-visibility.ts`)
+  says so — never unconditionally.
 - Adds `Person`/`ProfilePage` structured data built from exactly the same
   public-field allowlist `toPublicTeacherProfile()` already defines, so
   structured data can never describe something the visible page doesn't

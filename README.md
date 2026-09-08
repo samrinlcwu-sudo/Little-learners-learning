@@ -63,7 +63,10 @@ picker) is documented in
 subject/age-group/language/resource-type taxonomy — where each category
 list lives, and how it stays consistent across learning content,
 resources, games, and teacher profiles — is documented in
-[docs/TAXONOMY_ARCHITECTURE.md](docs/TAXONOMY_ARCHITECTURE.md).
+[docs/TAXONOMY_ARCHITECTURE.md](docs/TAXONOMY_ARCHITECTURE.md). The
+public teacher directory — search, filters, moderation states, and why
+it's honestly empty until real approved profiles exist — is documented
+in [docs/TEACHER_DIRECTORY_ARCHITECTURE.md](docs/TEACHER_DIRECTORY_ARCHITECTURE.md).
 
 ## Installation
 

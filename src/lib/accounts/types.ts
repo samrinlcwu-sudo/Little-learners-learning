@@ -99,14 +99,39 @@ export const TEACHING_INTERESTS = [
 export type TeachingInterest = (typeof TEACHING_INTERESTS)[number];
 
 /**
- * Who can see a teacher's public profile page (/teachers/p/[slug]).
- * Defaults to "private" on every new account — a profile is never public
- * just because it exists. See docs/TEACHER_ARCHITECTURE.md, "Privacy &
- * visibility," for the moderation-override extension point this leaves
- * room for.
+ * Whether the teacher WANTS their profile visible. Defaults to "private"
+ * on every new account — a profile is never public just because it
+ * exists. This is one of two independent gates; see
+ * `TeacherModerationStatus` below for the other, and
+ * src/lib/accounts/teacher-visibility.ts for how they combine.
  */
 export const TEACHER_PROFILE_VISIBILITIES = ["private", "public"] as const;
 export type TeacherProfileVisibility = (typeof TEACHER_PROFILE_VISIBILITIES)[number];
+
+/**
+ * The PLATFORM's side of the same decision (Prompt 28 Part 7) —
+ * independent of the teacher's own `visibility` toggle above. A teacher
+ * controls whether they *want* to be found; moderation controls whether
+ * the platform has actually cleared them to be found or listed.
+ *
+ * - "pending" — the default for every new profile. Nothing to review yet
+ *   (no moderation queue or reviewer exists), so no profile can reach
+ *   "approved" automatically or by any action in this codebase — matching
+ *   the same rule `verified` already follows: never set automatically.
+ * - "approved" — cleared to appear in the searchable directory
+ *   (/teachers). Only a real human review step sets this.
+ * - "rejected" — declined; hidden everywhere public, including the
+ *   direct profile link.
+ * - "hidden" — previously approved, later unlisted (e.g. a policy
+ *   concern found after the fact) — distinct from "rejected" as a
+ *   history, but has the identical effect on visibility.
+ *
+ * See src/lib/accounts/teacher-visibility.ts for exactly how this
+ * combines with `visibility`, and docs/TEACHER_DIRECTORY_ARCHITECTURE.md
+ * for the full reasoning.
+ */
+export const TEACHER_MODERATION_STATUSES = ["pending", "approved", "rejected", "hidden"] as const;
+export type TeacherModerationStatus = (typeof TEACHER_MODERATION_STATUSES)[number];
 
 /**
  * The professional profile behind the /teachers page and the teacher
@@ -147,6 +172,8 @@ export interface TeacherProfile {
   /** Free-text professional specialties, distinct from the fixed `subjects` list — e.g. "Special needs support," "Bilingual education." */
   expertise: string[];
   visibility: TeacherProfileVisibility;
+  /** See TeacherModerationStatus above — the platform's side of directory/profile visibility, separate from the teacher's own `visibility` toggle. */
+  moderationStatus: TeacherModerationStatus;
   /** Sourced by a human review step once teacher registration is connected to a real backend — never set automatically. */
   verified: boolean;
   createdAt: string;

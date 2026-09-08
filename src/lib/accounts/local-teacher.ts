@@ -57,6 +57,7 @@ function normalize(profile: TeacherProfile): TeacherProfile {
     ...profile,
     expertise: profile.expertise ?? [],
     visibility: profile.visibility ?? "private",
+    moderationStatus: profile.moderationStatus ?? "pending",
     // Prompt 28 changed this from free text to a fixed multi-select.
     // Old free text can't be safely auto-mapped onto the new options
     // without guessing at what the teacher meant — the same "don't invent
@@ -147,6 +148,7 @@ export function createLocalTeacherAccount(account: NewTeacherAccount): TeacherPr
     teachingInterests: [],
     expertise: [],
     visibility: "private",
+    moderationStatus: "pending",
     verified: false,
     createdAt: new Date().toISOString(),
     ...account,
@@ -156,7 +158,7 @@ export function createLocalTeacherAccount(account: NewTeacherAccount): TeacherPr
 }
 
 export type TeacherProfileUpdates = Partial<
-  Omit<TeacherProfile, "id" | "accountId" | "slug" | "visibility" | "verified" | "createdAt">
+  Omit<TeacherProfile, "id" | "accountId" | "slug" | "visibility" | "moderationStatus" | "verified" | "createdAt">
 >;
 
 /** Merges profile-completion fields into the existing record — see teacher-profile-form.tsx. No-ops if no account exists yet. */

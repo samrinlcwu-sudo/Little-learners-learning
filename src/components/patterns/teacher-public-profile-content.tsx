@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
-import { BadgeCheck, GraduationCap } from "lucide-react";
+import { BadgeCheck, GraduationCap, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heading } from "@/components/ui/heading";
 import { getAllLearningCategories } from "@/config/learning-categories";
-import { getAllTeacherAgeGroupOptions, formatTeacherAgeGroupLabel } from "@/config/teacher-options";
+import { getAllTeacherAgeGroupOptions, getAllTeacherLanguageOptions, formatTeacherAgeGroupLabel } from "@/config/teacher-options";
 import type { PublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
 const ageGroupOptionById = new Map(getAllTeacherAgeGroupOptions().map((o) => [o.id, o] as const));
+const languageLabelById = new Map(getAllTeacherLanguageOptions().map((o) => [o.id, o.label] as const));
 
 function ProfileSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -54,6 +55,12 @@ function TeacherPublicProfileContent({ profile }: { profile: PublicTeacherProfil
             )}
           </div>
           {profile.headline && <p className="mt-1 text-neutral-600">{profile.headline}</p>}
+          {profile.countryRegion && (
+            <p className="mt-1.5 flex items-center justify-center gap-1 text-sm text-neutral-500 sm:justify-start">
+              <MapPin className="size-3.5" aria-hidden="true" />
+              {profile.countryRegion}
+            </p>
+          )}
         </div>
       </div>
 
@@ -105,6 +112,18 @@ function TeacherPublicProfileContent({ profile }: { profile: PublicTeacherProfil
               {profile.subjects.map((slug) => (
                 <Badge key={slug} variant="secondary">
                   {categoryNameBySlug.get(slug) ?? slug}
+                </Badge>
+              ))}
+            </div>
+          </ProfileSection>
+        )}
+
+        {profile.languages.length > 0 && (
+          <ProfileSection title="Languages">
+            <div className="flex flex-wrap gap-1.5">
+              {profile.languages.map((id) => (
+                <Badge key={id} variant="neutral">
+                  {languageLabelById.get(id) ?? id}
                 </Badge>
               ))}
             </div>

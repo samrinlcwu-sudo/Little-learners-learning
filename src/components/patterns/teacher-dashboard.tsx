@@ -21,13 +21,27 @@ import {
   formatTeacherAgeGroupLabel,
 } from "@/config/teacher-options";
 import { getAllTeacherResourceTypeOptions } from "@/config/teacher-resource-types";
-import type { TeacherProfileVisibility } from "@/lib/accounts/types";
+import type { TeacherModerationStatus, TeacherProfileVisibility } from "@/lib/accounts/types";
 import { cn } from "@/lib/utils/cn";
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
 const ageGroupOptionById = new Map(getAllTeacherAgeGroupOptions().map((o) => [o.id, o] as const));
 const languageLabelById = new Map(getAllTeacherLanguageOptions().map((o) => [o.id, o.label] as const));
 const interestLabelById = new Map(getAllTeachingInterestOptions().map((o) => [o.id, o.label] as const));
+
+const MODERATION_STATUS_LABELS: Record<TeacherModerationStatus, string> = {
+  pending: "Pending review",
+  approved: "Approved",
+  rejected: "Not approved",
+  hidden: "Hidden",
+};
+
+const MODERATION_BADGE_VARIANT: Record<TeacherModerationStatus, "neutral" | "success" | "error"> = {
+  pending: "neutral",
+  approved: "success",
+  rejected: "error",
+  hidden: "error",
+};
 
 const futureFeatures = [
   {
@@ -186,6 +200,23 @@ function TeacherDashboard() {
                 <p className="mt-2 text-xs text-neutral-500">
                   {VISIBILITY_OPTIONS.find((o) => o.id === teacher.visibility)?.description}
                 </p>
+                {teacher.visibility === "public" && (
+                  <div className="mt-3 flex items-center justify-between gap-2 rounded-md bg-neutral-100 px-3 py-2">
+                    <span className="text-xs font-medium text-neutral-600">Directory listing</span>
+                    <Badge variant={MODERATION_BADGE_VARIANT[teacher.moderationStatus]}>
+                      {MODERATION_STATUS_LABELS[teacher.moderationStatus]}
+                    </Badge>
+                  </div>
+                )}
+                {teacher.visibility === "public" && teacher.moderationStatus === "pending" && (
+                  <p className="mt-2 text-xs text-neutral-500">
+                    Your profile page is live at the link below. It&apos;ll also appear in the searchable{" "}
+                    <Link href="/teachers" className="underline">
+                      teacher directory
+                    </Link>{" "}
+                    once a human reviews and approves it — nothing here is automatic.
+                  </p>
+                )}
                 {teacher.visibility === "public" && (
                   <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
                     <Link href={`/teachers/p/${teacher.slug}`}>

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { TeacherPublicProfileContent } from "@/components/patterns/teacher-public-profile-content";
 import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import { toPublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
+import { canViewTeacherProfile } from "@/lib/accounts/teacher-visibility";
 
 /**
  * The real public route (/teachers/p/[slug]) — genuinely gated by
@@ -56,7 +57,7 @@ function TeacherPublicProfilePage() {
     );
   }
 
-  if (teacher.visibility !== "public") {
+  if (!canViewTeacherProfile(teacher)) {
     return (
       <Section surface="sunken" className="flex flex-1 flex-col justify-center">
         <Container className="max-w-md text-center">
@@ -64,10 +65,12 @@ function TeacherPublicProfilePage() {
             <Lock className="size-7" aria-hidden="true" />
           </div>
           <Heading level="h1" className="mt-5">
-            This profile is private
+            This profile isn&apos;t available
           </Heading>
           <p className="mt-3 text-neutral-600">
-            Its owner hasn&apos;t made it public yet.
+            {teacher.visibility !== "public"
+              ? "Its owner hasn't made it public yet."
+              : "It isn't currently visible to the public."}
           </p>
           <Button className="mt-6" asChild>
             <Link href="/teachers/dashboard">Go to your dashboard</Link>
