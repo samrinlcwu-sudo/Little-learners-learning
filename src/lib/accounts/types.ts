@@ -71,6 +71,16 @@ export const TEACHER_LANGUAGES = ["english", "arabic", "urdu", "french", "spanis
 export type TeacherLanguage = (typeof TEACHER_LANGUAGES)[number];
 
 /**
+ * Who can see a teacher's public profile page (/teachers/p/[slug]).
+ * Defaults to "private" on every new account — a profile is never public
+ * just because it exists. See docs/TEACHER_ARCHITECTURE.md, "Privacy &
+ * visibility," for the moderation-override extension point this leaves
+ * room for.
+ */
+export const TEACHER_PROFILE_VISIBILITIES = ["private", "public"] as const;
+export type TeacherProfileVisibility = (typeof TEACHER_PROFILE_VISIBILITIES)[number];
+
+/**
  * The professional profile behind the /teachers page and the teacher
  * registration flow (docs/TEACHER_ARCHITECTURE.md) — separate from Account
  * so a teacher's public-facing details (bio, subjects) don't live mixed in
@@ -85,8 +95,17 @@ export interface TeacherProfile {
   name: string;
   email: string;
   countryRegion: string;
+  /**
+   * URL-safe identifier for the public profile route — generated once at
+   * account creation from the name plus a short random suffix, never
+   * user-edited, so a shared link never breaks even if the teacher later
+   * changes their display name.
+   */
+  slug: string;
   /** A data URL, stored on this device only — see docs/TEACHER_ARCHITECTURE.md for why this is safe without a file-storage backend. */
   photo?: string;
+  /** A one-line professional title, e.g. "Early Years Teacher | Montessori Certified". */
+  headline?: string;
   bio?: string;
   education?: string;
   certifications?: string;
@@ -96,6 +115,9 @@ export interface TeacherProfile {
   subjects: string[];
   languages: TeacherLanguage[];
   teachingInterests?: string;
+  /** Free-text professional specialties, distinct from the fixed `subjects` list — e.g. "Special needs support," "Bilingual education." */
+  expertise: string[];
+  visibility: TeacherProfileVisibility;
   /** Sourced by a human review step once teacher registration is connected to a real backend — never set automatically. */
   verified: boolean;
   createdAt: string;

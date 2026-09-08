@@ -5,11 +5,13 @@ import {
   createLocalTeacherAccount,
   getLocalTeacherSnapshot,
   getServerTeacherSnapshot,
+  setLocalTeacherVisibility,
   subscribeLocalTeacher,
   updateLocalTeacherProfile,
   type NewTeacherAccount,
   type TeacherProfileUpdates,
 } from "./local-teacher";
+import type { TeacherProfile } from "./types";
 
 /**
  * Same useSyncExternalStore pattern as useChildProfiles — the server and
@@ -38,5 +40,9 @@ export function useTeacherProfile() {
     return updateLocalTeacherProfile(updates);
   }, []);
 
-  return { teacher, ready, createAccount, updateProfile };
+  const setVisibility = React.useCallback((visibility: TeacherProfile["visibility"]) => {
+    return setLocalTeacherVisibility(visibility);
+  }, []);
+
+  return { teacher, ready, createAccount, updateProfile, setVisibility };
 }

@@ -1,4 +1,5 @@
 import type { TeacherProfile } from "./types";
+import { slugify, randomSlugSuffix } from "@/lib/utils/slugify";
 
 /**
  * The one teacher profile this browser holds — same reasoning as
@@ -41,13 +42,48 @@ function isBrowser(): boolean {
   return typeof window !== "undefined";
 }
 
+/**
+ * Fills in defaults for fields added after a record may have been created
+ * (expertise, visibility, slug — added in Prompt 27) so a profile saved
+ * before those fields existed doesn't crash the rest of the app on read.
+ * A missing slug is generated and persisted immediately, since every
+ * other piece of this system assumes one exists.
+ */
+function normalize(profile: TeacherProfile): TeacherProfile {
+  // `profile` is parsed JSON asserted as TeacherProfile — the type says
+  // these fields always exist, but a record saved before Prompt 27 won't
+  // actually have them, so each is read defensively rather than assumed.
+  const withDefaults: TeacherProfile = {
+    ...profile,
+    expertise: profile.expertise ?? [],
+    visibility: profile.visibility ?? "private",
+  };
+  if (!withDefaults.slug) {
+    withDefaults.slug = `${slugify(withDefaults.name) || "teacher"}-${randomSlugSuffix()}`;
+  }
+  return withDefaults;
+}
+
 function readFromStorage(): TeacherProfile | null {
   if (!isBrowser()) return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" ? (parsed as TeacherProfile) : null;
+    if (!parsed || typeof parsed !== "object") return null;
+
+    const normalized = normalize(parsed as TeacherProfile);
+    // A backfilled slug must be written back immediately — regenerating a
+    // new random one on every future load would silently break any link
+    // to the public profile page that used the previous one.
+    if (normalized.slug !== (parsed as TeacherProfile).slug) {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+      } catch {
+        // Storage full/unavailable — the in-memory value below still works for this session.
+      }
+    }
+    return normalized;
   } catch {
     return null;
   }
@@ -97,9 +133,12 @@ export function createLocalTeacherAccount(account: NewTeacherAccount): TeacherPr
   const profile: TeacherProfile = {
     id: crypto.randomUUID(),
     accountId: LOCAL_TEACHER_ACCOUNT_ID,
+    slug: `${slugify(account.name) || "teacher"}-${randomSlugSuffix()}`,
     ageGroupsTaught: [],
     subjects: [],
     languages: [],
+    expertise: [],
+    visibility: "private",
     verified: false,
     createdAt: new Date().toISOString(),
     ...account,
@@ -109,7 +148,7 @@ export function createLocalTeacherAccount(account: NewTeacherAccount): TeacherPr
 }
 
 export type TeacherProfileUpdates = Partial<
-  Omit<TeacherProfile, "id" | "accountId" | "verified" | "createdAt">
+  Omit<TeacherProfile, "id" | "accountId" | "slug" | "visibility" | "verified" | "createdAt">
 >;
 
 /** Merges profile-completion fields into the existing record — see teacher-profile-form.tsx. No-ops if no account exists yet. */
@@ -117,4 +156,18 @@ export function updateLocalTeacherProfile(updates: TeacherProfileUpdates): Teach
   const current = getLocalTeacherSnapshot();
   if (!current) return null;
   return commit({ ...current, ...updates });
+}
+
+/**
+ * The one control this browser has over public visibility (see
+ * docs/TEACHER_ARCHITECTURE.md, "Privacy & visibility"). Kept separate
+ * from updateLocalTeacherProfile — a publishing decision, not a content
+ * edit — so the profile editor's Save can never accidentally flip it.
+ */
+export function setLocalTeacherVisibility(
+  visibility: TeacherProfile["visibility"],
+): TeacherProfile | null {
+  const current = getLocalTeacherSnapshot();
+  if (!current) return null;
+  return commit({ ...current, visibility });
 }

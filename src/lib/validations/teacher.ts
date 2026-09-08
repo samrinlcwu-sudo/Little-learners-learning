@@ -29,6 +29,7 @@ export type TeacherAccountValues = z.infer<typeof teacherAccountSchema>;
  */
 export const teacherProfileSchema = z.object({
   photo: z.string().optional(),
+  headline: z.string().trim().max(120, "Must be 120 characters or fewer").optional(),
   bio: z.string().trim().max(600, "Keep it under 600 characters").optional(),
   education: z.string().trim().max(200, "Must be 200 characters or fewer").optional(),
   certifications: z.string().trim().max(300, "Must be 300 characters or fewer").optional(),
@@ -48,6 +49,18 @@ export const teacherProfileSchema = z.object({
   subjects: z.array(z.string()).default([]),
   languages: z.array(z.enum(TEACHER_LANGUAGES)).default([]),
   teachingInterests: z.string().trim().max(400, "Must be 400 characters or fewer").optional(),
+  // Entered as one comma-separated line in the UI, stored as a real array —
+  // simpler than another checkbox grid for something that's genuinely
+  // free-text ("Special needs support," "Bilingual education," ...).
+  expertise: z
+    .string()
+    .optional()
+    .transform((value) =>
+      (value ?? "")
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+    ),
 });
 /** The shape react-hook-form fields hold before validation (yearsExperience arrives as a string). */
 export type TeacherProfileInput = z.input<typeof teacherProfileSchema>;

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Library, GraduationCap, Settings, Sparkles, PenSquare } from "lucide-react";
+import { Library, GraduationCap, Settings, Sparkles, PenSquare, Globe2, LockKeyhole, ExternalLink } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -15,6 +15,7 @@ import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import { calculateProfileCompletion } from "@/lib/accounts/teacher-profile-completion";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import { TEACHER_AGE_GROUP_OPTIONS, TEACHER_LANGUAGE_OPTIONS } from "@/config/teacher-options";
+import type { TeacherProfileVisibility } from "@/lib/accounts/types";
 import { cn } from "@/lib/utils/cn";
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
@@ -36,6 +37,11 @@ const futureFeatures = [
   },
 ];
 
+const VISIBILITY_OPTIONS: { id: TeacherProfileVisibility; label: string; description: string }[] = [
+  { id: "private", label: "Private", description: "Only visible to you." },
+  { id: "public", label: "Public", description: "Visible to anyone with the link." },
+];
+
 /**
  * The landing point after registration (Prompt 26, Part 4). Reads the same
  * local teacher record every step of the flow writes to
@@ -44,7 +50,7 @@ const futureFeatures = [
  * there being no live backend yet.
  */
 function TeacherDashboard() {
-  const { teacher, ready } = useTeacherProfile();
+  const { teacher, ready, setVisibility } = useTeacherProfile();
 
   if (!ready) {
     return <Section className="min-h-[60vh]" />;
@@ -68,7 +74,6 @@ function TeacherDashboard() {
   }
 
   const completion = calculateProfileCompletion(teacher);
-  const missing = completion.fields.filter((field) => !field.complete);
 
   return (
     <>
@@ -104,20 +109,22 @@ function TeacherDashboard() {
                   style={{ width: `${completion.percent}%` }}
                 />
               </div>
-              <p className="mt-3 text-sm text-neutral-600">
-                {completion.percent === 100
-                  ? "Your profile is fully filled in — nice work."
-                  : `${completion.completedCount} of ${completion.totalCount} sections done. A fuller profile helps families and schools get to know you.`}
-              </p>
-              {missing.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {missing.map((field) => (
-                    <Badge key={field.label} variant="neutral">
-                      {field.label}
-                    </Badge>
-                  ))}
+
+              <div className="mt-5 space-y-3">
+                {completion.sections.map((section) => (
+                  <div key={section.title} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-neutral-700">{section.title}</span>
+                    <span className={cn("font-medium", section.percent === 100 ? "text-success-700" : "text-neutral-500")}>
+                      {section.fields.filter((f) => f.complete).length} of {section.fields.length}
+                    </span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-neutral-700">Resources</span>
+                  <span className="text-neutral-500">Not scored yet</span>
                 </div>
-              )}
+              </div>
+
               <Button className="mt-5" size="sm" asChild>
                 <Link href="/teachers/register/profile">
                   <PenSquare aria-hidden="true" />
@@ -126,30 +133,74 @@ function TeacherDashboard() {
               </Button>
             </Card>
 
-            <Card className="flex flex-col items-center justify-center gap-3 p-6 text-center">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-secondary-100 text-secondary-700">
-                <GraduationCap className="size-7" aria-hidden="true" />
-              </div>
-              <div>
+            <div className="flex flex-col gap-5">
+              <Card className="flex flex-col items-center justify-center gap-2 p-5 text-center">
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary-100 text-secondary-700">
+                  <GraduationCap className="size-6" aria-hidden="true" />
+                </div>
                 <p className="font-medium text-ink">Verification status</p>
-                <Badge variant={teacher.verified ? "success" : "neutral"} className="mt-1.5">
+                <Badge variant={teacher.verified ? "success" : "neutral"}>
                   {teacher.verified ? "Verified" : "Not yet verified"}
                 </Badge>
-              </div>
-              <p className="text-xs text-neutral-500">
-                Set only by a human review step once that&apos;s connected — never automatically.
-              </p>
-            </Card>
+                <p className="text-xs text-neutral-500">Set only by human review — never automatic.</p>
+              </Card>
+
+              <Card className="p-5">
+                <div className="flex items-center gap-2">
+                  {teacher.visibility === "public" ? (
+                    <Globe2 className="size-4 text-primary-600" aria-hidden="true" />
+                  ) : (
+                    <LockKeyhole className="size-4 text-neutral-500" aria-hidden="true" />
+                  )}
+                  <p className="font-medium text-ink">Profile visibility</p>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  {VISIBILITY_OPTIONS.map((option) => (
+                    <label
+                      key={option.id}
+                      className={cn(
+                        "flex cursor-pointer flex-col items-center gap-0.5 rounded-md border border-neutral-300 px-2 py-2 text-center transition-colors",
+                        "has-[:checked]:border-primary-600 has-[:checked]:bg-primary-50",
+                        "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary-600/30",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="visibility"
+                        value={option.id}
+                        checked={teacher.visibility === option.id}
+                        onChange={() => setVisibility(option.id)}
+                        className="sr-only"
+                      />
+                      <span className="text-sm font-medium text-ink">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-neutral-500">
+                  {VISIBILITY_OPTIONS.find((o) => o.id === teacher.visibility)?.description}
+                </p>
+                {teacher.visibility === "public" && (
+                  <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
+                    <Link href={`/teachers/p/${teacher.slug}`}>
+                      <ExternalLink aria-hidden="true" />
+                      View public profile
+                    </Link>
+                  </Button>
+                )}
+              </Card>
+            </div>
           </div>
 
           <div className="mt-14">
             <Heading level="h2">Professional information</Heading>
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
               <Card className="p-5">
-                <p className="text-sm font-medium text-neutral-500">Country / Region</p>
+                <p className="text-sm font-medium text-neutral-500">Headline</p>
+                <p className={cn("mt-1", teacher.headline ? "text-ink" : "text-neutral-500")}>
+                  {teacher.headline || "Not added yet"}
+                </p>
+                <p className="mt-4 text-sm font-medium text-neutral-500">Country / Region</p>
                 <p className="mt-1 text-ink">{teacher.countryRegion}</p>
-                <p className="mt-4 text-sm font-medium text-neutral-500">Education</p>
-                <p className="mt-1 text-ink">{teacher.education || "Not added yet"}</p>
                 <p className="mt-4 text-sm font-medium text-neutral-500">Years of experience</p>
                 <p className="mt-1 text-ink">
                   {teacher.yearsExperience !== undefined ? teacher.yearsExperience : "Not added yet"}
@@ -159,6 +210,10 @@ function TeacherDashboard() {
                 <p className="text-sm font-medium text-neutral-500">Bio</p>
                 <p className={cn("mt-1", teacher.bio ? "text-ink" : "text-neutral-500")}>
                   {teacher.bio || "Not added yet"}
+                </p>
+                <p className="mt-4 text-sm font-medium text-neutral-500">Education</p>
+                <p className={cn("mt-1 whitespace-pre-line", teacher.education ? "text-ink" : "text-neutral-500")}>
+                  {teacher.education || "Not added yet"}
                 </p>
                 <p className="mt-4 text-sm font-medium text-neutral-500">Certifications</p>
                 <p className={cn("mt-1 whitespace-pre-line", teacher.certifications ? "text-ink" : "text-neutral-500")}>
@@ -197,13 +252,26 @@ function TeacherDashboard() {
                 </div>
               )}
 
+              <p className="mt-5 text-sm font-medium text-neutral-500">Areas of expertise</p>
+              {teacher.expertise.length === 0 ? (
+                <p className="mt-1 text-sm text-neutral-500">Not added yet</p>
+              ) : (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {teacher.expertise.map((item) => (
+                    <Badge key={item} variant="accent">
+                      {item}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
               <p className="mt-5 text-sm font-medium text-neutral-500">Languages</p>
               {teacher.languages.length === 0 ? (
                 <p className="mt-1 text-sm text-neutral-500">Not added yet</p>
               ) : (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {teacher.languages.map((id) => (
-                    <Badge key={id} variant="accent">
+                    <Badge key={id} variant="neutral">
                       {languageLabelById.get(id) ?? id}
                     </Badge>
                   ))}
@@ -219,9 +287,7 @@ function TeacherDashboard() {
 
           <div className="mt-14">
             <Heading level="h2">Resources</Heading>
-            <p className="mt-2 text-neutral-600">
-              The Resource Library is real and live today — including material made specifically for teachers.
-            </p>
+            <p className="mt-2 text-neutral-600">{completion.resourcesNote}</p>
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
               <Link href="/resources?type=teacher-resource" className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
                 <Card interactive className="flex h-full flex-col gap-3 p-5">
@@ -229,8 +295,8 @@ function TeacherDashboard() {
                     <GraduationCap className="size-5" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="font-display text-lg font-semibold text-ink">Teacher resources</p>
-                    <p className="mt-1 text-sm text-neutral-600">Classroom-ready material made for educators.</p>
+                    <p className="font-display text-lg font-semibold text-ink">Browse teacher resources</p>
+                    <p className="mt-1 text-sm text-neutral-600">Classroom-ready material made for educators — from the platform, not from you yet.</p>
                   </div>
                 </Card>
               </Link>

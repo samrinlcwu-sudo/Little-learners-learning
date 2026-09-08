@@ -44,7 +44,12 @@ function TeacherProfilePage() {
 
   function handleSave(values: TeacherProfileValues & { photo?: string }) {
     updateProfile(values);
-    router.push("/teachers/dashboard");
+    // First-time completion continues straight to the dashboard — that's
+    // the confirmation. A later edit stays on this page and shows an
+    // inline "Profile updated" banner instead (see TeacherProfileForm),
+    // since navigating someone away right after they asked to save a
+    // small change would read as if it hadn't worked.
+    if (isFirstTime) router.push("/teachers/dashboard");
   }
 
   return (
@@ -63,7 +68,12 @@ function TeacherProfilePage() {
       <Section className="pt-10 sm:pt-12 lg:pt-14">
         <Container className="max-w-3xl">
           <Card className="p-6 sm:p-8">
-            <TeacherProfileForm teacher={teacher} onSave={handleSave} isFirstTime={isFirstTime} />
+            <TeacherProfileForm
+              teacher={teacher}
+              onSave={handleSave}
+              isFirstTime={isFirstTime}
+              onCancel={() => router.push("/teachers/dashboard")}
+            />
           </Card>
         </Container>
       </Section>

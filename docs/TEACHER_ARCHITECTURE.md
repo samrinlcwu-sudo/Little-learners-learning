@@ -1,6 +1,8 @@
-# Teacher Registration Architecture
+# Teacher Registration & Profile Architecture
 
-Introduced in Prompt 26, on top of the account foundation from Prompt 21
+Introduced in Prompt 26 (registration) and extended in Prompt 27 (the
+profile editor, profile completion, and public/private profile
+architecture), on top of the account foundation from Prompt 21
 (`docs/ACCOUNTS_ARCHITECTURE.md`). Read that doc first — this one only
 covers what's specific to teachers.
 
@@ -35,13 +37,17 @@ Each step is its own route, all under `/teachers/` (alongside the public
    that no email service is connected, so no real verification link was
    sent, and lets the teacher continue. Never fakes a "verified!" state.
 3. **Complete Professional Profile** (`/teachers/register/profile`) —
-   every field optional (photo, bio, education, certifications, years of
-   experience, age groups taught, subjects, languages, teaching
-   interests). Also the page a teacher returns to later to edit their
-   profile — one form, not two.
-4. **Teacher Dashboard** (`/teachers/dashboard`) — profile completion,
-   professional information, teaching expertise, real links into the
-   Resource Library, and an honest "what's ahead" list.
+   every field optional, organized into clear sections (Identity, About,
+   Education, Certifications, Experience, Teaching) rather than one long
+   form: photo, headline, bio, education, certifications, years of
+   experience, age groups taught, subjects, languages, areas of
+   expertise, teaching interests. Also the page a teacher returns to
+   later to edit their profile — one form, not two, with Cancel, Preview,
+   and Save all in one place (Prompt 27, Part 2).
+4. **Teacher Dashboard** (`/teachers/dashboard`) — a grouped profile
+   completion breakdown, professional information, teaching expertise,
+   the profile visibility control, real links into the Resource Library,
+   and an honest "what's ahead" list.
 
 ## What's real vs. what isn't (and why that split is safe)
 
@@ -92,25 +98,45 @@ admin-only. There is still no `/admin` route anywhere in this codebase.
 ## Data model
 
 `TeacherProfile` (`src/lib/accounts/types.ts`) now carries every field
-this flow collects: `name`, `email`, `countryRegion` (required at
-creation), plus optional `photo`, `bio`, `education`, `certifications`,
-`yearsExperience`, `ageGroupsTaught`, `subjects`, `languages`, and
-`teachingInterests`. `subjects` reuses learning-category slugs from
+this flow collects: `name`, `email`, `countryRegion`, `slug` (required —
+`slug` is generated, never typed), plus optional `photo`, `headline`,
+`bio`, `education`, `certifications`, `yearsExperience`,
+`ageGroupsTaught`, `subjects`, `languages`, `teachingInterests`, and
+`expertise`, plus `visibility` (Prompt 27 — see "Privacy & visibility"
+below). `subjects` reuses learning-category slugs from
 `src/config/learning-categories.ts` — the same list `/learn` and the
 Resource Library already use — rather than inventing a second list of
 subjects that could drift from the real ones. `ageGroupsTaught` and
 `languages` are short fixed lists (`TEACHER_AGE_GROUPS`,
 `TEACHER_LANGUAGES`) rather than free text, so profiles stay comparable.
+`expertise` is deliberately the opposite — free-text tags ("Special
+needs support," "Bilingual education") entered as one comma-separated
+field, because a teacher's specialties aren't a closed set the way
+subjects are.
 
-## Profile completion is a real calculation
+A profile saved before Prompt 27 won't have `slug`, `visibility`, or
+`expertise` yet — `local-teacher.ts`'s `normalize()` backfills them on
+read (a missing slug is generated and immediately persisted, so it never
+changes on a later reload and silently break a shared link).
 
-`src/lib/accounts/teacher-profile-completion.ts` counts exactly which of
-nine profile fields are actually filled in and reports a real percentage
-— never an estimate, never rounded up "for encouragement." Required
-account fields (name, email, country) are excluded from the count on
-purpose: they exist the instant an account is created, so counting them
-would inflate everyone's starting percentage before they've touched their
-profile at all.
+## Profile completion is a real calculation, grouped into sections
+
+`src/lib/accounts/teacher-profile-completion.ts` counts exactly which
+profile fields are actually filled in and reports a real percentage —
+never an estimate, never rounded up "for encouragement." It's grouped
+into the same three named sections the editor and dashboard use —
+**Basic Information** (photo, headline), **Professional Information**
+(bio, education, certifications, years of experience), **Teaching
+Expertise** (age groups, subjects, languages, expertise, teaching
+interests) — per Prompt 27 Part 3's request for a breakdown, not just one
+flat number. Required account fields (name, email, country) are excluded
+from the count on purpose: they exist the instant an account is created,
+so counting them would inflate everyone's starting percentage before
+they've touched their profile at all. **Resources** is shown as its own
+section everywhere (editor's absence, dashboard, public profile) but is
+never scored — resource authoring isn't built yet, so there's nothing a
+teacher could fill in there; scoring it would unfairly cap everyone below
+100% for a feature that isn't theirs to complete.
 
 ## Validation
 
@@ -123,32 +149,142 @@ the same error message everywhere, not a slightly different one here.
 Every error is a plain sentence; no raw Zod issue codes or stack traces
 ever reach the UI.
 
-## Privacy
+## The profile editor (Prompt 27, Part 2)
 
-Email, country, and every profile field never leave the browser they were
-entered in — there is no API call, no database row. The same
-belt-and-suspenders pattern as child profiles applies:
+`src/components/patterns/teacher-profile-form.tsx` is the one form used
+for first-time completion and every later edit, in clear labeled
+`<section>`s rather than one long wall of fields. Three actions, shown
+based on context:
 
-- Every route in this flow sets `robots: { index: false, follow: false }`.
-- No page's metadata is generated from the teacher's own data (title/
-  description are generic, e.g. "Teacher Dashboard," never the teacher's
-  name), so nothing private can leak through a `<title>` tag or a shared
-  link preview.
-- Only the fields a teacher fills in on the dashboard are ever shown, and
-  only to that same browser — there's no page anywhere that lists or
-  exposes another teacher's data, because there's no mechanism (no
-  backend) that could.
+- **Save** — "Save and continue" on first-time completion (redirects to
+  the dashboard, which is itself the confirmation); "Save changes" on
+  every later edit, which instead shows an inline "Profile updated."
+  banner and stays on the page — redirecting someone away right after
+  they asked to save a small change would read as if it hadn't worked.
+- **Cancel** — edit mode only (first-time gets "Skip for now" instead,
+  which is the same idea: leave without saving). Discards in-progress
+  changes and returns to the dashboard.
+- **Preview** — opens a modal rendering the exact same
+  `TeacherPublicProfileContent` component the real public page uses, fed
+  with the form's *current, unsaved* values (validated through the real
+  `teacherProfileSchema` so a preview can never diverge from what Save
+  would actually produce). If visibility is still Private, the modal says
+  so plainly — a preview is not the same as being visible to anyone.
+
+## Public profile architecture (Prompt 27, Part 4)
+
+`/teachers/p/[slug]` is a real route with real access-control logic, not
+a mockup. What it can't be — yet — is a page that looks up a specific
+teacher from a shared database, because there isn't one
+(`src/lib/supabase/is-configured.ts`). So today it can only ever find and
+show the *browser's own* profile:
+
+1. Read the local teacher record.
+2. Compare its `slug` to the route param — no match (wrong device, wrong
+   link, no local account at all) shows an honest "we couldn't find this
+   profile" state that explains the device-bound limitation, never a
+   generic 404.
+3. Check `visibility` — `"private"` shows "this profile is private,"
+   never the data underneath it.
+4. Only then render `TeacherPublicProfileContent`, fed through
+   `toPublicTeacherProfile()` (`src/lib/accounts/teacher-public-profile.ts`).
+
+**The public field allowlist is deliberately narrower than "everything
+that isn't obviously sensitive."** `toPublicTeacherProfile()` passes
+through exactly: name, photo, headline, bio, education, certifications,
+years of experience, age groups, subjects, expertise, and verification
+status. Email, country, languages, teaching interests, and every other
+private-dashboard field are never passed to it — not because they're
+each independently dangerous, but because Part 4 named a specific,
+focused list, and Part 6 asks for a professional page, not "everything a
+teacher has ever typed." The same function backs both the real route and
+the editor's Preview modal, so a preview can never show more than the
+real page would.
+
+### Privacy & visibility (Prompt 27, Part 5)
+
+`TeacherProfile.visibility` is `"private" | "public"`, defaulting to
+`"private"` on every new account — a profile is never public just
+because it exists, and nothing in this codebase flips it automatically.
+Only the teacher's own toggle on the dashboard
+(`setLocalTeacherVisibility`, `src/lib/accounts/local-teacher.ts`)
+changes it. This is kept as a dedicated function, separate from the
+general profile-update path, so the editor's Save can never accidentally
+publish a profile as a side effect of saving unrelated content changes.
+
+The brief also asks for moderation as a possible gate. There's no
+`moderationStatus` field yet, deliberately: with no reviewers and no
+review process, adding one would be an inert field that does nothing but
+add complexity. The extension point is already in place without it —
+once real moderation exists, the public route's visibility check becomes
+`visibility === "public" && moderationStatus !== "rejected"` (one added
+condition on the same boolean gate), not a rewrite of this page's
+rendering logic.
 
 ## SEO / AEO
 
 `/teachers` — the public landing page — remains the one discoverable,
 indexable page for "teacher" search intent: it explains what the platform
 offers educators, links to registration, and is the page
-`src/app/sitemap.ts` lists. Every page in this prompt
+`src/app/sitemap.ts` lists. Every account-flow page
 (`/teachers/register`, `/teachers/register/verify`,
 `/teachers/register/profile`, `/teachers/dashboard`) is a private,
-`noindex` account surface, exactly like `/sign-up`, `/dashboard`, and the
-rest of the account system — none of them are written for AEO, none are
-added to the sitemap, and none carry structured data. This is the same
-distinction `docs/ACCOUNTS_ARCHITECTURE.md` already draws between a
-public landing page and its private account surfaces.
+`noindex` surface, exactly like `/sign-up`, `/dashboard`, and the rest of
+the account system.
+
+### SEO for the public profile, specifically
+
+`/teachers/p/[slug]` sets `robots: { index: false, follow: false }`
+**unconditionally today, even for a profile a teacher has set to
+Public.** This isn't a placeholder oversight — it's the honest
+consequence of the same backend gap described above: Next's
+`generateMetadata` runs server-side, before any browser-local data is
+readable, so it has no way to know whether the profile behind a given
+slug is public, private, or real at all. Indexing a page whose content
+the server can't verify — including whether it's actually private — is
+exactly the risk Part 7 warns against ("private profiles must not be
+indexed"), so the safe default is noindex for all of them until a real
+backend can answer that question server-side.
+
+Once Supabase exists, this becomes a real `generateMetadata({ params })`
+that:
+
+- Looks up the row by slug, builds a unique title (`"{name} — Teacher
+  Profile"`) and description from the real headline/bio, and sets a
+  canonical URL — the same `buildSocialMetadata()` helper every other
+  page uses (`src/lib/seo/social-metadata.ts`).
+- Sets `robots: { index: true, follow: true }` **only** when
+  `visibility === "public"` (and, once it exists, the moderation check
+  above) — never unconditionally.
+- Adds `Person`/`ProfilePage` structured data built from exactly the same
+  public-field allowlist `toPublicTeacherProfile()` already defines, so
+  structured data can never describe something the visible page doesn't
+  — the same anti-drift principle `docs/SEO_ARCHITECTURE.md` already
+  applies to `BreadcrumbList`.
+
+### AEO labeling (Prompt 27, Part 8)
+
+`TeacherPublicProfileContent` uses one plain, literal heading per
+section — About, Education, Certifications, Experience, Age Groups,
+Subjects, Expertise, Resources — matching exactly what Part 8 asked for.
+Nothing is padded with keyword variations or restated for search
+engines; a section simply doesn't render if the teacher hasn't filled in
+that field; there's nothing there to over-explain.
+
+## Privacy
+
+Email, country, password, and every profile field never leave the
+browser they were entered in — there is no API call, no database row.
+The same belt-and-suspenders pattern as child profiles applies:
+
+- Every account-flow route sets `robots: { index: false, follow: false }`,
+  and the public profile route does too until visibility can be verified
+  server-side (see above).
+- No account-flow page's metadata is generated from the teacher's own
+  data (title/description are generic, e.g. "Teacher Dashboard," never
+  the teacher's name), so nothing private can leak through a `<title>`
+  tag or a shared link preview.
+- The public profile page only ever renders fields from the explicit
+  allowlist, and only when `visibility === "public"` — there's no page
+  anywhere that lists or exposes another teacher's data, because there's
+  no mechanism (no backend) that could.
