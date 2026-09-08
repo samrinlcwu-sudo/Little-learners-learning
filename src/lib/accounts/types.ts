@@ -55,17 +55,48 @@ export interface ChildProfile {
 }
 
 /**
- * The professional profile promised on the /teachers page — separate from
- * Account so a teacher's public-facing details (bio, subjects) don't live
- * mixed in with private account fields (email).
+ * The self-declared age bands a teacher can pick from — deliberately a
+ * short fixed list (matching the platform's own 2–8 audience) rather than
+ * a free-text field, so profiles stay comparable and quick to fill in.
+ */
+export const TEACHER_AGE_GROUPS = ["toddlers", "preschool", "early-primary", "primary"] as const;
+export type TeacherAgeGroup = (typeof TEACHER_AGE_GROUPS)[number];
+
+/**
+ * Common languages a teacher might teach in. "other" exists so nobody is
+ * forced into a false choice, without the maintenance burden of an
+ * exhaustive world-language list for what's an optional profile field.
+ */
+export const TEACHER_LANGUAGES = ["english", "arabic", "urdu", "french", "spanish", "other"] as const;
+export type TeacherLanguage = (typeof TEACHER_LANGUAGES)[number];
+
+/**
+ * The professional profile behind the /teachers page and the teacher
+ * registration flow (docs/TEACHER_ARCHITECTURE.md) — separate from Account
+ * so a teacher's public-facing details (bio, subjects) don't live mixed in
+ * with private account fields (email). Everything but `name`, `email`, and
+ * `countryRegion` is optional on purpose: registration only asks for those,
+ * and a teacher can fill in the rest of their profile whenever they like,
+ * a little at a time.
  */
 export interface TeacherProfile {
   id: string;
   accountId: string;
-  bio: string;
-  subjects: string[];
+  name: string;
+  email: string;
+  countryRegion: string;
+  /** A data URL, stored on this device only — see docs/TEACHER_ARCHITECTURE.md for why this is safe without a file-storage backend. */
+  photo?: string;
+  bio?: string;
+  education?: string;
+  certifications?: string;
   yearsExperience?: number;
-  /** Sourced by a human review step once teacher registration exists — never set automatically. */
+  ageGroupsTaught: TeacherAgeGroup[];
+  /** Learning-category slugs from src/config/learning-categories.ts. */
+  subjects: string[];
+  languages: TeacherLanguage[];
+  teachingInterests?: string;
+  /** Sourced by a human review step once teacher registration is connected to a real backend — never set automatically. */
   verified: boolean;
   createdAt: string;
 }

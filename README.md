@@ -55,7 +55,11 @@ deliberately never tracked, and the parent/child views) is documented in
 [docs/PROGRESS_ARCHITECTURE.md](docs/PROGRESS_ARCHITECTURE.md). SEO and
 AEO (metadata, sitemap, structured data, and how to add a new page
 without hurting search visibility) are documented in
-[docs/SEO_ARCHITECTURE.md](docs/SEO_ARCHITECTURE.md).
+[docs/SEO_ARCHITECTURE.md](docs/SEO_ARCHITECTURE.md). Teacher
+registration (the account → verify → profile → dashboard flow, what's
+real versus prepared, and why it's a dedicated flow rather than a role
+picker) is documented in
+[docs/TEACHER_ARCHITECTURE.md](docs/TEACHER_ARCHITECTURE.md).
 
 ## Installation
 

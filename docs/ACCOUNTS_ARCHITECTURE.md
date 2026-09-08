@@ -22,8 +22,12 @@ in between.
 `src/lib/accounts/types.ts` defines `AccountRole = "parent" | "teacher" |
 "admin"`.
 
-- **Parent** and **Teacher** are the two roles someone can actually sign
-  up as today (see the role picker on `/sign-up`).
+- **Parent** and **Teacher** are the two roles someone can actually
+  register for today — a parent via `/sign-up`, a teacher via the
+  dedicated `/teachers/register` flow (see `docs/TEACHER_ARCHITECTURE.md`,
+  added in Prompt 26). They're deliberately separate forms, not a role
+  picker on one shared form — a teacher's registration needs more than a
+  parent's does (country, and later a professional profile).
 - **Admin** exists in the type so the system doesn't need a breaking
   change to add it later, but there is no `/admin` route, no admin UI, and
   no admin sign-up path anywhere in this codebase. When admin
@@ -49,12 +53,14 @@ in between.
   fixed emoji choices (`CHILD_AVATAR_IDS`) — never a photo upload, which
   sidesteps needing to secure a real image of a child rather than adding a
   policy on top of collecting one.
-- `TeacherProfile` — id, accountId, bio, subjects, yearsExperience,
-  verified, createdAt. Separate from `Account` so a teacher's
-  public-facing profile (what `/teachers` describes as "coming later")
-  doesn't mix with private account fields like email. `verified` is
-  set by a human review step, never automatically — same rule the
-  religious-content review gate already follows elsewhere.
+- `TeacherProfile` — id, accountId, name, email, countryRegion, plus
+  optional photo/bio/education/certifications/yearsExperience/
+  ageGroupsTaught/subjects/languages/teachingInterests, verified,
+  createdAt. Separate from `Account` so a teacher's public-facing profile
+  doesn't mix with private account fields the same way `ChildProfile`
+  doesn't. `verified` is set by a human review step, never automatically —
+  same rule the religious-content review gate already follows elsewhere.
+  Real registration and profile-completion flow: `docs/TEACHER_ARCHITECTURE.md`.
 
 When Supabase is connected, each of these becomes a table with Row Level
 Security: a parent account can read/write its own `child_profiles` rows
@@ -69,7 +75,7 @@ reset-password,account}` plus the "sign out" concept described below:
 
 | Screen | Route | Fields |
 |---|---|---|
-| Sign Up | `/sign-up` | Name, Email, Role (Parent/Teacher), Password |
+| Sign Up (parent) | `/sign-up` | Name, Email, Password |
 | Sign In | `/sign-in` | Email, Password |
 | Forgot Password | `/forgot-password` | Email |
 | Reset Password | `/reset-password` | New password |
@@ -78,8 +84,8 @@ reset-password,account}` plus the "sign out" concept described below:
 Each form (`src/components/patterns/*-form.tsx`) validates with the same
 Zod + React Hook Form pattern the README already documented as the plan
 for "every future form" (`src/lib/validations/auth.ts`) — this is real,
-functional validation: an invalid email, a short password, or a missing
-role selection shows a real inline error. No "confirm password" field
+functional validation: an invalid email or a too-short password shows a
+real inline error. No "confirm password" field
 exists; a show/hide toggle (`src/components/ui/password-input.tsx`) does
 the same job with one fewer field to fill in.
 

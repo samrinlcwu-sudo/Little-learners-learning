@@ -14,7 +14,7 @@ import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 
 const description =
-  "How Little Learners Learning is being built for teachers — professional profiles, sharing expertise, and room to grow as the platform develops.";
+  "How Little Learners Learning works for teachers — create a professional profile today, browse classroom-ready resources, and see what's still ahead.";
 
 export const metadata: Metadata = {
   title: "For Teachers",
@@ -24,6 +24,10 @@ export const metadata: Metadata = {
 };
 
 const availableNow = [
+  {
+    title: "Create a teacher account and professional profile",
+    description: "Register, then add your bio, experience, subjects, and teaching interests — all live today.",
+  },
   {
     title: "Browse classroom-ready material by subject and age",
     description: "The Learning Hub and Resource Library are both live and organized for quick browsing.",
@@ -40,8 +44,8 @@ const availableNow = [
 
 const comingLater = [
   {
-    title: "Teacher accounts & professional profiles",
-    description: "A profile for your experience, subjects, and areas of expertise.",
+    title: "Human-reviewed profile verification",
+    description: "A \"verified\" badge on your profile once a real review process is connected.",
   },
   {
     title: "Contributing your own resources",
@@ -60,7 +64,7 @@ export default function TeachersPage() {
         breadcrumb={[{ label: "Home", href: "/" }, { label: "For Teachers" }]}
         eyebrow="For educators"
         title="For Teachers"
-        description="A future home for professional profiles, teaching resources, and the expertise you bring to early-years education."
+        description="A professional home for your teaching profile, classroom-ready resources, and the expertise you bring to early-years education."
         surface="sunken"
       />
 
@@ -86,19 +90,21 @@ export default function TeachersPage() {
           </div>
 
           <div className="mt-12 border-t border-neutral-200 pt-8">
-            <Badge variant="neutral">Registration isn&apos;t open yet</Badge>
+            <Badge variant="success">Registration is open</Badge>
             <p className="mt-3 text-sm text-neutral-600">
-              Teacher registration and professional profiles haven&apos;t been
-              built yet — the button below reflects that honestly rather
-              than linking to a sign-up form that doesn&apos;t exist.
+              Create a teacher account and build your professional profile —
+              it works in your browser today. Account creation isn&apos;t
+              connected to a live backend yet, so your details stay on this
+              device until real accounts are, but the profile itself is
+              genuinely yours to fill in.
             </p>
-            <Button className="mt-4" disabled title="Coming soon">
-              Register as a teacher
+            <Button className="mt-4" asChild>
+              <Link href="/teachers/register">Register as a teacher</Link>
             </Button>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild>
+            <Button variant="outline" asChild>
               <Link href="/learn">Explore Learning</Link>
             </Button>
             <Button variant="outline" asChild>

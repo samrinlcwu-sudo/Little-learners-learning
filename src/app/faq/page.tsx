@@ -74,7 +74,7 @@ const faqGroups: FaqGroup[] = [
       {
         question: "Can teachers create a profile or account?",
         answer:
-          "Not yet. Teacher registration and professional profiles are planned but haven't been built — the For Teachers page explains what's coming.",
+          "Yes — teacher registration and professional profiles work today at the For Teachers page. Like the rest of the account system, it isn't connected to a live backend yet, so your details are saved on the device you registered on rather than a real server.",
       },
       {
         question: "Is there content built for classrooms?",

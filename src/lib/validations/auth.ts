@@ -8,15 +8,16 @@ import { emailSchema, nameSchema } from "./common";
  */
 export const passwordSchema = z.string().min(8, "Must be at least 8 characters");
 
-export const accountRoleSchema = z.enum(["parent", "teacher"], {
-  message: "Choose one",
-});
-export type AccountRole = z.infer<typeof accountRoleSchema>;
-
+/**
+ * Parent-only: a teacher creating an account uses the dedicated flow at
+ * /teachers/register instead (see docs/TEACHER_ARCHITECTURE.md for why
+ * that's a separate, richer form rather than a role picker bolted onto
+ * this one). `Account.role` in src/lib/accounts/types.ts still allows
+ * "teacher" — that's the data model, not this form.
+ */
 export const signUpSchema = z.object({
   name: nameSchema,
   email: emailSchema,
-  role: accountRoleSchema,
   password: passwordSchema,
 });
 export type SignUpValues = z.infer<typeof signUpSchema>;
