@@ -118,18 +118,18 @@ const faqGroups: FaqGroup[] = [
       {
         question: "Will my activity or data be saved anywhere?",
         answer:
-          "No. No account backend exists yet, so nothing you type into a form — or do anywhere else on the site — is saved or tied to an identity.",
+          "Some of it, yes. Child profiles and their learning progress are saved in your browser today — see the parent dashboard. Nothing is tied to a real account yet, though: no backend is connected, so this stays on the device you're using rather than being backed up or synced anywhere.",
+      },
+      {
+        question: "Will there be progress tracking for children?",
+        answer:
+          "Yes — it already exists today. Once you add a child profile, what they explore — subjects, resources, and games — is recorded and shown on both the parent dashboard and the child's own view. It's saved in this browser only, since there's no account backend yet to sync it anywhere else.",
       },
     ],
   },
   {
     title: "Future Features",
     items: [
-      {
-        question: "Will there be progress tracking for children?",
-        answer:
-          "It's planned — letting parents and teachers see what a child has completed — but it isn't built yet.",
-      },
       {
         question: "Is there a mobile app?",
         answer:

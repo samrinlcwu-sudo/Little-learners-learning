@@ -204,8 +204,8 @@ export default function AboutPage() {
               For Teachers
             </Heading>
             <p className="mt-3 max-w-md text-neutral-600">
-              A future home for professional profiles, teaching resources,
-              and the expertise you bring to early-years education.
+              A professional home for your teaching profile, classroom-ready
+              resources, and the expertise you bring to early-years education.
             </p>
             <Button className="mt-6" variant="outline" asChild>
               <Link href="/teachers">See the Teachers page</Link>

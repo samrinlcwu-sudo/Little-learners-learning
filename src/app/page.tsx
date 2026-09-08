@@ -263,11 +263,11 @@ export default function Home() {
               For Teachers
             </Heading>
             <p className="mt-3 max-w-md text-neutral-600">
-              A future home for professional profiles, teaching resources,
-              and the expertise you bring to early-years education.
+              A professional home for your teaching profile, classroom-ready
+              resources, and the expertise you bring to early-years education.
             </p>
-            <Badge variant="neutral" className="mt-4 w-fit">
-              Registration isn&apos;t open yet
+            <Badge variant="success" className="mt-4 w-fit">
+              Registration is open
             </Badge>
             <div className="mt-4">
               <Button variant="outline" asChild>
