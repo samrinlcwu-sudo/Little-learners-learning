@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/patterns/page-header";
 import { GameCard } from "@/components/patterns/game-card";
 import { GamesBrowser } from "@/components/patterns/games-browser";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
+import { isGamePublished } from "@/lib/games/types";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
@@ -22,9 +23,34 @@ export const metadata: Metadata = {
 
 export default function GamesPage() {
   const featured = SAMPLE_GAMES.filter((g) => g.featured);
+  const published = SAMPLE_GAMES.filter(isGamePublished);
+
+  // Names every game that's actually published and reachable at its own
+  // /games/[game] URL — the same unfiltered set GamesBrowser renders before
+  // any client-side search/filter runs, so this never claims more than a
+  // crawler (or a no-JS visitor) can see on this page.
+  const structuredData =
+    published.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          itemListElement: published.map((game, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            url: `${siteConfig.url}/games/${game.slug}`,
+            name: game.title,
+          })),
+        }
+      : null;
 
   return (
     <>
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      )}
       <PageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Games" }]}
         eyebrow="Games Hub"

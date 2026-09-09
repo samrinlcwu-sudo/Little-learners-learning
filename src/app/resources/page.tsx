@@ -12,6 +12,7 @@ import { ResourceCard } from "@/components/patterns/resource-card";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
 import {
+  DEFAULT_PAGE_SIZE,
   filterResources,
   paginateResources,
   sortResources,
@@ -103,8 +104,31 @@ export default async function ResourcesPage({
     return qs ? `/resources?${qs}` : "/resources";
   }
 
+  // Names exactly the resources rendered on this page of results — same
+  // "only what's visible" rule as the Teacher Directory's ItemList, so the
+  // schema never claims a resource is here that a visitor can't see.
+  const structuredData =
+    items.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          itemListElement: items.map((resource, index) => ({
+            "@type": "ListItem",
+            position: (page - 1) * DEFAULT_PAGE_SIZE + index + 1,
+            url: `${siteConfig.url}/resources/${resource.slug}`,
+            name: resource.title,
+          })),
+        }
+      : null;
+
   return (
     <>
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      )}
       <PageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Resources" }]}
         eyebrow="Resource Library"

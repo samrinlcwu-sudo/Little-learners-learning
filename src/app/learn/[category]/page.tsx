@@ -6,6 +6,8 @@ import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   getAllLearningCategories,
   getLearningCategoryBySlug,
@@ -115,31 +117,55 @@ export default async function LearnCategoryPage({
           </div>
         </div>
 
-        {categoryGames.length > 0 && (
-          <div className="mt-12 border-t border-neutral-200 pt-8">
-            <Heading level="h4" as="h2" className="text-neutral-500">
-              Games for this subject
-            </Heading>
-            <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {categoryGames.map((game) => (
-                <GameCard key={game.id} game={game} categoryName={category.name} />
-              ))}
-            </div>
+        <div className="mt-12 border-t border-neutral-200 pt-8">
+          <Heading level="h4" as="h2" className="text-neutral-500">
+            Games for this subject
+          </Heading>
+          <div className="mt-4">
+            {categoryGames.length > 0 ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {categoryGames.map((game) => (
+                  <GameCard key={game.id} game={game} categoryName={category.name} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No games for this subject yet"
+                description="Games are added one at a time, each built around a single skill. See what's playable today in the Games Hub."
+                action={
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href="/games">Browse all games</Link>
+                  </Button>
+                }
+              />
+            )}
           </div>
-        )}
+        </div>
 
-        {categoryResources.length > 0 && (
-          <div className="mt-12 border-t border-neutral-200 pt-8">
-            <Heading level="h4" as="h2" className="text-neutral-500">
-              Resources for this subject
-            </Heading>
-            <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {categoryResources.map((resource) => (
-                <ResourceCard key={resource.id} resource={resource} categoryName={category.name} isSample />
-              ))}
-            </div>
+        <div className="mt-12 border-t border-neutral-200 pt-8">
+          <Heading level="h4" as="h2" className="text-neutral-500">
+            Resources for this subject
+          </Heading>
+          <div className="mt-4">
+            {categoryResources.length > 0 ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {categoryResources.map((resource) => (
+                  <ResourceCard key={resource.id} resource={resource} categoryName={category.name} isSample />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No resources for this subject yet"
+                description="Worksheets, activities, and ebooks are still being added here. Search the full Resource Library in the meantime."
+                action={
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href={`/resources?category=${category.slug}`}>Search resources</Link>
+                  </Button>
+                }
+              />
+            )}
           </div>
-        )}
+        </div>
 
         {relatedCategories.length > 0 && (
           <div className="mt-12 border-t border-neutral-200 pt-8">
