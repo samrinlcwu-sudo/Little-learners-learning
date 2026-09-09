@@ -9,6 +9,7 @@ import {
   Users,
   Accessibility,
   Gamepad2,
+  ArrowRight,
 } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
@@ -19,8 +20,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { DecorativeBlob } from "@/components/ui/decorative-blob";
 import { IconFeature } from "@/components/patterns/icon-feature";
-import { learningCategoryGroups } from "@/config/learning-categories";
+import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { parentValuePoints, teacherValuePoints } from "@/config/audience-value-points";
+import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
+import { isResourcePublished, type ResourceType } from "@/lib/resources/types";
+import { SAMPLE_GAMES } from "@/lib/games/sample-games";
+import { isGamePublished } from "@/lib/games/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 
@@ -33,23 +38,49 @@ export const metadata: Metadata = {
   ...buildSocialMetadata(siteConfig.name, description),
 };
 
-const resourceFormats = [
+const resourceFormats: { name: string; description: string; icon: typeof FileText; resourceType: ResourceType }[] = [
   {
     name: "Worksheets",
     description: "Printable practice sheets for hands-on learning at home or in the classroom.",
     icon: FileText,
+    resourceType: "worksheet",
   },
   {
     name: "Activities",
     description: "Guided exercises that reinforce a subject through doing, not just reading.",
     icon: NotebookPen,
+    resourceType: "activity",
   },
   {
     name: "Ebooks",
     description: "Age-appropriate reading material for early learners.",
     icon: Library,
+    resourceType: "ebook",
   },
+];
+
+/** A representative spread across all three subject groups — the full set of 16 stays on /learn, linked below. */
+const FEATURED_CATEGORY_SLUGS = [
+  "english-early-literacy",
+  "mathematics",
+  "life-skills",
+  "creativity",
+  "quran-nazra",
+  "arabic-letters",
+  "learning-games",
+  "puzzles",
 ] as const;
+
+const FEATURED_CATEGORY_TONE: Record<string, "primary" | "secondary" | "accent"> = {
+  "english-early-literacy": "primary",
+  mathematics: "primary",
+  "life-skills": "primary",
+  creativity: "primary",
+  "quran-nazra": "secondary",
+  "arabic-letters": "secondary",
+  "learning-games": "accent",
+  puzzles: "accent",
+};
 
 const whyPillars = [
   {
@@ -82,14 +113,13 @@ const ctaLinks = [
   { label: "For Teachers", href: "/teachers" },
 ];
 
-/** One tone per subject group — variety that tracks meaning (core / religious / play) rather than being arbitrary. */
-const GROUP_TONE: Record<string, "primary" | "secondary" | "accent"> = {
-  "Core Subjects": "primary",
-  "Qur'an & Arabic": "secondary",
-  "Activities & Play": "accent",
-};
-
 export default function Home() {
+  const publishedResources = SAMPLE_RESOURCES.filter(isResourcePublished);
+  const publishedGamesCount = SAMPLE_GAMES.filter(isGamePublished).length;
+  const featuredCategories = FEATURED_CATEGORY_SLUGS.map((slug) => getLearningCategoryBySlug(slug)).filter(
+    (category): category is NonNullable<typeof category> => category !== undefined,
+  );
+
   return (
     <>
       {/* Hero — warm, light, and the only place the display headline appears */}
@@ -121,12 +151,12 @@ export default function Home() {
             </Button>
           </div>
           <p className="mt-5 text-sm text-neutral-500">
-            The learning library is being built — explore what&apos;s coming.
+            New subjects, resources, and games are added as the library grows.
           </p>
         </Container>
       </Section>
 
-      {/* Learning categories — clean white reading surface for the full subject map */}
+      {/* Learning categories — clean white reading surface, a curated preview of the full subject map on /learn */}
       <Section>
         <Container>
           <div className="max-w-2xl">
@@ -135,32 +165,39 @@ export default function Home() {
               What your child can learn
             </Heading>
             <p className="mt-3 text-neutral-600">
-              The platform is organized around these subjects and activity
-              types. Content is still being built out — this is the map of
-              where it&apos;s headed.
+              16 subjects to explore, real worksheets and games to try, and
+              dashboards for parents and teachers — all organized in one
+              place, growing as the platform does.
             </p>
           </div>
 
-          <div className="mt-10 space-y-10">
-            {learningCategoryGroups.map((group) => (
-              <div key={group.group}>
-                <Heading level="h4" as="h3" className="text-neutral-500">
-                  {group.group}
-                </Heading>
-                <div className="mt-4 grid gap-x-6 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
-                  {group.categories.map((category) => (
-                    <IconFeature
-                      key={category.name}
-                      icon={category.icon}
-                      title={category.name}
-                      description={category.description}
-                      headingAs="h4"
-                      tone={GROUP_TONE[group.group] ?? "primary"}
-                    />
-                  ))}
-                </div>
-              </div>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {featuredCategories.map((category) => (
+              <Link
+                key={category.slug}
+                href={`/learn/${category.slug}`}
+                className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
+              >
+                <Card interactive className="h-full p-5">
+                  <IconFeature
+                    icon={category.icon}
+                    title={category.name}
+                    description={category.description}
+                    headingAs="h3"
+                    tone={FEATURED_CATEGORY_TONE[category.slug] ?? "primary"}
+                  />
+                </Card>
+              </Link>
             ))}
+          </div>
+
+          <div className="mt-8">
+            <Button variant="outline" asChild>
+              <Link href="/learn">
+                Explore all 16 subjects
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
           </div>
         </Container>
       </Section>
@@ -174,25 +211,28 @@ export default function Home() {
               Learning materials
             </Heading>
             <p className="mt-3 text-neutral-600">
-              Worksheets, activities, and ebooks — the formats learning will
-              come in, across every subject above.
+              Worksheets, activities, and ebooks — real sample resources exist
+              in every format today, with more added as the library grows.
             </p>
           </div>
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
-            {resourceFormats.map((format) => (
-              <Card key={format.name} className="p-6">
-                <div className="flex size-11 items-center justify-center rounded-xl bg-secondary-100 text-secondary-700">
-                  <format.icon className="size-5" aria-hidden="true" />
-                </div>
-                <CardContent className="flex flex-col gap-3 p-0 pt-4">
-                  <h3 className="font-display text-lg font-semibold text-ink">{format.name}</h3>
-                  <p className="text-sm text-neutral-600">{format.description}</p>
-                  <Badge variant="neutral" className="w-fit">
-                    Coming soon
-                  </Badge>
-                </CardContent>
-              </Card>
-            ))}
+            {resourceFormats.map((format) => {
+              const count = publishedResources.filter((r) => r.resourceType === format.resourceType).length;
+              return (
+                <Card key={format.name} className="p-6">
+                  <div className="flex size-11 items-center justify-center rounded-xl bg-secondary-100 text-secondary-700">
+                    <format.icon className="size-5" aria-hidden="true" />
+                  </div>
+                  <CardContent className="flex flex-col gap-3 p-0 pt-4">
+                    <h3 className="font-display text-lg font-semibold text-ink">{format.name}</h3>
+                    <p className="text-sm text-neutral-600">{format.description}</p>
+                    <Badge variant={count > 0 ? "success" : "neutral"} className="w-fit">
+                      {count > 0 ? `${count} sample${count === 1 ? "" : "s"} to browse` : "Coming soon"}
+                    </Badge>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
           <div className="mt-8">
             <Button variant="outline" asChild>
@@ -216,9 +256,9 @@ export default function Home() {
             The Learning Games Hub
           </Heading>
           <p className="mt-3 text-neutral-600">
-            Puzzles, mazes, coloring, and games — each one built around a
-            specific learning goal, not random entertainment. The Games Hub
-            is still being built.
+            {publishedGamesCount} free games are ready to play today —
+            starting with Letter Match and Number Memory — each one built
+            around a specific learning goal, not random entertainment.
           </p>
           <div className="mt-6">
             <Button variant="outline" asChild>
@@ -238,11 +278,17 @@ export default function Home() {
             </Heading>
             <p className="mt-3 max-w-md text-neutral-600">
               A tool built to help you guide your child&apos;s early
-              learning — not just another app to hand them.
+              learning — not just another app to hand them. Add a child
+              profile and see their real progress in your dashboard.
             </p>
-            <Button className="mt-6" variant="outline" asChild>
-              <Link href="/parents">For Parents</Link>
-            </Button>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button variant="outline" asChild>
+                <Link href="/parents">For Parents</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard">Open your dashboard</Link>
+              </Button>
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {parentValuePoints.map((point) => (
@@ -269,9 +315,12 @@ export default function Home() {
             <Badge variant="success" className="mt-4 w-fit">
               Registration is open
             </Badge>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap gap-3">
               <Button variant="outline" asChild>
                 <Link href="/teachers">For Teachers</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/teachers/dashboard">Open your dashboard</Link>
               </Button>
             </div>
           </div>
