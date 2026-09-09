@@ -127,6 +127,42 @@ percentage, no leaderboard, no "you're behind" framing — completion
 itself is worth noting, nothing is compared to another child or to a
 target.
 
+## Achievements (Prompt 39)
+
+`src/lib/progress/achievements.ts` adds one more way to read the same
+event log — a small, fixed set of positive milestones (`getAchievements`),
+each computed fresh from a child's own events every time it's called.
+There is no `achievements` table, row, or flag anywhere: a badge is never
+stored as "earned," only ever recomputed from whether the qualifying
+event(s) already exist. That means a badge can never drift out of sync
+with the real record, and nothing can award one without the event(s) that
+justify it — the same rule this whole file is built around.
+
+**Data integrity — distinct activities, not raw event counts.** A
+milestone like "completed 3 different games" counts distinct
+`activityHref` values, not raw `game_completed` events. Replaying and
+finishing the same game five times is one real accomplishment for this
+purpose, not five — counting raw events would let repetition of a single
+easy game "earn" a badge meant to reflect breadth. `getEarnedAchievements`
+is the only function either UI surface calls, and it returns exclusively
+already-earned badges — there is no "locked" or "0/3" state rendered
+anywhere, on either the parent dashboard (`ChildOverviewCard`) or the
+child's own view (`ChildExperience`), per the brief's "avoid pressure,
+ranking, or comparison" rule. `AchievementBadges`
+(`src/components/patterns/achievement-badges.tsx`) is the one rendering
+of a badge, shared by both surfaces, so a badge never looks or reads
+differently depending on who's looking at it.
+
+Only rendered inside the already-`noindex` `/dashboard` and
+`/dashboard/children/[childId]` routes, same as every other progress
+view — no public page, structured data, or API exposes a child's badges.
+Scaling this later (more badge definitions, a `child_achievements` table
+once real accounts exist, or feeding an AI recommendation with "which
+badges hasn't this child earned yet") means adding to `DEFINITIONS` or
+reading the same event rows differently — the derive-don't-store approach
+means there's nothing to migrate except the event log itself, which
+already has a real-accounts migration path (see above).
+
 ## Privacy, SEO, AEO
 
 Same architecture-level guarantee as child profiles

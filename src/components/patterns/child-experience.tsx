@@ -19,10 +19,12 @@ import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { DecorativeBlob } from "@/components/ui/decorative-blob";
 import { ChildAvatar } from "@/components/patterns/child-avatar";
+import { AchievementBadges } from "@/components/patterns/achievement-badges";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
 import { useChildProgressEvents } from "@/lib/progress/use-progress-events";
 import { setActiveChild } from "@/lib/progress/local-progress";
+import { getEarnedAchievements } from "@/lib/progress/achievements";
 import { getAccuracyReward } from "@/lib/games/rewards";
 import { getCategoryJourney, getNextStepSuggestion, type NextStepSuggestion } from "@/lib/learning-journey";
 import { cn } from "@/lib/utils/cn";
@@ -87,6 +89,7 @@ function ChildExperience() {
   const completedGames = events.filter((event) => event.type === "game_completed").slice(-5).reverse();
   const nextStep = getNextStepSuggestion(events);
   const exploreCategories = getExploreCategories();
+  const earnedBadges = getEarnedAchievements(events);
   const NextStepIcon = nextStep ? NEXT_STEP_ICONS[nextStep.kind] : null;
 
   return (
@@ -152,6 +155,8 @@ function ChildExperience() {
               <Sparkles className="size-5 text-accent-600" aria-hidden="true" />
               <p className="font-display text-lg font-semibold text-ink">Your learning journey</p>
             </div>
+
+            {earnedBadges.length > 0 && <AchievementBadges achievements={earnedBadges} size="lg" className="mt-4" />}
 
             {nextStep && NextStepIcon && (
               <Link

@@ -4,9 +4,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChildAvatar } from "@/components/patterns/child-avatar";
+import { AchievementBadges } from "@/components/patterns/achievement-badges";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { getEventsForChild } from "@/lib/progress/local-progress";
 import { summarizeChildProgress, describeEvent } from "@/lib/progress/summarize";
+import { getEarnedAchievements } from "@/lib/progress/achievements";
 import { getNextStepSuggestion } from "@/lib/learning-journey";
 import { formatRelativeTime } from "@/lib/utils/format-relative-time";
 import type { ChildProfile } from "@/lib/accounts/types";
@@ -41,6 +43,7 @@ function ChildOverviewCard({ child, events, progressReady, onEdit }: ChildOvervi
   const childEvents = getEventsForChild(events, child.id);
   const summary = summarizeChildProgress(childEvents);
   const nextStep = getNextStepSuggestion(childEvents);
+  const earnedBadges = getEarnedAchievements(childEvents);
 
   return (
     <Card className="flex h-full flex-col p-5">
@@ -99,6 +102,7 @@ function ChildOverviewCard({ child, events, progressReady, onEdit }: ChildOvervi
                 );
               })}
             </ul>
+            <AchievementBadges achievements={earnedBadges} className="mt-3" />
           </>
         )}
       </div>
