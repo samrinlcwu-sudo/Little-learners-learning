@@ -2,19 +2,17 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, BookOpen, Library, Gamepad2, Settings, Sparkles, ArrowRight } from "lucide-react";
+import { Plus, BookOpen, Library, Gamepad2, Settings, ShieldCheck, Sparkles } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
-import { ChildCard } from "@/components/patterns/child-card";
+import { ChildOverviewCard } from "@/components/patterns/child-overview-card";
 import { ChildProfileForm } from "@/components/patterns/child-profile-form";
-import { ChildAvatar } from "@/components/patterns/child-avatar";
 import {
   Modal,
   ModalContent,
@@ -24,10 +22,6 @@ import {
 } from "@/components/ui/modal";
 import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
 import { useProgressEvents } from "@/lib/progress/use-progress-events";
-import { getEventsForChild } from "@/lib/progress/local-progress";
-import { summarizeChildProgress, describeEvent } from "@/lib/progress/summarize";
-import { getNextStepSuggestion } from "@/lib/learning-journey";
-import { formatRelativeTime } from "@/lib/utils/format-relative-time";
 import type { ChildProfileValues } from "@/lib/validations/child-profile";
 import type { ChildProfile } from "@/lib/accounts/types";
 
@@ -65,9 +59,12 @@ const TONE_STYLES = {
  * The parent dashboard reads and writes child profiles from this browser's
  * localStorage only (src/lib/accounts/use-child-profiles.ts) — there's no
  * account to sync them to yet. It's still a genuinely working feature, not
- * a preview: adding, editing, and opening a child's view all actually work.
- * What it never does is show progress or activity data, because nothing
- * records that yet (see docs/ACCOUNTS_ARCHITECTURE.md).
+ * a preview: adding, editing, opening a child's view, and everything shown
+ * in each ChildOverviewCard (real recorded progress, a real "what's next"
+ * suggestion — see docs/PROGRESS_ARCHITECTURE.md and
+ * docs/LEARNING_JOURNEY_ARCHITECTURE.md) all actually work. What it never
+ * does is invent a statistic, achievement, or recommendation beyond what
+ * that child's own events support.
  */
 function ParentDashboard() {
   const { children, ready, addChild, updateChild } = useChildProfiles();
@@ -114,7 +111,12 @@ function ParentDashboard() {
 
           <div>
             <div className="flex items-center justify-between gap-4">
-              <Heading level="h2">My Children</Heading>
+              <div>
+                <Heading level="h2">My Children</Heading>
+                <p className="mt-1 text-sm text-neutral-600">
+                  Each child&apos;s own profile, real progress, and what to try next — in one place.
+                </p>
+              </div>
               <Button size="sm" onClick={openAddModal}>
                 <Plus aria-hidden="true" />
                 Add a child
@@ -136,14 +138,20 @@ function ParentDashboard() {
             ) : (
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {children.map((child) => (
-                  <ChildCard key={child.id} child={child} onEdit={openEditModal} />
+                  <ChildOverviewCard
+                    key={child.id}
+                    child={child}
+                    events={events}
+                    progressReady={progressReady}
+                    onEdit={openEditModal}
+                  />
                 ))}
               </div>
             )}
           </div>
 
           <div className="mt-14">
-            <Heading level="h2">Explore together</Heading>
+            <Heading level="h2">Find something to explore</Heading>
             <div className="mt-6 grid gap-5 sm:grid-cols-3">
               {quickLinks.map((link) => (
                 <Link key={link.href} href={link.href} className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
@@ -162,99 +170,37 @@ function ParentDashboard() {
           </div>
 
           <div className="mt-14">
-            <Heading level="h2">Learning progress</Heading>
-            <p className="mt-2 text-neutral-600">
-              What each child has actually explored — nothing here is
-              estimated or invented.
-            </p>
-
-            {!ready || !progressReady ? null : children.length === 0 ? (
-              <EmptyState
-                className="mt-6"
-                title="Add a child to see their progress here"
-                description="Once you add a child and they explore the site, what they did shows up here."
-              />
-            ) : (
-              <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                {children.map((child) => {
-                  const childEvents = getEventsForChild(events, child.id);
-                  const summary = summarizeChildProgress(childEvents);
-                  const nextStep = getNextStepSuggestion(childEvents);
-
-                  return (
-                    <Card key={child.id} className="p-5">
-                      <div className="flex items-center gap-3">
-                        <ChildAvatar avatar={child.avatar} />
-                        <div>
-                          <p className="font-medium text-ink">{child.name}</p>
-                          {summary.lastActiveAt && (
-                            <p className="text-xs text-neutral-500">
-                              Last active {formatRelativeTime(summary.lastActiveAt)}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {childEvents.length === 0 ? (
-                        <p className="mt-4 text-sm text-neutral-600">
-                          Nothing recorded yet — progress shows up here once{" "}
-                          {child.name} explores a subject, resource, or game.
-                        </p>
-                      ) : (
-                        <>
-                          {summary.topicsExplored.length > 0 && (
-                            <div className="mt-4 flex flex-wrap gap-1.5">
-                              {summary.topicsExplored.slice(0, 4).map((topic) => (
-                                <Badge key={topic} variant="neutral">
-                                  {topic}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          <ul className="mt-4 space-y-2">
-                            {summary.recentActivities.slice(0, 3).map((event) => (
-                              <li key={event.id} className="flex items-center justify-between gap-3 text-sm">
-                                <span className="text-neutral-700">{describeEvent(event)}</span>
-                                <span className="shrink-0 text-xs text-neutral-500">
-                                  {formatRelativeTime(event.occurredAt)}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                          {nextStep && (
-                            <Link
-                              href={nextStep.href}
-                              className="mt-4 flex items-center justify-between gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3.5 py-2.5 text-sm transition-colors hover:border-primary-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
-                            >
-                              <span>
-                                <span className="block text-xs font-medium text-primary-700">{nextStep.label}</span>
-                                <span className="font-medium text-ink">{nextStep.activityLabel}</span>
-                              </span>
-                              <ArrowRight className="size-4 shrink-0 text-primary-700" aria-hidden="true" />
-                            </Link>
-                          )}
-                        </>
-                      )}
-                    </Card>
-                  );
-                })}
+            <Heading level="h2">Account</Heading>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div className="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-11 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
+                    <Settings className="size-5" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-ink">Account settings</p>
+                    <p className="text-sm text-neutral-600">Manage your sign-in details.</p>
+                  </div>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link href="/account">Open</Link>
+                </Button>
               </div>
-            )}
-          </div>
-
-          <div className="mt-14 flex items-center justify-between gap-4 rounded-xl border border-neutral-200 p-5">
-            <div className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
-                <Settings className="size-5" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="font-medium text-ink">Account settings</p>
-                <p className="text-sm text-neutral-600">Manage your sign-in details.</p>
+              <div className="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-11 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
+                    <ShieldCheck className="size-5" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-ink">Privacy</p>
+                    <p className="text-sm text-neutral-600">What&apos;s collected and why.</p>
+                  </div>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link href="/privacy">Open</Link>
+                </Button>
               </div>
             </div>
-            <Button variant="outline" asChild>
-              <Link href="/account">Open</Link>
-            </Button>
           </div>
         </Container>
       </Section>
