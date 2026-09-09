@@ -14,15 +14,12 @@ import {
   getRelatedCategories,
 } from "@/config/learning-categories";
 import { LearningContentBrowser } from "@/components/patterns/learning-content-browser";
+import { LearningJourneySteps } from "@/components/patterns/learning-journey-steps";
 import { GameCard } from "@/components/patterns/game-card";
 import { ResourceCard } from "@/components/patterns/resource-card";
 import { TrackPageView } from "@/components/patterns/track-page-view";
-import { SAMPLE_CONTENT } from "@/lib/content/sample-content";
 import { CONTENT_TYPE_LABELS } from "@/lib/content/types";
-import { SAMPLE_GAMES } from "@/lib/games/sample-games";
-import { isGamePublished } from "@/lib/games/types";
-import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
-import { isResourcePublished } from "@/lib/resources/types";
+import { getCategoryJourney } from "@/lib/learning-journey";
 import { siteConfig } from "@/config/site";
 
 export function generateStaticParams() {
@@ -53,11 +50,10 @@ export default async function LearnCategoryPage({
     notFound();
   }
 
-  const categoryContent = SAMPLE_CONTENT.filter((item) => item.category === category.slug);
-  const categoryGames = SAMPLE_GAMES.filter((g) => g.category === category.slug && isGamePublished(g));
-  const categoryResources = SAMPLE_RESOURCES.filter(
-    (r) => r.category === category.slug && isResourcePublished(r),
-  );
+  const journey = getCategoryJourney(category.slug);
+  const categoryContent = journey?.content ?? [];
+  const categoryGames = journey?.games ?? [];
+  const categoryResources = journey?.resources ?? [];
   const relatedCategories = getRelatedCategories(category.slug);
 
   return (
@@ -106,9 +102,21 @@ export default async function LearnCategoryPage({
               ))}
             </ul>
           </div>
+
+          {journey && (
+            <div className="mt-8">
+              <Heading level="h4" as="h2" className="text-neutral-500">
+                Your learning journey
+              </Heading>
+              <p className="mt-1 text-sm text-neutral-500">
+                Learn what this subject covers, practice it, then play — jump to any step below.
+              </p>
+              <LearningJourneySteps steps={journey.steps} />
+            </div>
+          )}
         </div>
 
-        <div className="mt-10">
+        <div id="content" className="mt-10 scroll-mt-20">
           <Heading level="h4" as="h2" className="text-neutral-500">
             Content
           </Heading>
@@ -117,7 +125,7 @@ export default async function LearnCategoryPage({
           </div>
         </div>
 
-        <div className="mt-12 border-t border-neutral-200 pt-8">
+        <div id="games" className="mt-12 scroll-mt-20 border-t border-neutral-200 pt-8">
           <Heading level="h4" as="h2" className="text-neutral-500">
             Games for this subject
           </Heading>
@@ -142,7 +150,7 @@ export default async function LearnCategoryPage({
           </div>
         </div>
 
-        <div className="mt-12 border-t border-neutral-200 pt-8">
+        <div id="resources" className="mt-12 scroll-mt-20 border-t border-neutral-200 pt-8">
           <Heading level="h4" as="h2" className="text-neutral-500">
             Resources for this subject
           </Heading>

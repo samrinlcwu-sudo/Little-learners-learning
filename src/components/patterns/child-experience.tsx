@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, BookOpen, Gamepad2, Library, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Gamepad2, Library, Sparkles, Star } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -14,6 +14,7 @@ import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
 import { useChildProgressEvents } from "@/lib/progress/use-progress-events";
 import { setActiveChild } from "@/lib/progress/local-progress";
 import { getAccuracyReward } from "@/lib/games/rewards";
+import { getNextStepSuggestion } from "@/lib/learning-journey";
 import { cn } from "@/lib/utils/cn";
 
 const bigActions = [
@@ -61,6 +62,7 @@ function ChildExperience() {
   }
 
   const completedGames = events.filter((event) => event.type === "game_completed").slice(-5).reverse();
+  const nextStep = getNextStepSuggestion(events);
 
   return (
     <Section surface="tint-accent" className="relative min-h-[85vh] overflow-hidden">
@@ -103,10 +105,28 @@ function ChildExperience() {
               <Sparkles className="size-5 text-accent-600" aria-hidden="true" />
               <p className="font-display text-lg font-semibold text-ink">Your learning journey</p>
             </div>
+
+            {nextStep && (
+              <Link
+                href={nextStep.href}
+                className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-primary-600 px-5 py-4 text-white shadow-sm transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/50"
+              >
+                <span>
+                  <span className="block text-xs font-semibold uppercase tracking-wide text-primary-100">
+                    {nextStep.label}
+                  </span>
+                  <span className="block text-base font-bold">{nextStep.activityLabel}</span>
+                </span>
+                <ArrowRight className="size-5 shrink-0" aria-hidden="true" />
+              </Link>
+            )}
+
             {completedGames.length === 0 ? (
-              <p className="mt-2 text-sm text-neutral-600">
-                Nothing finished yet — pick something above to get started!
-              </p>
+              !nextStep && (
+                <p className="mt-2 text-sm text-neutral-600">
+                  Nothing finished yet — pick something above to get started!
+                </p>
+              )
             ) : (
               <ul className="mt-4 space-y-3">
                 {completedGames.map((event) => {

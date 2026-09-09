@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, BookOpen, Library, Gamepad2, Settings, Sparkles } from "lucide-react";
+import { Plus, BookOpen, Library, Gamepad2, Settings, Sparkles, ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -26,6 +26,7 @@ import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
 import { useProgressEvents } from "@/lib/progress/use-progress-events";
 import { getEventsForChild } from "@/lib/progress/local-progress";
 import { summarizeChildProgress, describeEvent } from "@/lib/progress/summarize";
+import { getNextStepSuggestion } from "@/lib/learning-journey";
 import { formatRelativeTime } from "@/lib/utils/format-relative-time";
 import type { ChildProfileValues } from "@/lib/validations/child-profile";
 import type { ChildProfile } from "@/lib/accounts/types";
@@ -178,6 +179,7 @@ function ParentDashboard() {
                 {children.map((child) => {
                   const childEvents = getEventsForChild(events, child.id);
                   const summary = summarizeChildProgress(childEvents);
+                  const nextStep = getNextStepSuggestion(childEvents);
 
                   return (
                     <Card key={child.id} className="p-5">
@@ -219,6 +221,18 @@ function ParentDashboard() {
                               </li>
                             ))}
                           </ul>
+                          {nextStep && (
+                            <Link
+                              href={nextStep.href}
+                              className="mt-4 flex items-center justify-between gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3.5 py-2.5 text-sm transition-colors hover:border-primary-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
+                            >
+                              <span>
+                                <span className="block text-xs font-medium text-primary-700">{nextStep.label}</span>
+                                <span className="font-medium text-ink">{nextStep.activityLabel}</span>
+                              </span>
+                              <ArrowRight className="size-4 shrink-0 text-primary-700" aria-hidden="true" />
+                            </Link>
+                          )}
                         </>
                       )}
                     </Card>

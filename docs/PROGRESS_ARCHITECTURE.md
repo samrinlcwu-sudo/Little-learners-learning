@@ -147,8 +147,9 @@ private dashboard or the public pages.
 The event log is intentionally the kind of data future features would
 read, not a shape they'd force a rewrite of:
 
-- **Learning recommendations** ("try Shapes next") would read
-  `topicsExplored` and suggest categories not yet in that list.
+- **Learning recommendations** ("try Shapes next") — built in Prompt 36,
+  see docs/LEARNING_JOURNEY_ARCHITECTURE.md. It reads exactly this event
+  log and nothing else.
 - **Parent insights** would aggregate across a longer time window than
   "recent activity" already does.
 - **Teacher insights** would need a classroom/roster concept that doesn't

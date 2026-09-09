@@ -10,9 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { ResourceCard } from "@/components/patterns/resource-card";
+import { GameCard } from "@/components/patterns/game-card";
 import { TrackPageView } from "@/components/patterns/track-page-view";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
+import { SAMPLE_GAMES } from "@/lib/games/sample-games";
+import { isGamePublished } from "@/lib/games/types";
 import {
   ACCESS_TIER_LABELS,
   RESOURCE_TYPE_LABELS,
@@ -88,6 +91,14 @@ export default async function ResourceDetailPage({
     : publishedOthers
         .filter((r) => r.category === resource.category || r.resourceType === resource.resourceType)
         .slice(0, 3);
+
+  // The same subject taxonomy connects a resource to a game, not just to
+  // other resources — e.g. a Mathematics worksheet to a Mathematics game.
+  // Only shown when a real, published game actually exists in this
+  // resource's category.
+  const relatedGame = resource.category
+    ? SAMPLE_GAMES.find((g) => g.category === resource.category && isGamePublished(g))
+    : undefined;
 
   // Structured data reflects only fields the model actually carries — no
   // ratings, review counts, or other social-proof properties, since none exist.
@@ -290,6 +301,17 @@ export default async function ResourceDetailPage({
             )}
           </div>
         </div>
+
+        {relatedGame && category && (
+          <div className="mt-12 max-w-3xl border-t border-neutral-200 pt-8">
+            <Heading level="h4" as="h2" className="text-neutral-500">
+              Practice the same skill with a game
+            </Heading>
+            <div className="mt-4 max-w-sm">
+              <GameCard game={relatedGame} categoryName={category.name} />
+            </div>
+          </div>
+        )}
 
         {showsSplitRelated ? (
           <>

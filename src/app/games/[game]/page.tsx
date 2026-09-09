@@ -9,11 +9,14 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GameCard } from "@/components/patterns/game-card";
+import { ResourceCard } from "@/components/patterns/resource-card";
 import { GamePlayer } from "@/components/games/game-player";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
 import { isGamePlayable } from "@/lib/games/registry";
 import { GAME_TYPE_LABELS, isGamePublished, type Game } from "@/lib/games/types";
+import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
+import { isResourcePublished } from "@/lib/resources/types";
 import { siteConfig } from "@/config/site";
 
 const DIFFICULTY_LABELS: Record<Game["difficulty"], string> = {
@@ -61,6 +64,13 @@ export default async function GameDetailPage({
   const related = SAMPLE_GAMES.filter(
     (g) => g.slug !== game.slug && isGamePublished(g) && (g.category === game.category || g.gameType === game.gameType),
   ).slice(0, 3);
+
+  // Same subject taxonomy connecting this game back to a resource — e.g. a
+  // Mathematics game to a Mathematics worksheet — only when a real,
+  // published resource actually exists in this game's category.
+  const relatedResource = game.category
+    ? SAMPLE_RESOURCES.find((r) => r.category === game.category && isResourcePublished(r))
+    : undefined;
 
   // Structured data reflects only fields the model actually carries.
   const structuredData = {
@@ -160,6 +170,17 @@ export default async function GameDetailPage({
             />
           )}
         </div>
+
+        {relatedResource && category && (
+          <div className="mt-12 max-w-2xl border-t border-neutral-200 pt-8">
+            <Heading level="h4" as="h2" className="text-neutral-500">
+              Practice the same subject with a resource
+            </Heading>
+            <div className="mt-4 max-w-sm">
+              <ResourceCard resource={relatedResource} categoryName={category.name} isSample />
+            </div>
+          </div>
+        )}
 
         {related.length > 0 && (
           <div className="mt-12 max-w-2xl border-t border-neutral-200 pt-8">
