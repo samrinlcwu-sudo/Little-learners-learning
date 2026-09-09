@@ -154,7 +154,7 @@ function TeacherDashboard() {
               </Button>
             </Card>
 
-            <div className="flex flex-col gap-5">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
               <Card className="flex flex-col items-center justify-center gap-2 p-5 text-center">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary-100 text-secondary-700">
                   <GraduationCap className="size-6" aria-hidden="true" />
