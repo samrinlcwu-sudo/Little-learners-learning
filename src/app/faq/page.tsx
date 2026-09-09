@@ -86,6 +86,11 @@ const faqGroups: FaqGroup[] = [
         answer:
           "Not yet — contributing resources is part of the planned teacher ecosystem, not something available today.",
       },
+      {
+        question: "Can families search for and find teachers?",
+        answer:
+          "There's a real, working teacher directory at the For Teachers page — searchable by name, subject, age group, language, and expertise. A teacher only appears there once they've made their profile public and the platform has reviewed it, so the directory may be empty or small while it's new — that's expected, not a bug.",
+      },
     ],
   },
   {

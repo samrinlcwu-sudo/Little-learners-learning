@@ -43,6 +43,10 @@ const availableNow = [
     title: "Set up child profiles in your dashboard",
     description: "Add a name, age, and avatar for each child — saved on this device, no account required.",
   },
+  {
+    title: "See real learning progress",
+    description: "Once a child profile exists, the subjects, resources, and games they've actually explored show up in your dashboard — never estimated or invented.",
+  },
 ];
 
 const comingLater = [
@@ -53,10 +57,6 @@ const comingLater = [
   {
     title: "Accounts that sync across devices",
     description: "Child profiles are saved on this device only for now — an account will let them follow you anywhere.",
-  },
-  {
-    title: "Progress tracking",
-    description: "Seeing what your child has completed and where they're headed next.",
   },
 ];
 

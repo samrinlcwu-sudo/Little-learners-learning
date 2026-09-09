@@ -179,11 +179,17 @@ export default function AboutPage() {
             </Heading>
             <p className="mt-3 max-w-md text-neutral-600">
               A tool built to help you guide your child&apos;s early
-              learning — not just another app to hand them.
+              learning — not just another app to hand them. Add a child
+              profile and see their real progress in your dashboard.
             </p>
-            <Button className="mt-6" variant="outline" asChild>
-              <Link href="/parents">See the Parents page</Link>
-            </Button>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button variant="outline" asChild>
+                <Link href="/parents">See the Parents page</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard">Open your dashboard</Link>
+              </Button>
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {parentValuePoints.map((point) => (
@@ -205,11 +211,18 @@ export default function AboutPage() {
             </Heading>
             <p className="mt-3 max-w-md text-neutral-600">
               A professional home for your teaching profile, classroom-ready
-              resources, and the expertise you bring to early-years education.
+              resources, and the expertise you bring to early-years education
+              — plus a directory where families can find you once your
+              profile is public and reviewed.
             </p>
-            <Button className="mt-6" variant="outline" asChild>
-              <Link href="/teachers">See the Teachers page</Link>
-            </Button>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button variant="outline" asChild>
+                <Link href="/teachers">See the Teachers page</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/teachers/dashboard">Open your dashboard</Link>
+              </Button>
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {teacherValuePoints.map((point) => (
