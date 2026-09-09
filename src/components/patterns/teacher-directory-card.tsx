@@ -34,7 +34,7 @@ function TeacherDirectoryCard({ teacher }: { teacher: PublicTeacherProfile }) {
           <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 text-neutral-400">
             {teacher.photo ? (
               // eslint-disable-next-line @next/next/no-img-element -- a locally-stored data URL, not a served/optimizable image
-              <img src={teacher.photo} alt="" className="size-full object-cover" />
+              <img src={teacher.photo} alt={teacher.name} className="size-full object-cover" />
             ) : (
               <GraduationCap className="size-6" aria-hidden="true" />
             )}

@@ -37,7 +37,7 @@ function TeacherPublicProfileContent({ profile }: { profile: PublicTeacherProfil
         <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white text-neutral-400 shadow-sm">
           {profile.photo ? (
             // eslint-disable-next-line @next/next/no-img-element -- a locally-stored data URL, not a served/optimizable image
-            <img src={profile.photo} alt="" className="size-full object-cover" />
+            <img src={profile.photo} alt={profile.name} className="size-full object-cover" />
           ) : (
             <GraduationCap className="size-9" aria-hidden="true" />
           )}
