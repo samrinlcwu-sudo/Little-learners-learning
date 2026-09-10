@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Library, GraduationCap, Settings, Sparkles, PenSquare, Globe2, LockKeyhole, ExternalLink } from "lucide-react";
+import { Library, GraduationCap, Settings, Sparkles, PenSquare, Globe2, LockKeyhole, ExternalLink, type LucideIcon } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -63,6 +63,21 @@ const VISIBILITY_OPTIONS: { id: TeacherProfileVisibility; label: string; descrip
   { id: "public", label: "Public", description: "Visible to anyone with the link." },
 ];
 
+interface QuickAction {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  href: string;
+  tone: "primary" | "secondary" | "accent" | "neutral";
+}
+
+const QUICK_ACTION_TONE_STYLES: Record<QuickAction["tone"], string> = {
+  primary: "bg-primary-100 text-primary-700",
+  secondary: "bg-secondary-100 text-secondary-700",
+  accent: "bg-accent-100 text-accent-800",
+  neutral: "bg-neutral-100 text-neutral-600",
+};
+
 /**
  * The landing point after registration (Prompt 26, Part 4). Reads the same
  * local teacher record every step of the flow writes to
@@ -96,6 +111,48 @@ function TeacherDashboard() {
 
   const completion = calculateProfileCompletion(teacher);
 
+  const quickActions: QuickAction[] = [
+    {
+      icon: PenSquare,
+      title: "Edit profile",
+      description: "Update your bio, expertise, and photo.",
+      href: "/teachers/register/profile",
+      tone: "primary",
+    },
+    ...(teacher.visibility === "public"
+      ? [
+          {
+            icon: ExternalLink,
+            title: "View public profile",
+            description: "See exactly what families see.",
+            href: `/teachers/p/${teacher.slug}`,
+            tone: "secondary" as const,
+          },
+        ]
+      : []),
+    {
+      icon: GraduationCap,
+      title: "Browse teacher resources",
+      description: "Classroom-ready material from the platform.",
+      href: "/resources?type=teacher-resource",
+      tone: "accent",
+    },
+    {
+      icon: Library,
+      title: "Full resource library",
+      description: "Worksheets, activities, and ebooks.",
+      href: "/resources",
+      tone: "secondary",
+    },
+    {
+      icon: Settings,
+      title: "Account settings",
+      description: "Manage your sign-in details.",
+      href: "/account",
+      tone: "neutral",
+    },
+  ];
+
   return (
     <>
       <PageHeader
@@ -114,7 +171,35 @@ function TeacherDashboard() {
             stays on this device.
           </Alert>
 
-          <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
+          <div>
+            <Heading level="h2">Quick actions</Heading>
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {quickActions.map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
+                >
+                  <Card interactive className="flex h-full flex-col gap-3 p-5">
+                    <div
+                      className={cn(
+                        "flex size-11 items-center justify-center rounded-xl",
+                        QUICK_ACTION_TONE_STYLES[action.tone],
+                      )}
+                    >
+                      <action.icon className="size-5" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <p className="font-display text-lg font-semibold text-ink">{action.title}</p>
+                      <p className="mt-1 text-sm text-neutral-600">{action.description}</p>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-14 grid gap-5 lg:grid-cols-[1.3fr_1fr]">
             <Card className="p-6">
               <div className="flex items-center justify-between gap-4">
                 <Heading level="h3" as="h2">
@@ -132,14 +217,24 @@ function TeacherDashboard() {
               </div>
 
               <div className="mt-5 space-y-3">
-                {completion.sections.map((section) => (
-                  <div key={section.title} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-neutral-700">{section.title}</span>
-                    <span className={cn("font-medium", section.percent === 100 ? "text-success-700" : "text-neutral-500")}>
-                      {section.fields.filter((f) => f.complete).length} of {section.fields.length}
-                    </span>
-                  </div>
-                ))}
+                {completion.sections.map((section) => {
+                  const missing = section.fields.filter((f) => !f.complete);
+                  return (
+                    <div key={section.title}>
+                      <div className="flex items-center justify-between gap-3 text-sm">
+                        <span className="text-neutral-700">{section.title}</span>
+                        <span className={cn("font-medium", section.percent === 100 ? "text-success-700" : "text-neutral-500")}>
+                          {section.fields.filter((f) => f.complete).length} of {section.fields.length}
+                        </span>
+                      </div>
+                      {missing.length > 0 && (
+                        <p className="mt-1 text-xs text-neutral-500">
+                          Still needed: {missing.map((f) => f.label).join(", ")}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span className="text-neutral-700">Resources</span>
                   <span className="text-neutral-500">Not scored yet</span>
@@ -210,20 +305,13 @@ function TeacherDashboard() {
                 )}
                 {teacher.visibility === "public" && teacher.moderationStatus === "pending" && (
                   <p className="mt-2 text-xs text-neutral-500">
-                    Your profile page is live at the link below. It&apos;ll also appear in the searchable{" "}
+                    Your profile page is already live — see &quot;View public profile&quot; in Quick
+                    actions above. It&apos;ll also appear in the searchable{" "}
                     <Link href="/teachers" className="underline">
                       teacher directory
                     </Link>{" "}
                     once a human reviews and approves it — nothing here is automatic.
                   </p>
-                )}
-                {teacher.visibility === "public" && (
-                  <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
-                    <Link href={`/teachers/p/${teacher.slug}`}>
-                      <ExternalLink aria-hidden="true" />
-                      View public profile
-                    </Link>
-                  </Button>
                 )}
               </Card>
             </div>
@@ -345,30 +433,10 @@ function TeacherDashboard() {
                 </Badge>
               ))}
             </div>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <Link href="/resources?type=teacher-resource" className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
-                <Card interactive className="flex h-full flex-col gap-3 p-5">
-                  <div className="flex size-11 items-center justify-center rounded-xl bg-secondary-100 text-secondary-700">
-                    <GraduationCap className="size-5" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="font-display text-lg font-semibold text-ink">Browse teacher resources</p>
-                    <p className="mt-1 text-sm text-neutral-600">Classroom-ready material made for educators — from the platform, not from you yet.</p>
-                  </div>
-                </Card>
-              </Link>
-              <Link href="/resources" className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
-                <Card interactive className="flex h-full flex-col gap-3 p-5">
-                  <div className="flex size-11 items-center justify-center rounded-xl bg-primary-100 text-primary-700">
-                    <Library className="size-5" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="font-display text-lg font-semibold text-ink">Full resource library</p>
-                    <p className="mt-1 text-sm text-neutral-600">Worksheets, activities, and ebooks for every subject.</p>
-                  </div>
-                </Card>
-              </Link>
-            </div>
+            <p className="mt-4 text-sm text-neutral-600">
+              See &quot;Browse teacher resources&quot; and &quot;Full resource library&quot; in Quick
+              actions above.
+            </p>
           </div>
 
           <div className="mt-14">
@@ -380,21 +448,6 @@ function TeacherDashboard() {
               A clear line between what already works and what&apos;s still being built.
             </p>
             <CapabilityList className="mt-6" title="Future professional features" status="coming" items={futureFeatures} />
-          </div>
-
-          <div className="mt-14 flex items-center justify-between gap-4 rounded-xl border border-neutral-200 p-5">
-            <div className="flex items-center gap-3">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
-                <Settings className="size-5" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="font-medium text-ink">Account settings</p>
-                <p className="text-sm text-neutral-600">Manage your sign-in details.</p>
-              </div>
-            </div>
-            <Button variant="outline" asChild>
-              <Link href="/account">Open</Link>
-            </Button>
           </div>
         </Container>
       </Section>
