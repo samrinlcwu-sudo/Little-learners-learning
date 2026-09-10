@@ -35,10 +35,11 @@ function sectionPercent(fields: ProfileCompletionField[]): number {
  * use (Basic Information, Professional Information, Teaching Expertise),
  * per Prompt 27's request for "a useful profile-completion indicator,"
  * not just one flat number. "Resources" is deliberately excluded from the
- * score: resource authoring isn't built yet (docs/TEACHER_ARCHITECTURE.md),
- * so there is nothing a teacher could fill in there — scoring it would
- * unfairly cap everyone's percentage below 100% for a feature that isn't
- * theirs to complete.
+ * score even though resource authoring is real now (Prompt 42,
+ * docs/TEACHER_ARCHITECTURE.md): creating zero, one, or many resources is
+ * a genuine choice, not an incomplete field on this profile — scoring it
+ * would unfairly cap everyone's percentage below 100% for something that
+ * isn't part of "the profile" at all.
  */
 export function calculateProfileCompletion(teacher: TeacherProfile): ProfileCompletionSummary {
   const basicInformation: ProfileCompletionField[] = [
@@ -76,6 +77,7 @@ export function calculateProfileCompletion(teacher: TeacherProfile): ProfileComp
     completedCount,
     totalCount,
     sections,
-    resourcesNote: "Resource authoring isn't connected yet — nothing to show here until it is.",
+    resourcesNote:
+      "A resource you create here is real and saved — but it stays visible only to you until a human reviewer approves it, since that review step isn't connected yet.",
   };
 }

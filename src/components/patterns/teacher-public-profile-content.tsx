@@ -3,9 +3,11 @@ import { BadgeCheck, GraduationCap, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heading } from "@/components/ui/heading";
+import { ResourceCard } from "@/components/patterns/resource-card";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import { getAllTeacherAgeGroupOptions, getAllTeacherLanguageOptions, formatTeacherAgeGroupLabel } from "@/config/teacher-options";
 import type { PublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
+import { isResourcePublished, type Resource } from "@/lib/resources/types";
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
 const ageGroupOptionById = new Map(getAllTeacherAgeGroupOptions().map((o) => [o.id, o] as const));
@@ -30,7 +32,14 @@ function ProfileSection({ title, children }: { title: string; children: ReactNod
  * labeled sections, no like/follow/share affordances, no feed — per
  * Prompt 27's explicit "not a social-media profile" direction.
  */
-function TeacherPublicProfileContent({ profile }: { profile: PublicTeacherProfile }) {
+export interface TeacherPublicProfileContentProps {
+  profile: PublicTeacherProfile;
+  /** This teacher's own resources, unfiltered — filtered to publicly-visible ones here, the same isResourcePublished() gate every other resource listing uses. */
+  resources?: Resource[];
+}
+
+function TeacherPublicProfileContent({ profile, resources = [] }: TeacherPublicProfileContentProps) {
+  const publishedResources = resources.filter(isResourcePublished);
   return (
     <Card className="overflow-hidden">
       <div className="flex flex-col items-center gap-4 bg-surface-tint-primary px-6 py-10 text-center sm:flex-row sm:text-left">
@@ -143,9 +152,22 @@ function TeacherPublicProfileContent({ profile }: { profile: PublicTeacherProfil
         )}
 
         <ProfileSection title="Resources">
-          <p className="text-sm text-neutral-500">
-            {profile.name.split(" ")[0]} hasn&apos;t published any resources yet.
-          </p>
+          {publishedResources.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2">
+              {publishedResources.map((resource) => (
+                <ResourceCard
+                  key={resource.id}
+                  resource={resource}
+                  categoryName={resource.category ? categoryNameBySlug.get(resource.category) : undefined}
+                  isSample={false}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-neutral-500">
+              {profile.name.split(" ")[0]} hasn&apos;t published any resources yet.
+            </p>
+          )}
         </ProfileSection>
       </div>
     </Card>

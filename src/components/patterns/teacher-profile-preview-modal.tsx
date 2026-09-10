@@ -4,6 +4,7 @@ import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from "
 import { Alert } from "@/components/ui/alert";
 import { TeacherPublicProfileContent } from "@/components/patterns/teacher-public-profile-content";
 import { toPublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
+import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 import type { TeacherProfile } from "@/lib/accounts/types";
 
 export interface TeacherProfilePreviewModalProps {
@@ -20,6 +21,7 @@ export interface TeacherProfilePreviewModalProps {
  * include changes that haven't been saved yet.
  */
 function TeacherProfilePreviewModal({ open, onOpenChange, teacher }: TeacherProfilePreviewModalProps) {
+  const { resources } = useTeacherResources();
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
@@ -32,7 +34,10 @@ function TeacherProfilePreviewModal({ open, onOpenChange, teacher }: TeacherProf
             Your profile is currently set to Private, so no one can actually see this yet — change that from your dashboard when you&apos;re ready.
           </Alert>
         )}
-        <TeacherPublicProfileContent profile={toPublicTeacherProfile(teacher)} />
+        <TeacherPublicProfileContent
+          profile={toPublicTeacherProfile(teacher)}
+          resources={resources.filter((r) => r.author.teacherId === teacher.id)}
+        />
       </ModalContent>
     </Modal>
   );

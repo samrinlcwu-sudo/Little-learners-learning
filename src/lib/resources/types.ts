@@ -150,13 +150,37 @@ export interface Resource {
   featured: boolean;
   publicationStatus: PublicationStatus;
   religiousReview: ReligiousReviewStatus;
+  /**
+   * Only meaningful when `author.role === "teacher"` — undefined for every
+   * platform-authored resource. Mirrors `TeacherModerationStatus`
+   * (src/lib/accounts/types.ts): a teacher can mark their own resource
+   * "published," but it can never actually become visible anywhere until a
+   * human reviewer sets this to "approved" — and no reviewer tool exists
+   * yet, so it stays "pending" indefinitely. This is prepared architecture
+   * for future moderation, not a claim that review is happening today. See
+   * docs/TEACHER_ARCHITECTURE.md.
+   */
+  reviewStatus?: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;
 }
 
-/** Same gate as learning content: draft never shows, Qur'an-category resources require explicit human verification. */
+/**
+ * Same gate as learning content: draft never shows, Qur'an-category
+ * resources require explicit human verification. A teacher-authored
+ * resource additionally requires `reviewStatus === "approved"` — since no
+ * reviewer tool exists anywhere in this codebase, that can never actually
+ * happen yet, so every teacher-authored resource stays invisible here
+ * until real moderation is built. Never bypass this check to "let a
+ * teacher's resource show up" — that would be exactly the fake review this
+ * system is designed to prevent.
+ */
 export function isResourcePublished(resource: Resource): boolean {
   if (resource.publicationStatus !== "published") return false;
+
+  if (resource.author.role === "teacher" && resource.reviewStatus !== "approved") {
+    return false;
+  }
 
   const requiresReligiousReview = resource.category
     ? (RELIGIOUS_REVIEW_REQUIRED_CATEGORIES as readonly string[]).includes(resource.category)

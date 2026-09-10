@@ -43,6 +43,35 @@ describe("isResourcePublished", () => {
     const visible = SAMPLE_RESOURCES.filter(isResourcePublished);
     expect(visible.find((r) => r.slug === "arabic-letters-tracing-pack")).toBeUndefined();
   });
+
+  it("hides a teacher-authored resource marked published but not yet reviewed", () => {
+    const resource = makeResource({
+      author: { name: "Ms. Amina", role: "teacher", teacherId: "t1" },
+      reviewStatus: "pending",
+    });
+    expect(isResourcePublished(resource)).toBe(false);
+  });
+
+  it("hides a teacher-authored resource with no reviewStatus at all", () => {
+    const resource = makeResource({ author: { name: "Ms. Amina", role: "teacher", teacherId: "t1" } });
+    expect(isResourcePublished(resource)).toBe(false);
+  });
+
+  it("hides a rejected teacher-authored resource", () => {
+    const resource = makeResource({
+      author: { name: "Ms. Amina", role: "teacher", teacherId: "t1" },
+      reviewStatus: "rejected",
+    });
+    expect(isResourcePublished(resource)).toBe(false);
+  });
+
+  it("shows a teacher-authored resource once approved and published", () => {
+    const resource = makeResource({
+      author: { name: "Ms. Amina", role: "teacher", teacherId: "t1" },
+      reviewStatus: "approved",
+    });
+    expect(isResourcePublished(resource)).toBe(true);
+  });
 });
 
 describe("canDownload", () => {

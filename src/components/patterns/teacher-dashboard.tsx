@@ -1,7 +1,19 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
-import { Library, GraduationCap, Settings, Sparkles, PenSquare, Globe2, LockKeyhole, ExternalLink, type LucideIcon } from "lucide-react";
+import {
+  Library,
+  GraduationCap,
+  Settings,
+  Sparkles,
+  PenSquare,
+  Globe2,
+  LockKeyhole,
+  ExternalLink,
+  Plus,
+  type LucideIcon,
+} from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -9,10 +21,20 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+} from "@/components/ui/modal";
 import { PageHeader } from "@/components/patterns/page-header";
 import { CapabilityList } from "@/components/patterns/capability-list";
+import { TeacherResourceForm } from "@/components/patterns/teacher-resource-form";
+import { TeacherResourceList } from "@/components/patterns/teacher-resource-list";
 import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import { calculateProfileCompletion } from "@/lib/accounts/teacher-profile-completion";
+import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import {
   getAllTeacherAgeGroupOptions,
@@ -20,7 +42,8 @@ import {
   getAllTeachingInterestOptions,
   formatTeacherAgeGroupLabel,
 } from "@/config/teacher-options";
-import { getAllTeacherResourceTypeOptions } from "@/config/teacher-resource-types";
+import type { NewTeacherResource } from "@/lib/resources/local-teacher-resources";
+import type { Resource } from "@/lib/resources/types";
 import type { TeacherModerationStatus, TeacherProfileVisibility } from "@/lib/accounts/types";
 import { cn } from "@/lib/utils/cn";
 
@@ -49,8 +72,8 @@ const futureFeatures = [
     description: "A \"verified\" mark on your profile once a real review process is connected — never set automatically.",
   },
   {
-    title: "Contributing your own resources",
-    description: "Sharing material you've made and being discoverable by families looking for your specialties.",
+    title: "Resource review",
+    description: "A real reviewer looking at what you submit, so an approved resource can actually appear in the library and on your public profile.",
   },
   {
     title: "A teacher community",
@@ -67,7 +90,9 @@ interface QuickAction {
   icon: LucideIcon;
   title: string;
   description: string;
-  href: string;
+  /** Exactly one of href/onClick — a real destination link, or an in-page action like opening a modal. */
+  href?: string;
+  onClick?: () => void;
   tone: "primary" | "secondary" | "accent" | "neutral";
 }
 
@@ -87,6 +112,9 @@ const QUICK_ACTION_TONE_STYLES: Record<QuickAction["tone"], string> = {
  */
 function TeacherDashboard() {
   const { teacher, ready, setVisibility } = useTeacherProfile();
+  const { resources, addResource, updateResource, deleteResource } = useTeacherResources();
+  const [resourceModalOpen, setResourceModalOpen] = React.useState(false);
+  const [editingResource, setEditingResource] = React.useState<Resource | null>(null);
 
   if (!ready) {
     return <Section className="min-h-[60vh]" />;
@@ -110,6 +138,35 @@ function TeacherDashboard() {
   }
 
   const completion = calculateProfileCompletion(teacher);
+  const ownResources = resources.filter((r) => r.author.teacherId === teacher.id);
+
+  function openCreateResourceModal() {
+    setEditingResource(null);
+    setResourceModalOpen(true);
+  }
+
+  function openEditResourceModal(resource: Resource) {
+    setEditingResource(resource);
+    setResourceModalOpen(true);
+  }
+
+  const teacherId = teacher.id;
+  const teacherName = teacher.name;
+
+  function handleSaveResource(values: NewTeacherResource, status: "draft" | "published") {
+    if (editingResource) {
+      updateResource(editingResource.id, { ...values, publicationStatus: status });
+    } else {
+      addResource(teacherId, teacherName, values, status);
+    }
+    setResourceModalOpen(false);
+  }
+
+  function handleDeleteResource(resource: Resource) {
+    if (window.confirm(`Delete "${resource.title}"? This can't be undone.`)) {
+      deleteResource(resource.id);
+    }
+  }
 
   const quickActions: QuickAction[] = [
     {
@@ -130,6 +187,13 @@ function TeacherDashboard() {
           },
         ]
       : []),
+    {
+      icon: Plus,
+      title: "Create resource",
+      description: "Add a worksheet, activity, or ebook of your own.",
+      onClick: openCreateResourceModal,
+      tone: "primary",
+    },
     {
       icon: GraduationCap,
       title: "Browse teacher resources",
@@ -174,13 +238,9 @@ function TeacherDashboard() {
           <div>
             <Heading level="h2">Quick actions</Heading>
             <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {quickActions.map((action) => (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
-                >
-                  <Card interactive className="flex h-full flex-col gap-3 p-5">
+              {quickActions.map((action) => {
+                const content = (
+                  <Card interactive className="flex h-full flex-col gap-3 p-5 text-left">
                     <div
                       className={cn(
                         "flex size-11 items-center justify-center rounded-xl",
@@ -194,8 +254,18 @@ function TeacherDashboard() {
                       <p className="mt-1 text-sm text-neutral-600">{action.description}</p>
                     </div>
                   </Card>
-                </Link>
-              ))}
+                );
+                const className = "rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30";
+                return action.href ? (
+                  <Link key={action.title} href={action.href} className={className}>
+                    {content}
+                  </Link>
+                ) : (
+                  <button key={action.title} type="button" onClick={action.onClick} className={className}>
+                    {content}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -423,20 +493,21 @@ function TeacherDashboard() {
           </div>
 
           <div className="mt-14">
-            <Heading level="h2">Resources</Heading>
-            <p className="mt-2 text-neutral-600">{completion.resourcesNote}</p>
-            <div className="mt-4 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-medium text-neutral-500">Planned resource types:</span>
-              {getAllTeacherResourceTypeOptions().map((option) => (
-                <Badge key={option.id} variant="neutral">
-                  {option.label}
-                </Badge>
-              ))}
+            <div className="flex items-center justify-between gap-4">
+              <Heading level="h2">Your resources</Heading>
+              <Button size="sm" onClick={openCreateResourceModal}>
+                <Plus aria-hidden="true" />
+                Create resource
+              </Button>
             </div>
-            <p className="mt-4 text-sm text-neutral-600">
-              See &quot;Browse teacher resources&quot; and &quot;Full resource library&quot; in Quick
-              actions above.
-            </p>
+            <p className="mt-2 text-neutral-600">{completion.resourcesNote}</p>
+            <div className="mt-6">
+              <TeacherResourceList
+                resources={ownResources}
+                onEdit={openEditResourceModal}
+                onDelete={handleDeleteResource}
+              />
+            </div>
           </div>
 
           <div className="mt-14">
@@ -451,6 +522,24 @@ function TeacherDashboard() {
           </div>
         </Container>
       </Section>
+
+      <Modal open={resourceModalOpen} onOpenChange={setResourceModalOpen}>
+        <ModalContent className="max-h-[85vh] overflow-y-auto">
+          <ModalHeader>
+            <ModalTitle>{editingResource ? `Edit "${editingResource.title}"` : "Create a resource"}</ModalTitle>
+            <ModalDescription>
+              {editingResource
+                ? "Update the details below."
+                : "Save as a draft to keep working on it, or submit it for review when it's ready."}
+            </ModalDescription>
+          </ModalHeader>
+          <TeacherResourceForm
+            resource={editingResource ?? undefined}
+            onSave={handleSaveResource}
+            onCancel={() => setResourceModalOpen(false)}
+          />
+        </ModalContent>
+      </Modal>
     </>
   );
 }

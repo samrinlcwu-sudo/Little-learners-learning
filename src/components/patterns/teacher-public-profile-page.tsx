@@ -11,6 +11,7 @@ import { TeacherPublicProfileContent } from "@/components/patterns/teacher-publi
 import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import { toPublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
 import { canViewTeacherProfile } from "@/lib/accounts/teacher-visibility";
+import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 
 /**
  * The real public route (/teachers/p/[slug]) — genuinely gated by
@@ -26,6 +27,7 @@ import { canViewTeacherProfile } from "@/lib/accounts/teacher-visibility";
 function TeacherPublicProfilePage() {
   const params = useParams<{ slug: string }>();
   const { teacher, ready } = useTeacherProfile();
+  const { resources } = useTeacherResources();
 
   if (!ready) {
     return <Section className="min-h-[60vh]" />;
@@ -83,7 +85,10 @@ function TeacherPublicProfilePage() {
   return (
     <Section surface="sunken" className="py-12 sm:py-16">
       <Container className="max-w-2xl">
-        <TeacherPublicProfileContent profile={toPublicTeacherProfile(teacher)} />
+        <TeacherPublicProfileContent
+          profile={toPublicTeacherProfile(teacher)}
+          resources={resources.filter((r) => r.author.teacherId === teacher.id)}
+        />
       </Container>
     </Section>
   );

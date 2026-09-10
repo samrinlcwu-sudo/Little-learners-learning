@@ -2,14 +2,17 @@
 
 Introduced in Prompt 26 (registration) and extended in Prompt 27 (the
 profile editor, profile completion, and public/private profile
-architecture), Prompt 28 (the shared expertise/resource taxonomy), and
-Prompt 29 (the searchable teacher directory), on top of the account
-foundation from Prompt 21 (`docs/ACCOUNTS_ARCHITECTURE.md`). Read that
-doc first — this one only covers what's specific to teachers. Where a
-category list comes from and how it stays consistent across the rest of
-the site is covered separately in `docs/TAXONOMY_ARCHITECTURE.md`; the
-public directory, search, filters, and moderation states are covered in
-`docs/TEACHER_DIRECTORY_ARCHITECTURE.md`.
+architecture), Prompt 28 (the shared expertise/resource taxonomy),
+Prompt 29 (the searchable teacher directory), and Prompt 41 (the
+consolidated dashboard), on top of the account foundation from Prompt 21
+(`docs/ACCOUNTS_ARCHITECTURE.md`). Read that doc first — this one only
+covers what's specific to teachers. Where a category list comes from and
+how it stays consistent across the rest of the site is covered
+separately in `docs/TAXONOMY_ARCHITECTURE.md`; the public directory,
+search, filters, and moderation states are covered in
+`docs/TEACHER_DIRECTORY_ARCHITECTURE.md`; teacher-authored resource
+creation and its own review lifecycle is covered below, in "Resource
+creation (Prompt 42)."
 
 ## Why a dedicated flow, not a role picker
 
@@ -293,3 +296,89 @@ The same belt-and-suspenders pattern as child profiles applies:
   allowlist, and only when `visibility === "public"` — there's no page
   anywhere that lists or exposes another teacher's data, because there's
   no mechanism (no backend) that could.
+
+## Resource creation (Prompt 42)
+
+Prompt 28's `getAllTeacherResourceTypeOptions()` (`src/config/teacher-resource-types.ts`)
+was explicitly built ahead of this — "the moment a real 'create a
+resource' form is built, its type picker reads from
+`getAllTeacherResourceTypeOptions()` below instead of inventing its own
+list." This prompt is that form.
+
+### The model: no new content type
+
+A teacher-created resource is an ordinary `Resource`
+(`src/lib/resources/types.ts`) — the exact same shape `SAMPLE_RESOURCES`
+uses, with `author: { role: "teacher", teacherId }`. Nothing new was
+declared except one additive, optional field:
+
+```ts
+reviewStatus?: "pending" | "approved" | "rejected";
+```
+
+`isResourcePublished()` now also requires `reviewStatus === "approved"`
+whenever `author.role === "teacher"`. No reviewer tool exists anywhere in
+this codebase, so a teacher-authored resource can be set to
+`publicationStatus: "published"` (via "Submit for review" in the
+dashboard) but can never actually pass `isResourcePublished()` — it
+stays invisible everywhere that gate is checked, exactly like a teacher
+profile stuck at `moderationStatus: "pending"` forever
+(`docs/TEACHER_DIRECTORY_ARCHITECTURE.md`). This is the same "prepared
+architecture, not simulated" rule as everywhere else: the lifecycle is
+real and will start working the moment a real review tool sets
+`reviewStatus` to `"approved"`, but nothing here pretends that reviewer
+exists today.
+
+### Storage: the same tiny external store pattern
+
+`src/lib/resources/local-teacher-resources.ts` mirrors
+`local-children.ts` exactly — an array in this browser's `localStorage`,
+read via `useSyncExternalStore`
+(`src/lib/resources/use-teacher-resources.ts`). A browser holds at most
+one local teacher account, so this is simply "this browser's teacher's
+resources," though every resource still carries `author.teacherId` for
+when a real multi-tenant table exists.
+
+### No file upload, on purpose
+
+The create/edit form (`teacher-resource-form.tsx`) has no file or
+download field. This codebase has never had real file storage — every
+`SAMPLE_RESOURCES` entry already ships with no `downloadFile` for the
+same reason — so offering an upload that couldn't actually store
+anything would be exactly the fabricated capability the project's
+honesty rules forbid. A teacher fills in the same descriptive fields
+(title, description, type, subject, age range, difficulty, learning
+objective, an optional thumbnail) that already exist on `Resource`.
+
+### Where teachers manage their own resources
+
+The dashboard's "Your resources" section
+(`teacher-dashboard.tsx` + `teacher-resource-list.tsx`) is a real table —
+title, subject, type, status, created date, edit/delete — never the
+`ResourceCard` browsing grid, since managing your own list and
+discovering the library are different tasks. Ownership is structural:
+a browser can only ever hold one teacher's resources, so there is no
+"another teacher's private resource" this device could read or edit.
+
+### Where they integrate publicly
+
+`TeacherPublicProfileContent` — already shared by the real public route
+and the profile editor's "Preview" modal — gained an optional
+`resources` prop, filtered through the same `isResourcePublished()`
+gate and rendered with the same `ResourceCard` component `/resources`
+uses. This satisfies "don't build a second, disconnected library"
+without inventing a live public feed: since no resource can pass the
+gate yet, this section honestly shows "hasn't published any resources
+yet" for every real visitor, same as the teacher directory being
+honestly empty today.
+
+### A known, disclosed limit
+
+`ResourceCard`'s action links to `/resources/[slug]`, a page whose
+`generateStaticParams()` only knows about `SAMPLE_RESOURCES` — a
+server-rendered page has no way to read one browser's `localStorage`.
+A teacher-authored resource's own detail page can only exist once a
+real backend serves it, exactly the same limitation the public profile
+route already has ("a public profile link only works in the browser it
+was created in"). Not a bug introduced here — the inherent shape of
+"real backend-free architecture" this entire codebase already commits to.
