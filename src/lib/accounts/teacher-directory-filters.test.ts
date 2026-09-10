@@ -11,6 +11,7 @@ function makeEntry(overrides: Partial<PublicTeacherProfile> = {}): PublicTeacher
     subjects: ["mathematics"],
     languages: ["english"],
     expertise: ["Special needs support"],
+    teachingInterests: ["hands-on-learning"],
     verified: false,
     ...overrides,
   };
@@ -46,6 +47,16 @@ describe("filterTeacherDirectory", () => {
     const result = filterTeacherDirectory(entries, { expertise: "special" });
     expect(result).toHaveLength(1);
     expect(result[0].expertise[0]).toBe("Special needs support");
+  });
+
+  it("filters by teaching interest", () => {
+    const entries = [
+      makeEntry({ teachingInterests: ["montessori-inspired"] }),
+      makeEntry({ teachingInterests: ["play-based-learning"] }),
+    ];
+    const result = filterTeacherDirectory(entries, { teachingInterest: "montessori-inspired" });
+    expect(result).toHaveLength(1);
+    expect(result[0].teachingInterests).toContain("montessori-inspired");
   });
 
   it("matches the free-text query against name, headline, bio, and region", () => {

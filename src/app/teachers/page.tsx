@@ -17,15 +17,20 @@ import { TeacherDirectoryCard } from "@/components/patterns/teacher-directory-ca
 import { TeacherDirectoryStructuredData } from "@/components/patterns/teacher-directory-structured-data";
 import { teacherValuePoints } from "@/config/audience-value-points";
 import { getAllLearningCategories } from "@/config/learning-categories";
-import { getAllTeacherAgeGroupOptions, getAllTeacherLanguageOptions, formatTeacherAgeGroupLabel } from "@/config/teacher-options";
+import {
+  getAllTeacherAgeGroupOptions,
+  getAllTeacherLanguageOptions,
+  getAllTeachingInterestOptions,
+  formatTeacherAgeGroupLabel,
+} from "@/config/teacher-options";
 import { getApprovedTeacherDirectoryEntries } from "@/lib/accounts/teacher-directory";
 import { filterTeacherDirectory, paginateTeacherDirectory, type TeacherDirectoryFilters } from "@/lib/accounts/teacher-directory-filters";
-import type { TeacherAgeGroup, TeacherLanguage } from "@/lib/accounts/types";
+import type { TeacherAgeGroup, TeacherLanguage, TeachingInterest } from "@/lib/accounts/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 
 const description =
-  "Search Little Learners Learning's teacher directory by subject, age group, language, and expertise — or create your own professional profile.";
+  "Search Little Learners Learning's teacher directory by subject, age group, language, teaching interest, and expertise — or create your own professional profile.";
 
 export const metadata: Metadata = {
   title: "For Teachers",
@@ -44,8 +49,8 @@ const comingLater = [
     description: "A \"verified\" badge on your profile once a real review process is connected.",
   },
   {
-    title: "Contributing your own resources",
-    description: "Sharing material you've made and being discoverable by families looking for your specialties.",
+    title: "Resource review",
+    description: "A real reviewer looking at what you submit, so an approved resource can actually appear in the library and on your public profile.",
   },
   {
     title: "A teacher community",
@@ -81,6 +86,7 @@ export default async function TeachersPage({ searchParams }: PageProps<"/teacher
     ageGroup: (getParam("age") as TeacherAgeGroup) || undefined,
     language: (getParam("language") as TeacherLanguage) || undefined,
     expertise: getParam("expertise") || undefined,
+    teachingInterest: (getParam("interest") as TeachingInterest) || undefined,
   };
   const page = Number(getParam("page")) || 1;
 
@@ -88,7 +94,12 @@ export default async function TeachersPage({ searchParams }: PageProps<"/teacher
   const filtered = filterTeacherDirectory(allEntries, filters);
   const { items, pageCount, totalCount } = paginateTeacherDirectory(filtered, page);
   const hasActiveFilters = Boolean(
-    filters.query || filters.subject || filters.ageGroup || filters.language || filters.expertise,
+    filters.query ||
+      filters.subject ||
+      filters.ageGroup ||
+      filters.language ||
+      filters.expertise ||
+      filters.teachingInterest,
   );
 
   function pageHref(targetPage: number) {
@@ -98,6 +109,7 @@ export default async function TeachersPage({ searchParams }: PageProps<"/teacher
     if (filters.ageGroup) next.set("age", filters.ageGroup);
     if (filters.language) next.set("language", filters.language);
     if (filters.expertise) next.set("expertise", filters.expertise);
+    if (filters.teachingInterest) next.set("interest", filters.teachingInterest);
     if (targetPage > 1) next.set("page", String(targetPage));
     const qs = next.toString();
     return qs ? `/teachers?${qs}` : "/teachers";
@@ -109,7 +121,7 @@ export default async function TeachersPage({ searchParams }: PageProps<"/teacher
         breadcrumb={[{ label: "Home", href: "/" }, { label: "For Teachers" }]}
         eyebrow="For educators"
         title="For Teachers"
-        description="A professional home for your teaching profile and classroom-ready resources — and a directory where families and schools can find early-years educators by subject, age group, language, and expertise."
+        description="A professional home for your teaching profile and classroom-ready resources — and a directory where families and schools can find early-years educators by subject, age group, language, teaching interest, and expertise."
         surface="sunken"
       />
 
@@ -134,12 +146,12 @@ export default async function TeachersPage({ searchParams }: PageProps<"/teacher
           <p className="mt-2 max-w-2xl text-neutral-600">
             Every teacher listed here has created a professional profile and
             chosen to make it public. Search by name, or filter by the
-            subjects, age groups, languages, and expertise they&apos;ve
-            added to their own profile — nothing here is inferred or
-            assumed on their behalf.
+            subjects, age groups, languages, teaching interests, and
+            expertise they&apos;ve added to their own profile — nothing here
+            is inferred or assumed on their behalf.
           </p>
 
-          <form method="get" className="mt-6 grid gap-4 rounded-xl border border-neutral-200 bg-surface p-5 sm:grid-cols-2 lg:grid-cols-5">
+          <form method="get" className="mt-6 grid gap-4 rounded-xl border border-neutral-200 bg-surface p-5 sm:grid-cols-2 lg:grid-cols-3">
             <div className="sm:col-span-2 lg:col-span-1">
               <Label htmlFor="q">Search</Label>
               <Input id="q" name="q" type="search" placeholder="Name, region…" defaultValue={filters.query} />
@@ -181,7 +193,18 @@ export default async function TeachersPage({ searchParams }: PageProps<"/teacher
               <Label htmlFor="expertise">Expertise</Label>
               <Input id="expertise" name="expertise" placeholder="e.g. Bilingual" defaultValue={filters.expertise} />
             </div>
-            <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-5">
+            <div>
+              <Label htmlFor="interest">Teaching interest</Label>
+              <Select id="interest" name="interest" defaultValue={filters.teachingInterest ?? ""}>
+                <option value="">Any teaching interest</option>
+                {getAllTeachingInterestOptions().map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-3">
               <Button type="submit">
                 <SearchIcon aria-hidden="true" />
                 Search
@@ -272,6 +295,10 @@ export default async function TeachersPage({ searchParams }: PageProps<"/teacher
                 {
                   title: "Choose to appear in the directory",
                   description: "Set your profile to public from your dashboard — real access control, reviewed before listing.",
+                },
+                {
+                  title: "Create your own resources",
+                  description: "Add a worksheet, activity, or ebook from your dashboard — saved for real, awaiting review before it can appear publicly.",
                 },
                 {
                   title: "Browse classroom-ready material by subject and age",

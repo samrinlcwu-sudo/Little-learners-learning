@@ -5,13 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { Heading } from "@/components/ui/heading";
 import { ResourceCard } from "@/components/patterns/resource-card";
 import { getAllLearningCategories } from "@/config/learning-categories";
-import { getAllTeacherAgeGroupOptions, getAllTeacherLanguageOptions, formatTeacherAgeGroupLabel } from "@/config/teacher-options";
+import {
+  getAllTeacherAgeGroupOptions,
+  getAllTeacherLanguageOptions,
+  getAllTeachingInterestOptions,
+  formatTeacherAgeGroupLabel,
+} from "@/config/teacher-options";
 import type { PublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
 import { isResourcePublished, type Resource } from "@/lib/resources/types";
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
 const ageGroupOptionById = new Map(getAllTeacherAgeGroupOptions().map((o) => [o.id, o] as const));
 const languageLabelById = new Map(getAllTeacherLanguageOptions().map((o) => [o.id, o.label] as const));
+const teachingInterestLabelById = new Map(getAllTeachingInterestOptions().map((o) => [o.id, o.label] as const));
 
 function ProfileSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -145,6 +151,18 @@ function TeacherPublicProfileContent({ profile, resources = [] }: TeacherPublicP
               {profile.expertise.map((item) => (
                 <Badge key={item} variant="accent">
                   {item}
+                </Badge>
+              ))}
+            </div>
+          </ProfileSection>
+        )}
+
+        {profile.teachingInterests.length > 0 && (
+          <ProfileSection title="Teaching Interests">
+            <div className="flex flex-wrap gap-1.5">
+              {profile.teachingInterests.map((id) => (
+                <Badge key={id} variant="primary">
+                  {teachingInterestLabelById.get(id) ?? id}
                 </Badge>
               ))}
             </div>

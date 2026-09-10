@@ -41,6 +41,12 @@ const TIER_BADGE_VARIANT = {
 function ResourceCard({ resource, categoryName, isSample }: ResourceCardProps) {
   const downloadable = canDownload(resource);
   const TypeIcon = RESOURCE_TYPE_ICONS[resource.resourceType];
+  const isTeacherAuthored = resource.author.role === "teacher";
+  // Only platform-authored resources have a real /resources/[slug] page
+  // today (generateStaticParams only knows SAMPLE_RESOURCES) — a
+  // teacher-authored resource has no detail page to link to yet, so this
+  // card must never imply one exists. See docs/TEACHER_ARCHITECTURE.md.
+  const hasDetailPage = !isTeacherAuthored;
 
   return (
     <Card interactive className="flex h-full flex-col overflow-hidden">
@@ -69,6 +75,7 @@ function ResourceCard({ resource, categoryName, isSample }: ResourceCardProps) {
         </Badge>
         <CardTitle className="mt-2">{resource.title}</CardTitle>
         {resource.subtitle && <p className="mt-0.5 text-sm text-neutral-500">{resource.subtitle}</p>}
+        {isTeacherAuthored && <p className="mt-0.5 text-sm text-neutral-500">By {resource.author.name}</p>}
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-3">
         <p className="text-sm text-neutral-600">{resource.description}</p>
@@ -95,12 +102,17 @@ function ResourceCard({ resource, categoryName, isSample }: ResourceCardProps) {
           <Button size="sm" asChild className="w-full">
             <Link href={`/resources/${resource.slug}`}>View resource</Link>
           </Button>
-        ) : (
+        ) : hasDetailPage ? (
           <Button size="sm" variant="outline" asChild className="w-full">
             <Link href={`/resources/${resource.slug}`}>
               {resource.accessTier !== "free" && <Lock aria-hidden="true" />}
               {resource.accessTier === "free" ? "Details — no file yet" : "Details — coming soon"}
             </Link>
+          </Button>
+        ) : (
+          <Button size="sm" variant="outline" disabled className="w-full">
+            {resource.accessTier !== "free" && <Lock aria-hidden="true" />}
+            No file yet
           </Button>
         )}
       </CardFooter>

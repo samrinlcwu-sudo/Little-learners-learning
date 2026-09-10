@@ -2,15 +2,16 @@ import type { TeacherProfile } from "./types";
 
 /**
  * Exactly what a public teacher profile is allowed to show — everything
- * else on TeacherProfile (email, teachingInterests, accountId,
- * moderationStatus, ...) is never passed to the public-facing view, on
- * purpose. Prompt 27 kept this list to exactly what its Part 4 named;
- * Prompt 28's directory (Part 2) explicitly asks to search by language
- * and "region where appropriate," so `languages` and `countryRegion` are
- * added here now — both are genuinely low-sensitivity (a language and a
- * country, not an address), and a person deciding whether a teacher can
- * help their child benefits from seeing them, the same way a resume or
- * LinkedIn profile would show them. Everything else stays excluded.
+ * else on TeacherProfile (email, accountId, moderationStatus, ...) is
+ * never passed to the public-facing view, on purpose. Prompt 27 kept this
+ * list to exactly what its Part 4 named; Prompt 28's directory (Part 2)
+ * explicitly asks to search by language and "region where appropriate,"
+ * so `languages` and `countryRegion` were added; Prompt 43's discovery
+ * work adds `teachingInterests` the same way — a teacher's own selected
+ * teaching styles/approaches are exactly as low-sensitivity as `subjects`
+ * or `expertise` (already public), and a parent deciding whether a
+ * teacher's approach fits their child benefits from seeing them.
+ * Everything else stays excluded.
  *
  * Both the real public route (src/app/teachers/p/[slug]/page.tsx), the
  * directory card (src/components/patterns/teacher-directory-card.tsx),
@@ -31,6 +32,7 @@ export interface PublicTeacherProfile {
   subjects: string[];
   languages: TeacherProfile["languages"];
   expertise: string[];
+  teachingInterests: TeacherProfile["teachingInterests"];
   verified: boolean;
 }
 
@@ -49,6 +51,7 @@ export function toPublicTeacherProfile(teacher: TeacherProfile): PublicTeacherPr
     subjects: teacher.subjects,
     languages: teacher.languages,
     expertise: teacher.expertise,
+    teachingInterests: teacher.teachingInterests,
     verified: teacher.verified,
   };
 }

@@ -1,5 +1,5 @@
 import type { PublicTeacherProfile } from "./teacher-public-profile";
-import type { TeacherAgeGroup, TeacherLanguage } from "./types";
+import type { TeacherAgeGroup, TeacherLanguage, TeachingInterest } from "./types";
 
 export interface TeacherDirectoryFilters {
   /** Matches against name, headline, bio, and country/region — see Prompt 29 Part 2's "region where appropriate." */
@@ -9,6 +9,8 @@ export interface TeacherDirectoryFilters {
   language?: TeacherLanguage;
   /** Free-text substring match against `expertise` — that field is itself free text, so a fixed dropdown wouldn't fit it. */
   expertise?: string;
+  /** A fixed option, unlike `expertise` — teachingInterests is a multi-select from TEACHING_INTEREST_OPTIONS, so this filters by exact id (Prompt 43). */
+  teachingInterest?: TeachingInterest;
 }
 
 export const DEFAULT_DIRECTORY_PAGE_SIZE = 12;
@@ -34,6 +36,8 @@ export function filterTeacherDirectory(
       const q = filters.expertise.trim().toLowerCase();
       if (q && !entry.expertise.some((item) => item.toLowerCase().includes(q))) return false;
     }
+
+    if (filters.teachingInterest && !entry.teachingInterests.includes(filters.teachingInterest)) return false;
 
     if (filters.query) {
       const q = filters.query.trim().toLowerCase();

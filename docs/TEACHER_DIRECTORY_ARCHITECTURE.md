@@ -85,19 +85,22 @@ changing.
 | Subject (Learning Area) | A dropdown from `getAllLearningCategories()` — the same 16-category list every other part of the site uses |
 | Age Group | A dropdown from `getAllTeacherAgeGroupOptions()` |
 | Language | A dropdown from `getAllTeacherLanguageOptions()` |
+| Teaching interest (Prompt 43) | A dropdown from `getAllTeachingInterestOptions()` — a fixed multi-select on the profile, unlike free-text `expertise`, so an exact-match dropdown fits it |
 
-No "unnecessary filters" were added — the four dropdown/text filters
-above are exactly Part 3's suggested list, nothing more.
+No "unnecessary filters" were added — every filter above maps directly
+to a real, teacher-entered field; nothing was invented to pad the list.
 
 ### Expanding the public-field allowlist for search
 
 Prompt 27 deliberately kept `PublicTeacherProfile` narrow. Prompt 29 Part
 2 explicitly asks to search by language and region, so `languages` and
-`countryRegion` were added to that allowlist now — both are
-low-sensitivity (a language and a country, not an address), the same
-judgment call already documented for why country was safe to consider.
-Everything else stays excluded: email, teaching interests, and every
-other private-dashboard-only field.
+`countryRegion` were added to that allowlist; Prompt 43 adds
+`teachingInterests` the same way — a teacher's own selected teaching
+styles are exactly as low-sensitivity as `subjects` or `expertise`
+(already public), and useful for the same reason `languages` was added:
+a parent narrowing down teachers by real, self-reported approach.
+Everything else stays excluded: email, accountId, moderationStatus, and
+every other private-dashboard-only field.
 
 ## The directory card (Part 4)
 
@@ -136,7 +139,8 @@ Today this component is real code that has never yet run with data.
 The directory's intro paragraph states plainly, in one place: what the
 directory is (a search over teacher profiles), who teachers are (people
 who created a profile and chose to make it public), what's searchable
-(name, region, subjects, age groups, languages, expertise), and where
+(name, region, subjects, age groups, languages, teaching interests,
+expertise), and where
 that information comes from (the teacher's own profile, never inferred).
 No keyword-stuffed variants of the same sentence exist elsewhere on the
 page.
@@ -156,7 +160,7 @@ page except which real numbers come back from
 Because live data is always empty, the actual proof this works is in
 `src/lib/accounts/teacher-visibility.test.ts` (8 cases covering every
 visibility/moderation combination) and
-`src/lib/accounts/teacher-directory-filters.test.ts` (10 cases covering
+`src/lib/accounts/teacher-directory-filters.test.ts` (11 cases covering
 each filter individually, combined filters, and pagination edge cases —
 empty list, out-of-range page). Manually verified live: seeding a sample
 entry through the (temporarily swapped, then reverted) data source
