@@ -16,6 +16,8 @@ export interface ResourceCardProps {
   resource: Resource;
   categoryName?: string;
   isSample: boolean;
+  /** Hide the "By {name}" line — set false on a teacher's own profile, where every card is obviously theirs. Defaults to true for shared listings (the resource hub, related-resource rails) where attribution is the point. */
+  showAuthor?: boolean;
 }
 
 const DIFFICULTY_LABELS: Record<Resource["difficulty"], string> = {
@@ -38,7 +40,7 @@ const TIER_BADGE_VARIANT = {
  * exists, otherwise a disabled-style state that matches the tier (never a
  * button that implies a download which doesn't exist).
  */
-function ResourceCard({ resource, categoryName, isSample }: ResourceCardProps) {
+function ResourceCard({ resource, categoryName, isSample, showAuthor = true }: ResourceCardProps) {
   const downloadable = canDownload(resource);
   const TypeIcon = RESOURCE_TYPE_ICONS[resource.resourceType];
   const isTeacherAuthored = resource.author.role === "teacher";
@@ -75,7 +77,7 @@ function ResourceCard({ resource, categoryName, isSample }: ResourceCardProps) {
         </Badge>
         <CardTitle className="mt-2">{resource.title}</CardTitle>
         {resource.subtitle && <p className="mt-0.5 text-sm text-neutral-500">{resource.subtitle}</p>}
-        {isTeacherAuthored && <p className="mt-0.5 text-sm text-neutral-500">By {resource.author.name}</p>}
+        {isTeacherAuthored && showAuthor && <p className="mt-0.5 text-sm text-neutral-500">By {resource.author.name}</p>}
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-3">
         <p className="text-sm text-neutral-600">{resource.description}</p>

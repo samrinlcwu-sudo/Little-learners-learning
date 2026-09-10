@@ -178,6 +178,7 @@ function TeacherPublicProfileContent({ profile, resources = [] }: TeacherPublicP
                   resource={resource}
                   categoryName={resource.category ? categoryNameBySlug.get(resource.category) : undefined}
                   isSample={false}
+                  showAuthor={false}
                 />
               ))}
             </div>
