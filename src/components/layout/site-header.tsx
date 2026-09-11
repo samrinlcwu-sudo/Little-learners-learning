@@ -9,6 +9,7 @@ import { primaryNav, type NavLink } from "@/config/nav";
 import { Button } from "@/components/ui/button";
 import { SiteSearch, SiteSearchTrigger } from "@/components/patterns/site-search";
 import { AiAssistantTrigger } from "@/components/patterns/ai-assistant";
+import { NotificationCenter, NotificationCenterTrigger, NotificationBellIcon } from "@/components/patterns/notification-center";
 import { useAiAudience } from "@/lib/ai/use-ai-audience";
 import { AI_AUDIENCE_PERMISSIONS } from "@/lib/ai/permissions";
 import { cn } from "@/lib/utils/cn";
@@ -47,6 +48,14 @@ function HeaderActions({ className, assistantAvailable }: { className?: string; 
           </button>
         </AiAssistantTrigger>
       )}
+      <NotificationCenterTrigger asChild>
+        <button
+          type="button"
+          className="relative inline-flex size-11 items-center justify-center rounded-md text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
+        >
+          <NotificationBellIcon className="relative inline-flex" />
+        </button>
+      </NotificationCenterTrigger>
       <Button variant="ghost" size="sm" asChild>
         <Link href="/sign-in">Sign in</Link>
       </Button>
@@ -86,8 +95,9 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
   }, []);
 
   return (
-    <SiteSearch>
-      <header className="sticky top-0 z-40 border-b border-neutral-200 bg-surface/95 shadow-sm backdrop-blur-md">
+    <NotificationCenter>
+      <SiteSearch>
+        <header className="sticky top-0 z-40 border-b border-neutral-200 bg-surface/95 shadow-sm backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link
             href="/"
@@ -171,6 +181,18 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
                   </AiAssistantTrigger>
                 </div>
               )}
+              <div className="px-4 pt-2">
+                <NotificationCenterTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => setMobileOpen(false)}
+                    className="relative flex h-11 w-full items-center gap-2.5 rounded-md border border-neutral-200 bg-neutral-100 px-3.5 text-sm text-neutral-500 transition-colors hover:bg-neutral-200"
+                  >
+                    <NotificationBellIcon className="relative inline-flex" hideLabel={false} />
+                    <span>Notifications</span>
+                  </button>
+                </NotificationCenterTrigger>
+              </div>
               <ul className="flex flex-col px-4 py-2">
                 {links.map((link) => (
                   <li key={link.href}>
@@ -197,6 +219,7 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
         </div>
       </header>
     </SiteSearch>
+    </NotificationCenter>
   );
 }
 

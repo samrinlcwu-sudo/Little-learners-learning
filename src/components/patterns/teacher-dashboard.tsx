@@ -12,6 +12,7 @@ import {
   LockKeyhole,
   ExternalLink,
   Plus,
+  Bell,
   type LucideIcon,
 } from "lucide-react";
 import { Container } from "@/components/ui/container";
@@ -219,6 +220,13 @@ function TeacherDashboard() {
       description: "Worksheets, activities, and ebooks.",
       href: "/resources",
       tone: "secondary",
+    },
+    {
+      icon: Bell,
+      title: "Notifications",
+      description: "Real updates about your account and resources.",
+      href: "/dashboard/notifications",
+      tone: "neutral",
     },
     {
       icon: Settings,

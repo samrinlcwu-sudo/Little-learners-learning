@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, BookOpen, Library, Gamepad2, ClipboardList, Settings, ShieldCheck, Sparkles } from "lucide-react";
+import { Plus, BookOpen, Library, Gamepad2, ClipboardList, Bell, Settings, ShieldCheck, Sparkles } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -54,6 +54,13 @@ const quickLinks = [
     title: "Applications",
     description: "Start or track an application for your child.",
     href: "/dashboard/applications",
+    tone: "neutral" as const,
+  },
+  {
+    icon: Bell,
+    title: "Notifications",
+    description: "Real updates about your applications and account.",
+    href: "/dashboard/notifications",
     tone: "neutral" as const,
   },
 ];
