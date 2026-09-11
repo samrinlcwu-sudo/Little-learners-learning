@@ -25,7 +25,7 @@ yet.
 | Session handling | `src/lib/ai/use-ai-conversation.ts` | In-memory conversation state for one open dialog |
 | Service layer | `src/lib/ai/types.ts` (`AiAssistantProvider`), `get-provider.ts` | The one seam a real provider plugs into |
 | Guardrails | `src/lib/ai/guardrails.ts` | Safety rules a real integration must be built around, and the disclosure shown today |
-| Knowledge/content | Everything under `src/config` and `src/lib/resources`, `src/lib/content` | Not new — a real assistant answers from the same subjects/resources/games data every other page already reads, not a separate content store |
+| Knowledge/content | `src/lib/ai/knowledge/` (Prompt 47 — see `docs/AI_KNOWLEDGE_LAYER_ARCHITECTURE.md`) | Composes the existing subjects/resources/games/progress data into an AI-facing shape; invents nothing new |
 
 Nothing here is a rebuild of an existing system. The "knowledge layer" row
 is deliberately just a pointer to content that already exists — a real

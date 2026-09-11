@@ -18,8 +18,10 @@ import { LearningJourneySteps } from "@/components/patterns/learning-journey-ste
 import { GameCard } from "@/components/patterns/game-card";
 import { ResourceCard } from "@/components/patterns/resource-card";
 import { TrackPageView } from "@/components/patterns/track-page-view";
+import { LearningAreaStructuredData } from "@/components/patterns/learning-area-structured-data";
 import { CONTENT_TYPE_LABELS } from "@/lib/content/types";
 import { getCategoryJourney } from "@/lib/learning-journey";
+import { getLearningAreaKnowledge } from "@/lib/ai/knowledge/public-knowledge";
 import { siteConfig } from "@/config/site";
 
 export function generateStaticParams() {
@@ -55,10 +57,12 @@ export default async function LearnCategoryPage({
   const categoryGames = journey?.games ?? [];
   const categoryResources = journey?.resources ?? [];
   const relatedCategories = getRelatedCategories(category.slug);
+  const areaKnowledge = getLearningAreaKnowledge(category.slug);
 
   return (
     <Section>
       <Container>
+        {areaKnowledge && <LearningAreaStructuredData area={areaKnowledge} />}
         <TrackPageView
           type="topic_explored"
           topic={category.slug}
