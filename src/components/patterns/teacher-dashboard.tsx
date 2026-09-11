@@ -32,6 +32,7 @@ import { PageHeader } from "@/components/patterns/page-header";
 import { CapabilityList } from "@/components/patterns/capability-list";
 import { TeacherResourceForm } from "@/components/patterns/teacher-resource-form";
 import { TeacherResourceList } from "@/components/patterns/teacher-resource-list";
+import { useOpenAiAssistant } from "@/components/patterns/ai-assistant";
 import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import { calculateProfileCompletion } from "@/lib/accounts/teacher-profile-completion";
 import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
@@ -94,6 +95,8 @@ interface QuickAction {
   href?: string;
   onClick?: () => void;
   tone: "primary" | "secondary" | "accent" | "neutral";
+  /** e.g. "Development preview" for the assistant entry — never implies a finished feature when it isn't one. */
+  badge?: string;
 }
 
 const QUICK_ACTION_TONE_STYLES: Record<QuickAction["tone"], string> = {
@@ -115,6 +118,7 @@ function TeacherDashboard() {
   const { resources, addResource, updateResource, deleteResource } = useTeacherResources();
   const [resourceModalOpen, setResourceModalOpen] = React.useState(false);
   const [editingResource, setEditingResource] = React.useState<Resource | null>(null);
+  const openAssistant = useOpenAiAssistant();
 
   if (!ready) {
     return <Section className="min-h-[60vh]" />;
@@ -169,6 +173,14 @@ function TeacherDashboard() {
   }
 
   const quickActions: QuickAction[] = [
+    {
+      icon: Sparkles,
+      title: "Ask the Learning Assistant",
+      description: "Find resources, explore by subject or age group, and check your own resource status.",
+      onClick: () => openAssistant?.(),
+      tone: "accent",
+      badge: "Development preview",
+    },
     {
       icon: PenSquare,
       title: "Edit profile",
@@ -241,13 +253,16 @@ function TeacherDashboard() {
               {quickActions.map((action) => {
                 const content = (
                   <Card interactive className="flex h-full flex-col gap-3 p-5 text-left">
-                    <div
-                      className={cn(
-                        "flex size-11 items-center justify-center rounded-xl",
-                        QUICK_ACTION_TONE_STYLES[action.tone],
-                      )}
-                    >
-                      <action.icon className="size-5" aria-hidden="true" />
+                    <div className="flex items-start justify-between gap-2">
+                      <div
+                        className={cn(
+                          "flex size-11 items-center justify-center rounded-xl",
+                          QUICK_ACTION_TONE_STYLES[action.tone],
+                        )}
+                      >
+                        <action.icon className="size-5" aria-hidden="true" />
+                      </div>
+                      {action.badge && <Badge variant="warning">{action.badge}</Badge>}
                     </div>
                     <div>
                       <p className="font-display text-lg font-semibold text-ink">{action.title}</p>

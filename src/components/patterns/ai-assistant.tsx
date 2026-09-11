@@ -11,9 +11,13 @@ import { useAiConversation } from "@/lib/ai/use-ai-conversation";
 import { AI_DISCLOSURE_TEXT } from "@/lib/ai/guardrails";
 import type { AiAudience } from "@/lib/ai/types";
 import { getAllLearningCategories } from "@/config/learning-categories";
+import { getAllTeacherAgeGroupOptions } from "@/config/teacher-options";
 import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
 import { useProgressEvents } from "@/lib/progress/use-progress-events";
+import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
+import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 import { getChildProgressKnowledge } from "@/lib/ai/knowledge/progress-knowledge";
+import { getTeacherResourceKnowledge } from "@/lib/ai/knowledge/teacher-knowledge";
 import { cn } from "@/lib/utils/cn";
 
 const AUDIENCE_GREETING: Record<AiAudience, string> = {
@@ -32,10 +36,18 @@ const AUDIENCE_PROMPTS: Record<AiAudience, string[]> = {
     "What games are available?",
     "How is my child doing?",
   ],
-  teacher: ["How do I publish a resource?", "What's still missing from my profile?"],
+  teacher: [
+    "Find resources for preschool",
+    "Show me mathematics resources",
+    "How do I publish a resource?",
+    "What age groups are supported?",
+  ],
   child: [],
   admin: [],
 };
+
+const CHIP_LINK_CLASS =
+  "rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30";
 
 /**
  * The parent-only home view shown before any message is sent — real
@@ -57,12 +69,7 @@ function ParentHomeSections({ onNavigate }: { onNavigate: () => void }) {
         <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">Learning areas</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {categories.map((category) => (
-            <Link
-              key={category.slug}
-              href={`/learn/${category.slug}`}
-              onClick={onNavigate}
-              className="rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
-            >
+            <Link key={category.slug} href={`/learn/${category.slug}`} onClick={onNavigate} className={CHIP_LINK_CLASS}>
               {category.name}
             </Link>
           ))}
@@ -102,6 +109,79 @@ function ParentHomeSections({ onNavigate }: { onNavigate: () => void }) {
         </Link>
         <Link href="/games" onClick={onNavigate} className="font-medium text-primary-700 underline-offset-4 hover:underline">
           Browse games
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The teacher-only home view shown before any message is sent — real age
+ * bands (the same TEACHER_AGE_GROUP_OPTIONS a teacher's own profile uses,
+ * src/config/teacher-options.ts) and real learning areas to jump to
+ * directly, plus a real count of this teacher's own resources by status
+ * (src/lib/ai/knowledge/teacher-knowledge.ts, Prompt 47) — never another
+ * teacher's data, since `resources` here is already scoped to this
+ * browser's one teacher (src/lib/resources/local-teacher-resources.ts).
+ * Nothing here is sent through the chat/provider. See
+ * docs/AI_TEACHER_ASSISTANT_ARCHITECTURE.md.
+ */
+function TeacherHomeSections({ onNavigate }: { onNavigate: () => void }) {
+  const { teacher } = useTeacherProfile();
+  const { resources } = useTeacherResources();
+  const categories = getAllLearningCategories();
+  const ageGroups = getAllTeacherAgeGroupOptions();
+  const ownResources = teacher ? getTeacherResourceKnowledge(teacher.id, resources) : [];
+  const draftCount = ownResources.filter((r) => r.publicationStatus === "draft").length;
+  const awaitingReviewCount = ownResources.filter((r) => r.publicationStatus === "published" && !r.visibleToPublic).length;
+  const publishedCount = ownResources.filter((r) => r.visibleToPublic).length;
+
+  return (
+    <div className="space-y-5 border-t border-neutral-100 pt-4">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">Explore by age group</p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {ageGroups.map((option) => (
+            <Link
+              key={option.id}
+              href={`/resources?age=${option.ageRange.minYears}`}
+              onClick={onNavigate}
+              className={CHIP_LINK_CLASS}
+            >
+              {option.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">Learning areas</p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {categories.map((category) => (
+            <Link key={category.slug} href={`/learn/${category.slug}`} onClick={onNavigate} className={CHIP_LINK_CLASS}>
+              {category.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {teacher && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">Your resources</p>
+          <p className="mt-2 text-sm text-neutral-700">
+            {ownResources.length === 0
+              ? "You haven't created any resources yet."
+              : `${draftCount} draft${draftCount === 1 ? "" : "s"} · ${awaitingReviewCount} awaiting review · ${publishedCount} published`}
+          </p>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <Link href="/resources" onClick={onNavigate} className="font-medium text-primary-700 underline-offset-4 hover:underline">
+          Browse the resource library
+        </Link>
+        <Link href="/teachers/dashboard" onClick={onNavigate} className="font-medium text-primary-700 underline-offset-4 hover:underline">
+          Manage your resources
         </Link>
       </div>
     </div>
@@ -195,6 +275,7 @@ function AiAssistant({ children }: AiAssistantProps) {
                   </div>
                 )}
                 {audience === "parent" && <ParentHomeSections onNavigate={() => setOpen(false)} />}
+                {audience === "teacher" && <TeacherHomeSections onNavigate={() => setOpen(false)} />}
               </div>
             ) : (
               messages.map((message) => (
@@ -267,4 +348,14 @@ function AiAssistantTrigger({ asChild, children }: AiAssistantTriggerProps) {
   );
 }
 
-export { AiAssistant, AiAssistantTrigger };
+/**
+ * For call sites that already manage their own clickable element (e.g. the
+ * Teacher Dashboard's `QuickAction` array, which renders every action as
+ * `<button onClick={action.onClick}>`) rather than wrapping a child with
+ * `AiAssistantTrigger`. Returns `null` outside an `<AiAssistant>` tree.
+ */
+function useOpenAiAssistant(): (() => void) | null {
+  return React.useContext(AiAssistantOpenContext);
+}
+
+export { AiAssistant, AiAssistantTrigger, useOpenAiAssistant };
