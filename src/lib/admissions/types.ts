@@ -74,12 +74,32 @@ export interface ApplicationStatusEvent {
   occurredAt: string;
 }
 
+/**
+ * Collected as part of the application itself, not a real account record —
+ * there is no persistent parent profile anywhere in this codebase to pull
+ * this from (see docs/ACCOUNTS_ARCHITECTURE.md: sign-in/sign-up are real
+ * forms that create nothing yet). Reuses the shared primitives already
+ * written for exactly this in src/lib/validations/common.ts.
+ */
+export interface ApplicantInfo {
+  name: string;
+  email: string;
+  phone?: string;
+}
+
 export interface Application {
   id: string;
   parentAccountId: string;
-  /** References an existing ChildProfile.id (src/lib/accounts/types.ts) — never a duplicate learner record. */
-  childId: string;
-  /** Learning-category slugs (src/config/learning-categories.ts) — at least one, chosen from the real 16 subjects. */
+  /**
+   * Undefined until Step 1 of the application wizard is actually filled
+   * in — a brand-new draft (created the moment a family starts the
+   * wizard, so "save and exit" always has something real to persist) has
+   * none of these fields yet. Never a placeholder value.
+   */
+  applicant?: ApplicantInfo;
+  /** References an existing ChildProfile.id (src/lib/accounts/types.ts) — never a duplicate learner record. Undefined until Step 2. */
+  childId?: string;
+  /** Learning-category slugs (src/config/learning-categories.ts), chosen from the real 16 subjects. Empty until Step 3. */
   learningInterests: string[];
   /** Whatever the family wants to add — never required, never pre-filled with a suggested claim. */
   message?: string;
@@ -92,13 +112,28 @@ export interface Application {
   submittedAt?: string;
 }
 
+/**
+ * Whether every field submission actually requires is filled in — the gate
+ * between "a draft the family can keep coming back to, in whatever state"
+ * and "ready to submit." A draft can be saved at any point in the wizard,
+ * complete or not; only submitting requires completeness.
+ */
+export function isApplicationComplete(application: Application): boolean {
+  return Boolean(
+    application.applicant?.name &&
+      application.applicant?.email &&
+      application.childId &&
+      application.learningInterests.length > 0,
+  );
+}
+
 /** A submitted or withdrawn application is finished — only a draft or an already-submitted one can still be acted on by the family. */
 export function canEditApplication(application: Application): boolean {
   return application.status === "draft";
 }
 
 export function canSubmitApplication(application: Application): boolean {
-  return application.status === "draft";
+  return application.status === "draft" && isApplicationComplete(application);
 }
 
 export function canWithdrawApplication(application: Application): boolean {

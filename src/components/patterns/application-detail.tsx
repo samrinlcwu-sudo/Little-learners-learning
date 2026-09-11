@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Check, Circle, Lock } from "lucide-react";
@@ -12,8 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/patterns/page-header";
-import { ApplicationForm } from "@/components/patterns/application-form";
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal";
 import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
 import { useApplications } from "@/lib/admissions/use-applications";
 import { getAllLearningCategories } from "@/config/learning-categories";
@@ -35,8 +32,7 @@ import { cn } from "@/lib/utils/cn";
 function ApplicationDetail() {
   const params = useParams<{ applicationId: string }>();
   const { children, ready: childrenReady } = useChildProfiles();
-  const { applications, ready, updateApplication, submit, withdraw } = useApplications();
-  const [editOpen, setEditOpen] = React.useState(false);
+  const { applications, ready, submit, withdraw } = useApplications();
 
   if (!ready || !childrenReady) {
     return <Section className="min-h-[60vh]" />;
@@ -153,9 +149,20 @@ function ApplicationDetail() {
               Details
             </Heading>
             <dl className="mt-4 space-y-4 text-sm">
+              {application.applicant && (
+                <div>
+                  <dt className="font-medium text-neutral-500">Applicant</dt>
+                  <dd className="mt-1 text-ink">
+                    {application.applicant.name} — {application.applicant.email}
+                    {application.applicant.phone && ` — ${application.applicant.phone}`}
+                  </dd>
+                </div>
+              )}
               <div>
                 <dt className="font-medium text-neutral-500">Child</dt>
-                <dd className="mt-1 text-ink">{child?.name ?? "Child profile removed"}</dd>
+                <dd className="mt-1 text-ink">
+                  {child ? child.name : application.childId ? "Child profile removed" : "Not selected yet"}
+                </dd>
               </div>
               <div>
                 <dt className="font-medium text-neutral-500">Learning interests</dt>
@@ -177,8 +184,8 @@ function ApplicationDetail() {
 
             <div className="mt-6 flex flex-wrap gap-3 border-t border-neutral-200 pt-6">
               {canEditApplication(application) && (
-                <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
-                  Edit draft
+                <Button size="sm" variant="outline" asChild>
+                  <Link href={`/dashboard/applications/new?id=${application.id}`}>Edit draft</Link>
                 </Button>
               )}
               {canSubmitApplication(application) && (
@@ -195,24 +202,6 @@ function ApplicationDetail() {
           </Card>
         </Container>
       </Section>
-
-      <Modal open={editOpen} onOpenChange={setEditOpen}>
-        <ModalContent className="max-h-[85vh] overflow-y-auto">
-          <ModalHeader>
-            <ModalTitle>Edit draft</ModalTitle>
-            <ModalDescription>Update your details below.</ModalDescription>
-          </ModalHeader>
-          <ApplicationForm
-            childProfiles={children}
-            application={application}
-            onSave={(values) => {
-              updateApplication(application.id, values);
-              setEditOpen(false);
-            }}
-            onCancel={() => setEditOpen(false)}
-          />
-        </ModalContent>
-      </Modal>
     </>
   );
 }

@@ -20,6 +20,12 @@ function SiteFooter() {
               {siteConfig.name} — an early-years learning platform, currently
               in development.
             </p>
+            <a
+              href={`mailto:${siteConfig.email}`}
+              className="text-sm text-neutral-400 underline-offset-4 transition-colors hover:text-white hover:underline"
+            >
+              {siteConfig.email}
+            </a>
           </div>
 
           {footerNav.map((group) => (

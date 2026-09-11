@@ -5,6 +5,7 @@ import {
   canWithdrawApplication,
   getApplicationLearningAreas,
   getApplicationTimeline,
+  isApplicationComplete,
   UNREACHABLE_APPLICATION_STATUSES,
   type Application,
 } from "./types";
@@ -14,6 +15,7 @@ function makeApplication(overrides: Partial<Application> = {}): Application {
   return {
     id: "a1",
     parentAccountId: "local-browser-only",
+    applicant: { name: "Amina Hussain", email: "amina@example.com" },
     childId: "c1",
     learningInterests: ["mathematics"],
     status: "draft",
@@ -24,10 +26,32 @@ function makeApplication(overrides: Partial<Application> = {}): Application {
   };
 }
 
+describe("isApplicationComplete", () => {
+  it("is true once applicant name/email, a child, and at least one interest are all present", () => {
+    expect(isApplicationComplete(makeApplication())).toBe(true);
+  });
+
+  it("is false for a brand-new draft with nothing filled in yet", () => {
+    expect(isApplicationComplete(makeApplication({ applicant: undefined, childId: undefined, learningInterests: [] }))).toBe(
+      false,
+    );
+  });
+
+  it("is false if only some steps are filled in", () => {
+    expect(isApplicationComplete(makeApplication({ childId: undefined }))).toBe(false);
+    expect(isApplicationComplete(makeApplication({ learningInterests: [] }))).toBe(false);
+    expect(isApplicationComplete(makeApplication({ applicant: { name: "", email: "" } }))).toBe(false);
+  });
+});
+
 describe("canEditApplication / canSubmitApplication", () => {
-  it("is true only for a draft", () => {
+  it("is true only for a complete draft", () => {
     expect(canEditApplication(makeApplication({ status: "draft" }))).toBe(true);
     expect(canSubmitApplication(makeApplication({ status: "draft" }))).toBe(true);
+  });
+
+  it("is false for an incomplete draft — save-and-exit works, but submission needs every required field", () => {
+    expect(canSubmitApplication(makeApplication({ status: "draft", childId: undefined }))).toBe(false);
   });
 
   it("is false once submitted or withdrawn", () => {

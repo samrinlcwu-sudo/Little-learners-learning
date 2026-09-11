@@ -73,15 +73,23 @@ function pushStatusEvent(application: Application, status: ApplicationStatus): A
   return { ...application, statusHistory: [...application.statusHistory, { status, occurredAt: new Date().toISOString() }] };
 }
 
-export type NewApplication = Pick<Application, "childId" | "learningInterests" | "message">;
+/**
+ * Every field is optional — a draft is created the moment a family opens
+ * the application wizard (src/components/patterns/application-wizard.tsx),
+ * before they've filled in anything, so "save and exit" always has a real
+ * record to persist to from Step 1 onward.
+ */
+export type NewApplication = Partial<Pick<Application, "applicant" | "childId" | "learningInterests" | "message">>;
 
-export function createDraftApplication(input: NewApplication): Application[] {
+/** Returns the created application directly (not just the array) — the wizard needs its real id immediately, to build a resumable URL. */
+export function createDraftApplication(input: NewApplication = {}): Application {
   const now = new Date().toISOString();
   let application: Application = {
     id: crypto.randomUUID(),
     parentAccountId: LOCAL_PARENT_ID,
+    applicant: input.applicant,
     childId: input.childId,
-    learningInterests: input.learningInterests,
+    learningInterests: input.learningInterests ?? [],
     message: input.message,
     status: "draft",
     statusHistory: [],
@@ -89,10 +97,11 @@ export function createDraftApplication(input: NewApplication): Application[] {
     updatedAt: now,
   };
   application = pushStatusEvent(application, "draft");
-  return commit([...getLocalApplicationsSnapshot(), application]);
+  commit([...getLocalApplicationsSnapshot(), application]);
+  return application;
 }
 
-export type ApplicationUpdates = Partial<Pick<Application, "childId" | "learningInterests" | "message">>;
+export type ApplicationUpdates = Partial<Pick<Application, "applicant" | "childId" | "learningInterests" | "message">>;
 
 /** Editing is only meaningful for a draft — see canEditApplication in types.ts; this function doesn't re-check that itself, the same way updateLocalTeacherResource trusts its caller. */
 export function updateDraftApplication(id: string, updates: ApplicationUpdates): Application[] {
@@ -103,17 +112,21 @@ export function updateDraftApplication(id: string, updates: ApplicationUpdates):
   );
 }
 
-export function submitApplication(id: string): Application[] {
+/** Returns the now-submitted application (with its real reference number) directly — a caller showing a confirmation needs it synchronously, before React's next render. Returns undefined if the id doesn't match a draft. */
+export function submitApplication(id: string): Application | undefined {
   const now = new Date().toISOString();
-  return commit(
+  let result: Application | undefined;
+  commit(
     getLocalApplicationsSnapshot().map((application) => {
       if (application.id !== id || application.status !== "draft") return application;
-      return pushStatusEvent(
+      result = pushStatusEvent(
         { ...application, status: "submitted", referenceNumber: generateReferenceNumber(), submittedAt: now, updatedAt: now },
         "submitted",
       );
+      return result;
     }),
   );
+  return result;
 }
 
 export function withdrawApplication(id: string): Application[] {

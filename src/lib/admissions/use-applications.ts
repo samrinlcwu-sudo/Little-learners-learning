@@ -29,8 +29,8 @@ export function useApplications() {
   );
   const ready = applications !== getServerApplicationsSnapshot();
 
-  const createApplication = React.useCallback((input: NewApplication) => {
-    createDraftApplication(input);
+  const createApplication = React.useCallback((input?: NewApplication) => {
+    return createDraftApplication(input);
   }, []);
 
   const updateApplication = React.useCallback((id: string, updates: ApplicationUpdates) => {
@@ -38,7 +38,7 @@ export function useApplications() {
   }, []);
 
   const submit = React.useCallback((id: string) => {
-    submitApplication(id);
+    return submitApplication(id);
   }, []);
 
   const withdraw = React.useCallback((id: string) => {

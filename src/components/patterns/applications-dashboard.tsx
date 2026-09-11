@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import { Plus, ClipboardList } from "lucide-react";
 import { Container } from "@/components/ui/container";
@@ -10,8 +9,6 @@ import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { ApplicationCard } from "@/components/patterns/application-card";
-import { ApplicationForm } from "@/components/patterns/application-form";
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal";
 import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
 import { useApplications } from "@/lib/admissions/use-applications";
 
@@ -20,18 +17,14 @@ import { useApplications } from "@/lib/admissions/use-applications";
  * (src/lib/admissions/local-applications.ts) — real drafts and real
  * submissions, with the same "no live review connected yet" honesty
  * banner every other not-yet-backed feature on this platform already
- * shows (Parent Dashboard, Teacher Dashboard). See
- * docs/ADMISSIONS_ARCHITECTURE.md.
+ * shows (Parent Dashboard, Teacher Dashboard). Starting or continuing an
+ * application opens the full multi-step wizard at
+ * /dashboard/applications/new (Prompt 52) — this page is just the list.
+ * See docs/ADMISSIONS_ARCHITECTURE.md.
  */
 function ApplicationsDashboard() {
   const { children, ready: childrenReady } = useChildProfiles();
-  const { applications, ready, createApplication } = useApplications();
-  const [modalOpen, setModalOpen] = React.useState(false);
-
-  function handleCreate(input: Parameters<typeof createApplication>[0]) {
-    createApplication(input);
-    setModalOpen(false);
-  }
+  const { applications, ready } = useApplications();
 
   return (
     <>
@@ -57,9 +50,11 @@ function ApplicationsDashboard() {
               <p className="mt-1 text-sm text-neutral-600">One per child, per set of learning interests.</p>
             </div>
             {childrenReady && children.length > 0 && (
-              <Button size="sm" onClick={() => setModalOpen(true)}>
-                <Plus aria-hidden="true" />
-                Start an application
+              <Button size="sm" asChild>
+                <Link href="/dashboard/applications/new">
+                  <Plus aria-hidden="true" />
+                  Start an application
+                </Link>
               </Button>
             )}
           </div>
@@ -83,8 +78,8 @@ function ApplicationsDashboard() {
               title="No applications yet"
               description="Start a draft whenever you're ready — nothing is submitted until you choose to."
               action={
-                <Button size="sm" onClick={() => setModalOpen(true)}>
-                  Start an application
+                <Button size="sm" asChild>
+                  <Link href="/dashboard/applications/new">Start an application</Link>
                 </Button>
               }
             />
@@ -101,16 +96,6 @@ function ApplicationsDashboard() {
           )}
         </Container>
       </Section>
-
-      <Modal open={modalOpen} onOpenChange={setModalOpen}>
-        <ModalContent className="max-h-[85vh] overflow-y-auto">
-          <ModalHeader>
-            <ModalTitle>Start an application</ModalTitle>
-            <ModalDescription>Saved as a draft first — you choose when to submit it.</ModalDescription>
-          </ModalHeader>
-          <ApplicationForm childProfiles={children} onSave={handleCreate} onCancel={() => setModalOpen(false)} />
-        </ModalContent>
-      </Modal>
     </>
   );
 }
