@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SkipLink } from "@/components/ui/skip-link";
 import { SiteStructuredData } from "@/components/patterns/site-structured-data";
+import { AiAssistant } from "@/components/patterns/ai-assistant";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 import "./globals.css";
 
@@ -45,11 +46,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <SiteStructuredData />
         <SkipLink />
-        <SiteHeader />
-        <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col focus:outline-none">
-          {children}
-        </main>
-        <SiteFooter />
+        <AiAssistant>
+          <SiteHeader />
+          <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col focus:outline-none">
+            {children}
+          </main>
+          <SiteFooter />
+        </AiAssistant>
       </body>
     </html>
   );

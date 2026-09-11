@@ -7,12 +7,14 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { ChildOverviewCard } from "@/components/patterns/child-overview-card";
 import { ChildProfileForm } from "@/components/patterns/child-profile-form";
+import { AiAssistantTrigger } from "@/components/patterns/ai-assistant";
 import {
   Modal,
   ModalContent,
@@ -108,6 +110,23 @@ function ParentDashboard() {
             isn&apos;t connected to an account yet. Anything you add here
             stays on this device.
           </Alert>
+
+          <AiAssistantTrigger asChild>
+            <button type="button" className="mb-10 block w-full rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
+              <Card interactive className="flex items-center gap-4 p-5">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700">
+                  <Sparkles className="size-5" aria-hidden="true" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-display text-lg font-semibold text-ink">Ask about learning</p>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    Find resources, understand a subject, or see progress-related help for your children.
+                  </p>
+                </div>
+                <Badge variant="warning">Development preview</Badge>
+              </Card>
+            </button>
+          </AiAssistantTrigger>
 
           <div>
             <div className="flex items-center justify-between gap-4">

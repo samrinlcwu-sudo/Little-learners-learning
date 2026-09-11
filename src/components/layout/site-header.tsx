@@ -8,7 +8,7 @@ import { siteConfig } from "@/config/site";
 import { primaryNav, type NavLink } from "@/config/nav";
 import { Button } from "@/components/ui/button";
 import { SiteSearch, SiteSearchTrigger } from "@/components/patterns/site-search";
-import { AiAssistant, AiAssistantTrigger } from "@/components/patterns/ai-assistant";
+import { AiAssistantTrigger } from "@/components/patterns/ai-assistant";
 import { useAiAudience } from "@/lib/ai/use-ai-audience";
 import { AI_AUDIENCE_PERMISSIONS } from "@/lib/ai/permissions";
 import { cn } from "@/lib/utils/cn";
@@ -87,8 +87,7 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
 
   return (
     <SiteSearch>
-      <AiAssistant>
-        <header className="sticky top-0 z-40 border-b border-neutral-200 bg-surface/95 shadow-sm backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-neutral-200 bg-surface/95 shadow-sm backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link
             href="/"
@@ -196,8 +195,7 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
             </nav>
           </div>
         </div>
-        </header>
-      </AiAssistant>
+      </header>
     </SiteSearch>
   );
 }
