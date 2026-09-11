@@ -3,11 +3,14 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, Sparkles } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { primaryNav, type NavLink } from "@/config/nav";
 import { Button } from "@/components/ui/button";
 import { SiteSearch, SiteSearchTrigger } from "@/components/patterns/site-search";
+import { AiAssistant, AiAssistantTrigger } from "@/components/patterns/ai-assistant";
+import { useAiAudience } from "@/lib/ai/use-ai-audience";
+import { AI_AUDIENCE_PERMISSIONS } from "@/lib/ai/permissions";
 import { cn } from "@/lib/utils/cn";
 
 export interface SiteHeaderProps {
@@ -21,7 +24,7 @@ export interface SiteHeaderProps {
  * There's no session system yet, so every visitor is signed out; this is
  * the one state to show until real auth sessions exist.
  */
-function HeaderActions({ className }: { className?: string }) {
+function HeaderActions({ className, assistantAvailable }: { className?: string; assistantAvailable: boolean }) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <SiteSearchTrigger asChild>
@@ -33,6 +36,17 @@ function HeaderActions({ className }: { className?: string }) {
           <span className="sr-only">Search</span>
         </button>
       </SiteSearchTrigger>
+      {assistantAvailable && (
+        <AiAssistantTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex size-11 items-center justify-center rounded-md text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
+          >
+            <Sparkles className="size-5" aria-hidden="true" />
+            <span className="sr-only">Ask the Little Learners Assistant</span>
+          </button>
+        </AiAssistantTrigger>
+      )}
       <Button variant="ghost" size="sm" asChild>
         <Link href="/sign-in">Sign in</Link>
       </Button>
@@ -46,6 +60,8 @@ function HeaderActions({ className }: { className?: string }) {
 function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const toggleRef = React.useRef<HTMLButtonElement>(null);
+  const audience = useAiAudience();
+  const assistantAvailable = AI_AUDIENCE_PERMISSIONS[audience].mayAccessAssistant;
 
   React.useEffect(() => {
     if (!mobileOpen) return;
@@ -71,7 +87,8 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
 
   return (
     <SiteSearch>
-      <header className="sticky top-0 z-40 border-b border-neutral-200 bg-surface/95 shadow-sm backdrop-blur-md">
+      <AiAssistant>
+        <header className="sticky top-0 z-40 border-b border-neutral-200 bg-surface/95 shadow-sm backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link
             href="/"
@@ -102,7 +119,7 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
             </ul>
           </nav>
 
-          <HeaderActions className="hidden lg:flex" />
+          <HeaderActions className="hidden lg:flex" assistantAvailable={assistantAvailable} />
 
           <button
             ref={toggleRef}
@@ -141,6 +158,20 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
                   </button>
                 </SiteSearchTrigger>
               </div>
+              {assistantAvailable && (
+                <div className="px-4 pt-2">
+                  <AiAssistantTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex h-11 w-full items-center gap-2.5 rounded-md border border-neutral-200 bg-neutral-100 px-3.5 text-sm text-neutral-500 transition-colors hover:bg-neutral-200"
+                    >
+                      <Sparkles className="size-4 shrink-0" aria-hidden="true" />
+                      Ask the assistant
+                    </button>
+                  </AiAssistantTrigger>
+                </div>
+              )}
               <ul className="flex flex-col px-4 py-2">
                 {links.map((link) => (
                   <li key={link.href}>
@@ -165,7 +196,8 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
             </nav>
           </div>
         </div>
-      </header>
+        </header>
+      </AiAssistant>
     </SiteSearch>
   );
 }
