@@ -160,15 +160,25 @@ exists — ready to turn on once the guardrails are real, not before.
 ## Entry point placement
 
 One shared `AiAssistant` / `AiAssistantTrigger` pair
-(`src/components/patterns/ai-assistant.tsx`), structured exactly like the
-existing `SiteSearch` / `SiteSearchTrigger` (`site-search.tsx`) — a Radix
-dialog wrapping the header, with trigger buttons in both the desktop
-header actions and the mobile drawer. Mounting it in `SiteHeader`
-(alongside search) rather than only inside individual dashboards means it
-reads as a built-in platform utility on every eligible page, not a
-bolted-on widget added to just one screen — while `mayAccessAssistant`
-still keeps it out of the one context (a child's own learning page) where
-it shouldn't appear.
+(`src/components/patterns/ai-assistant.tsx`), originally mounted in
+`SiteHeader` alongside `SiteSearch` / `SiteSearchTrigger` (`site-search.tsx`)
+so it read as a built-in platform utility from day one, not a bolted-on
+widget on a single screen.
+
+**Updated in Prompt 48:** `<AiAssistant>` now wraps the whole page body in
+`src/app/layout.tsx`, not just `SiteHeader`, so entry points can live
+anywhere — the header's icon, and (from Prompt 48 onward) a card on the
+Parent Dashboard and an item in the Teacher Dashboard's Quick Actions
+grid, all opening the exact same dialog. This also means
+`AiAssistantTrigger` is deliberately **not** `DialogPrimitive.Trigger`
+(unlike `SiteSearchTrigger`, which still is) — see
+`docs/AI_PARENT_ASSISTANT_ARCHITECTURE.md`, "What changed," for the real
+bug that caused (nesting two Radix `Dialog.Root`s let the innermost one
+hijack the outer one's trigger) and the fix (a plain React context,
+`AiAssistantOpenContext`, independent of Radix's own Dialog context).
+`mayAccessAssistant` still keeps the assistant out of the one context (a
+child's own learning page) where it shouldn't appear, regardless of where
+a trigger is placed.
 
 ## SEO/AEO
 

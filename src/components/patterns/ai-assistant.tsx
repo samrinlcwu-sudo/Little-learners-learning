@@ -47,7 +47,7 @@ const AUDIENCE_PROMPTS: Record<AiAudience, string[]> = {
 };
 
 const CHIP_LINK_CLASS =
-  "rounded-full border border-neutral-200 px-3 py-1 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30";
+  "rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30";
 
 /**
  * The parent-only home view shown before any message is sent — real
@@ -257,7 +257,11 @@ function AiAssistant({ children }: AiAssistantProps) {
             </DialogPrimitive.Close>
           </div>
 
-          <div ref={listRef} className="min-h-[220px] flex-1 space-y-3 overflow-y-auto px-5 py-4">
+          <div
+            ref={listRef}
+            aria-live="polite"
+            className="min-h-[220px] flex-1 space-y-3 overflow-y-auto px-5 py-4"
+          >
             {messages.length === 0 ? (
               <div className="space-y-4">
                 {AUDIENCE_PROMPTS[audience].length > 0 && (

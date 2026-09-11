@@ -106,10 +106,23 @@ pattern the rest of this local-first app already relies on:
 | "What resources are suitable for this age group?" | `getLearningAreasForAge(ageYears)` |
 | "Which resources are related to counting?" | `findResourcesByKeyword("counting")` |
 
-None of these are wired into the assistant UI yet (`src/components/patterns/ai-assistant.tsx`
-still only ever returns the Prompt 46 development-placeholder reply) — this
-table describes what the data layer can now support, not a new feature a
-visitor can use today.
+**Updated in Prompts 48–49:** the open-ended chat itself still only ever
+returns the Prompt 46 development-placeholder reply — none of these
+functions answer a *typed* question yet. But the assistant's parent- and
+teacher-only home views (`ParentHomeSections` / `TeacherHomeSections` in
+`src/components/patterns/ai-assistant.tsx`) do call `getChildProgressKnowledge`
+and `getTeacherResourceKnowledge` directly to render real, honest
+read-only summaries before any message is sent — see
+`docs/AI_PARENT_ASSISTANT_ARCHITECTURE.md` and
+`docs/AI_TEACHER_ASSISTANT_ARCHITECTURE.md`. `getLearningAreaKnowledge`,
+`getLearningAreasForAge`, `getLearningAreasForNamedAgeGroup`,
+`findResourcesByKeyword`, and `findGamesByKeyword` remain unused outside
+their own tests today — those UIs link to `/learn/[slug]` and
+`/resources?age=` directly rather than routing through these functions,
+since a static link needed no lookup. They stay real and tested,
+ready for whichever future feature (in-chat search, or a smarter
+age-group view) actually needs to look content up rather than just link
+to it.
 
 ## SEO/AEO
 
