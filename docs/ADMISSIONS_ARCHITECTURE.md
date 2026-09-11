@@ -161,6 +161,60 @@ applications only, so there's no cross-family access to prevent at
 runtime — it's already structurally impossible, the same guarantee every
 other local-first store in this app relies on.
 
+## Application tracking & status experience (Prompt 53)
+
+`ApplicationDetail` (`src/components/patterns/application-detail.tsx`) was
+already this family's real, honest status view since Prompt 51 — Prompt 53
+extends it rather than replacing it, and adds nothing that isn't backed by
+a real field:
+
+- **A scannable summary strip** — reference number, the date the
+  application was created, and the date it last changed — sits above the
+  timeline, so a family doesn't have to read the whole timeline just to
+  answer "when did I apply?" or "what's my reference number?" All three
+  come straight from the `Application` record; nothing is computed or
+  guessed.
+- **"What happens next"** (`getApplicationNextAction`,
+  `src/lib/admissions/types.ts`) — one honest sentence per *reachable*
+  status only: finish and submit a draft, "no action needed" for a
+  submitted application (since nothing here can move it further without a
+  real reviewer), or "this application is closed" once withdrawn. It never
+  promises a response time or implies a review is already happening.
+- **The status ladder is unchanged** — still `getApplicationTimeline`,
+  still rendered as reached / not-yet-reached / locked, still limited to
+  the statuses this codebase can and cannot actually reach (see the table
+  above). Prompt 53's brief shows an example ladder including "Additional
+  information required"; that stage stays visibly locked here, the same as
+  "Accepted" and "Declined," because nothing sets it today.
+- **The applications list** (`ApplicationCard`) now also shows the applied
+  date next to the reference number, so the tracking experience is
+  consistent whether a family is scanning the list or reading one
+  application's full detail.
+
+### Permissions, honestly
+
+The brief asks that "a user must only be able to access their own
+application records" and that this "not" be client-side-only security.
+This codebase has no accounts, no sessions, and no server
+(`docs/ACCOUNTS_ARCHITECTURE.md`) — so there is no second user's data that
+could ever reach this browser to check against. The same reasoning already
+documented for `ChildProfile` applies unchanged: ownership here is
+structural, not a runtime check that could be bypassed — a browser's
+`localStorage` simply never contains another family's rows. Adding a
+client-side `if (application.parentAccountId !== currentUser.id)` guard
+would be exactly the fake security the brief warns against: it would imply
+a real multi-user boundary exists today, when none does. Once real
+accounts and a server exist, the enforcement point becomes Row Level
+Security on the `applications` table (a signed-in account reads/writes
+only its own rows, admin bypasses via a server-side check) — the same
+migration path already described for `child_profiles` and
+`teacher_profiles`.
+
+An unrecognized or missing application id (a bad link, a different
+browser, a since-deleted draft) already showed the honest "We couldn't
+find that application" empty state before Prompt 53 — verified again this
+prompt, unchanged.
+
 ## Privacy
 
 - `ApplicationsDashboard` and `ApplicationDetail` read `useChildProfiles()`
@@ -188,3 +242,18 @@ and the detail route stay noindex while `/admissions` carries real
 canonical/social metadata. Confirmed existing parent, child, teacher, and
 AI assistant journeys are unaffected, and mobile layout is comfortable
 end to end.
+
+**Prompt 53** verified live, in one browser tab: the full
+Applications → Open Application → View Status → View Details path for a
+draft, a submitted application, and a withdrawn application, confirming
+the new summary strip (reference/applied/last updated) and "What happens
+next" sentence are correct for each status. Verified the empty states
+(no child profile yet, no applications yet) and the "not found" state for
+a bogus `/dashboard/applications/[applicationId]` id. Verified "unauthorized
+access" the only way it can mean anything here: this browser never sees
+another family's applications, because none of its `localStorage` ever
+holds one — there's no session to test bypassing. Confirmed both
+application routes remain `robots: { index: false, follow: false }`, and
+that the loading gate (`!ready || !childrenReady`) renders before content
+without a flash of empty state. Ran typecheck, lint, the full Vitest suite,
+and a production build; all clean.

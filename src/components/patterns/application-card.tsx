@@ -41,6 +41,7 @@ function ApplicationCard({ application, child }: ApplicationCardProps) {
           {application.referenceNumber && (
             <p className="mt-0.5 text-xs text-neutral-500">Reference {application.referenceNumber}</p>
           )}
+          <p className="mt-0.5 text-xs text-neutral-500">Applied {new Date(application.createdAt).toLocaleDateString()}</p>
         </div>
         <Badge variant={STATUS_BADGE_VARIANT[application.status]}>{APPLICATION_STATUS_LABELS[application.status]}</Badge>
       </div>

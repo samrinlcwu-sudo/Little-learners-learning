@@ -185,6 +185,33 @@ export function getApplicationTimeline(application: Application): ApplicationTim
   });
 }
 
+/**
+ * The one honest sentence the tracking experience shows for "what should I
+ * do now" — built only from this application's own real, reachable status.
+ * Never a fabricated "we'll be in touch within X days" promise, and never
+ * phrased for a status (under-review/info-requested/accepted/declined)
+ * that no code path in this codebase can actually set — see
+ * UNREACHABLE_APPLICATION_STATUSES above.
+ */
+export function getApplicationNextAction(application: Application): string {
+  switch (application.status) {
+    case "draft":
+      return isApplicationComplete(application)
+        ? "Review your answers and submit when you're ready."
+        : "Finish the remaining steps, then submit when you're ready.";
+    case "submitted":
+      return "No action needed right now. There's no live review connected yet, so this page will only change if you withdraw it yourself — check back here any time.";
+    case "withdrawn":
+      return "This application is closed. You can start a new one whenever you'd like.";
+    case "under-review":
+    case "info-requested":
+    case "accepted":
+    case "declined":
+      // Unreachable today — no code path sets these statuses (see UNREACHABLE_APPLICATION_STATUSES).
+      return "Waiting on a real review process, which isn't connected yet.";
+  }
+}
+
 /** Real category objects for an application's stored slugs — filters out any slug that no longer resolves (e.g. a category later deactivated). */
 export function getApplicationLearningAreas(
   application: Application,

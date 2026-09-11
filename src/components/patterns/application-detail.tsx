@@ -20,6 +20,7 @@ import {
   canSubmitApplication,
   canWithdrawApplication,
   getApplicationLearningAreas,
+  getApplicationNextAction,
   getApplicationTimeline,
 } from "@/lib/admissions/types";
 import { cn } from "@/lib/utils/cn";
@@ -105,6 +106,29 @@ function ApplicationDetail() {
                 {APPLICATION_STATUS_LABELS[application.status]}
               </Badge>
             </div>
+
+            <dl className="mt-4 grid grid-cols-2 gap-4 border-y border-neutral-200 py-4 text-sm sm:grid-cols-3">
+              <div>
+                <dt className="text-neutral-500">Reference</dt>
+                <dd className="mt-0.5 font-medium text-ink">{application.referenceNumber ?? "Not yet submitted"}</dd>
+              </div>
+              <div>
+                <dt className="text-neutral-500">Applied</dt>
+                <dd className="mt-0.5 font-medium text-ink">{new Date(application.createdAt).toLocaleDateString()}</dd>
+              </div>
+              <div>
+                <dt className="text-neutral-500">Last updated</dt>
+                <dd className="mt-0.5 font-medium text-ink">{new Date(application.updatedAt).toLocaleDateString()}</dd>
+              </div>
+            </dl>
+
+            <Alert
+              variant={application.status === "withdrawn" ? "warning" : application.status === "submitted" ? "success" : "info"}
+              className="mt-4"
+              title="What happens next"
+            >
+              {getApplicationNextAction(application)}
+            </Alert>
 
             <ol className="mt-6 space-y-4">
               {timeline.map((step) => (
