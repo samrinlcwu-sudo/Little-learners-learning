@@ -257,3 +257,18 @@ application routes remain `robots: { index: false, follow: false }`, and
 that the loading gate (`!ready || !childrenReady`) renders before content
 without a flash of empty state. Ran typecheck, lint, the full Vitest suite,
 and a production build; all clean.
+
+## Checkpoint (Prompt 55)
+
+A full regression pass re-verified the entire admissions flow end to end —
+new draft → validation-blocked steps → real submission → honest
+confirmation → tracking detail → list view — plus a bogus application id
+(honest "not found," not an error) and mobile layout. No genuine defect
+was found in this system; no code changes were needed. Re-confirmed: both
+`/dashboard/applications*` routes stay `robots: { index: false, follow:
+false }`; no API route exists anywhere in this codebase that could expose
+an application (`src/app` has no `route.ts`), so "not exposed through
+public APIs" holds by construction, not by a filter; access control
+remains structural (one browser holds one family's data) rather than a
+client-side ownership check, since no account/session system exists yet
+to check against.

@@ -191,3 +191,16 @@ journeys are all unaffected. Ran typecheck, lint, the full Vitest suite
 (including new tests for `getUnreadCount`, `sortNotificationsByRecency`,
 and every channel provider's honest connected/not-connected behavior),
 and a production build; all clean.
+
+## Checkpoint (Prompt 55)
+
+Re-verified live, in a fresh browser tab (no stale state): a real
+submit/withdraw still creates the correct notification, the bell badge and
+"Mark all as read" still work, and the full `/dashboard/notifications`
+list still renders every field correctly. Re-confirmed
+`getNotificationChannelProviders()` reports `connected: true` for exactly
+one channel (`in-app`) and `"not-connected"` for the other four — no
+external provider was accidentally wired in anywhere in this codebase
+(`grep` for `fetch(`/`XMLHttpRequest`/`axios` inside `src/lib/notifications`
+and `src/lib/admissions` returns nothing). No genuine defect was found; no
+code changes were needed this checkpoint.
