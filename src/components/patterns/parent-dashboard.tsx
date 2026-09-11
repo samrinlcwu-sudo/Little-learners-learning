@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, BookOpen, Library, Gamepad2, Settings, ShieldCheck, Sparkles } from "lucide-react";
+import { Plus, BookOpen, Library, Gamepad2, ClipboardList, Settings, ShieldCheck, Sparkles } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -49,12 +49,20 @@ const quickLinks = [
     href: "/games",
     tone: "accent" as const,
   },
+  {
+    icon: ClipboardList,
+    title: "Applications",
+    description: "Start or track an application for your child.",
+    href: "/dashboard/applications",
+    tone: "neutral" as const,
+  },
 ];
 
 const TONE_STYLES = {
   primary: "bg-primary-100 text-primary-700",
   secondary: "bg-secondary-100 text-secondary-700",
   accent: "bg-accent-100 text-accent-800",
+  neutral: "bg-neutral-100 text-neutral-600",
 };
 
 /**
@@ -171,7 +179,7 @@ function ParentDashboard() {
 
           <div className="mt-14">
             <Heading level="h2">Find something to explore</Heading>
-            <div className="mt-6 grid gap-5 sm:grid-cols-3">
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {quickLinks.map((link) => (
                 <Link key={link.href} href={link.href} className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
                   <Card interactive className="flex h-full flex-col gap-3 p-5">

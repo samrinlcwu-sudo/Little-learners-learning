@@ -16,6 +16,7 @@ export const primaryNav: NavLink[] = [
   { label: "Games", href: "/games" },
   { label: "For Parents", href: "/parents" },
   { label: "For Teachers", href: "/teachers" },
+  { label: "Admissions", href: "/admissions" },
   { label: "About", href: "/about" },
 ];
 
@@ -33,6 +34,7 @@ export const footerNav: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "For Parents", href: "/parents" },
       { label: "For Teachers", href: "/teachers" },
+      { label: "Admissions", href: "/admissions" },
       { label: "About", href: "/about" },
     ],
   },
