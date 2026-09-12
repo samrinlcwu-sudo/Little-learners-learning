@@ -24,6 +24,7 @@ import {
 } from "@/config/teacher-options";
 import { RESOURCE_TYPE_LABELS } from "@/lib/resources/types";
 import {
+  ACCOUNT_STATUS_LABELS,
   TEACHER_MODERATION_STATUSES,
   TEACHER_MODERATION_STATUS_LABELS,
   type TeacherModerationStatus,
@@ -53,7 +54,7 @@ const interestLabelById = new Map(getAllTeachingInterestOptions().map((o) => [o.
 function AdminTeacherDetail() {
   const params = useParams<{ teacherId: string }>();
   const { teachers, ready } = useAdminTeacherAccounts();
-  const { setModerationStatus, setVerified } = useTeacherProfile();
+  const { setModerationStatus, setVerified, setAccountStatus } = useTeacherProfile();
   const { resources, ready: resourcesReady, setReviewStatus } = useTeacherResources();
 
   if (!ready || !resourcesReady) {
@@ -104,11 +105,6 @@ function AdminTeacherDetail() {
 
       <Section className="pt-10 sm:pt-12 lg:pt-14">
         <Container className="max-w-3xl space-y-8">
-          <Alert variant="warning">
-            This admin area isn&apos;t protected by real authentication yet — see docs/ACCOUNTS_ARCHITECTURE.md.
-            Every action below is real and changes this teacher&apos;s actual record on this device.
-          </Alert>
-
           <Card className="p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <div className="flex items-start gap-4">
@@ -137,9 +133,16 @@ function AdminTeacherDetail() {
             </div>
           </Card>
 
+          {teacher.accountStatus === "deactivated" && (
+            <Alert variant="error">
+              This account is deactivated — the teacher&apos;s own dashboard and public profile are both blocked
+              while it stays this way, even if directory moderation or visibility would otherwise allow them.
+            </Alert>
+          )}
+
           <Card className="p-6">
             <Heading level="h3" as="h2">
-              Account status
+              Directory &amp; verification
             </Heading>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               <div>
@@ -198,6 +201,30 @@ function AdminTeacherDetail() {
               <p className="mt-2 text-xs text-neutral-500">
                 A real human decision, recorded honestly — never set automatically anywhere else in this codebase.
               </p>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Heading level="h3" as="h2">
+                Account status
+              </Heading>
+              <Badge variant={teacher.accountStatus === "active" ? "success" : "error"}>
+                {ACCOUNT_STATUS_LABELS[teacher.accountStatus]}
+              </Badge>
+            </div>
+            <p className="mt-2 text-sm text-neutral-600">
+              A platform-level suspension, separate from directory moderation above — deactivating this account
+              blocks the teacher&apos;s own dashboard and public profile entirely, not just its directory listing.
+            </p>
+            <div className="mt-4">
+              <Button
+                size="sm"
+                variant={teacher.accountStatus === "active" ? "outline" : "primary"}
+                onClick={() => setAccountStatus(teacher.accountStatus === "active" ? "deactivated" : "active")}
+              >
+                {teacher.accountStatus === "active" ? "Deactivate account" : "Reactivate account"}
+              </Button>
             </div>
           </Card>
 

@@ -18,6 +18,7 @@ function makeTeacher(overrides: Partial<TeacherProfile> = {}): TeacherProfile {
     visibility: "private",
     moderationStatus: "pending",
     verified: false,
+    accountStatus: "active",
     createdAt: "2026-01-01T00:00:00.000Z",
     ...overrides,
   };

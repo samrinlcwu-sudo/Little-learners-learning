@@ -18,6 +18,7 @@ function makeTeacher(overrides: Partial<TeacherProfile> = {}): TeacherProfile {
     visibility: "private",
     moderationStatus: "pending",
     verified: false,
+    accountStatus: "active",
     createdAt: "2026-01-01T00:00:00.000Z",
     ...overrides,
   };
@@ -42,6 +43,14 @@ describe("canViewTeacherProfile", () => {
 
   it("is false for a public but hidden profile", () => {
     expect(canViewTeacherProfile(makeTeacher({ visibility: "public", moderationStatus: "hidden" }))).toBe(false);
+  });
+
+  it("is false for a deactivated account, even public and approved", () => {
+    expect(
+      canViewTeacherProfile(
+        makeTeacher({ visibility: "public", moderationStatus: "approved", accountStatus: "deactivated" }),
+      ),
+    ).toBe(false);
   });
 });
 

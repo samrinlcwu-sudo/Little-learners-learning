@@ -5,10 +5,12 @@ import {
   addLocalChild,
   getLocalChildrenSnapshot,
   getServerChildrenSnapshot,
+  setLocalChildAccountStatus,
   subscribeLocalChildren,
   updateLocalChild,
   type NewChildProfile,
 } from "./local-children";
+import type { ChildProfile } from "./types";
 
 /**
  * `useSyncExternalStore` reads localStorage (an external data source, not
@@ -36,5 +38,9 @@ export function useChildProfiles() {
     updateLocalChild(id, updates);
   }, []);
 
-  return { children, ready, addChild, updateChild };
+  const setAccountStatus = React.useCallback((id: string, accountStatus: ChildProfile["accountStatus"]) => {
+    setLocalChildAccountStatus(id, accountStatus);
+  }, []);
+
+  return { children, ready, addChild, updateChild, setAccountStatus };
 }

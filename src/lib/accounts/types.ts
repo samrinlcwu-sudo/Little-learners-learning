@@ -28,6 +28,26 @@ export interface Account {
 }
 
 /**
+ * A platform-level account state, independent of any role-specific status
+ * — a teacher's `TeacherModerationStatus` only ever gates *public
+ * directory* visibility; this gates the account itself, for every role
+ * that can hold one (today: teacher and child profiles). Added in
+ * Prompt 57 (`docs/ADMIN_ARCHITECTURE.md`) alongside the admin controls
+ * that are the only thing that can ever set it to `"deactivated"` — a
+ * teacher's own profile editor and a parent's own child-profile form both
+ * exclude this field from what they can write. Every profile stored
+ * before Prompt 57 is read as `"active"` (see each store's own
+ * normalization), so nothing existing changes behavior by default.
+ */
+export const ACCOUNT_STATUSES = ["active", "deactivated"] as const;
+export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
+
+export const ACCOUNT_STATUS_LABELS: Record<AccountStatus, string> = {
+  active: "Active",
+  deactivated: "Deactivated",
+};
+
+/**
  * The fixed set of playful avatar choices a parent picks from — deliberately
  * not a photo upload. No real image of a child is ever collected or stored,
  * which sidesteps the privacy question entirely rather than needing to
@@ -52,6 +72,8 @@ export interface ChildProfile {
   /** A learning-category slug (src/config/learning-categories.ts) — optional, personalizes what's suggested first. */
   favoriteCategory?: string;
   createdAt: string;
+  /** See AccountStatus above — only an admin action can ever set this to "deactivated". */
+  accountStatus: AccountStatus;
 }
 
 /**
@@ -185,4 +207,6 @@ export interface TeacherProfile {
   /** Sourced by a human review step once teacher registration is connected to a real backend — never set automatically. */
   verified: boolean;
   createdAt: string;
+  /** See AccountStatus above — only an admin action can ever set this to "deactivated"; gates the account itself, separate from moderationStatus (which only gates public listing/visibility). */
+  accountStatus: AccountStatus;
 }

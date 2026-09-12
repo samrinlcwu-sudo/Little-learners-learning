@@ -86,6 +86,23 @@ function ChildExperience() {
     );
   }
 
+  if (child.accountStatus === "deactivated") {
+    return (
+      <Section surface="sunken" className="flex flex-1 flex-col justify-center">
+        <Container className="max-w-md text-center">
+          <Heading level="h1">This profile has been deactivated</Heading>
+          <p className="mt-3 text-neutral-600">
+            {child.name}&apos;s learning view isn&apos;t available right now. Contact support if you believe this is
+            a mistake.
+          </p>
+          <Button className="mt-6" asChild>
+            <Link href="/dashboard">Back to dashboard</Link>
+          </Button>
+        </Container>
+      </Section>
+    );
+  }
+
   const completedGames = events.filter((event) => event.type === "game_completed").slice(-5).reverse();
   const nextStep = getNextStepSuggestion(events);
   const exploreCategories = getExploreCategories();

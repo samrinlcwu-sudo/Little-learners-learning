@@ -1,5 +1,6 @@
 import type { TeacherProfile } from "./types";
 import { slugify, randomSlugSuffix } from "@/lib/utils/slugify";
+import { recordAdminAuditEvent } from "@/lib/admin/audit-log";
 
 /**
  * The one teacher profile this browser holds — same reasoning as
@@ -65,6 +66,7 @@ function normalize(profile: TeacherProfile): TeacherProfile {
     // rather than converted, and the teacher can reselect from the real
     // list next time they edit their profile.
     teachingInterests: Array.isArray(profile.teachingInterests) ? profile.teachingInterests : [],
+    accountStatus: profile.accountStatus ?? "active",
   };
   if (!withDefaults.slug) {
     withDefaults.slug = `${slugify(withDefaults.name) || "teacher"}-${randomSlugSuffix()}`;
@@ -150,6 +152,7 @@ export function createLocalTeacherAccount(account: NewTeacherAccount): TeacherPr
     visibility: "private",
     moderationStatus: "pending",
     verified: false,
+    accountStatus: "active",
     createdAt: new Date().toISOString(),
     ...account,
   };
@@ -158,7 +161,7 @@ export function createLocalTeacherAccount(account: NewTeacherAccount): TeacherPr
 }
 
 export type TeacherProfileUpdates = Partial<
-  Omit<TeacherProfile, "id" | "accountId" | "slug" | "visibility" | "moderationStatus" | "verified" | "createdAt">
+  Omit<TeacherProfile, "id" | "accountId" | "slug" | "visibility" | "moderationStatus" | "verified" | "accountStatus" | "createdAt">
 >;
 
 /** Merges profile-completion fields into the existing record — see teacher-profile-form.tsx. No-ops if no account exists yet. */
@@ -196,7 +199,14 @@ export function setLocalTeacherModerationStatus(
 ): TeacherProfile | null {
   const current = getLocalTeacherSnapshot();
   if (!current) return null;
-  return commit({ ...current, moderationStatus });
+  const updated = commit({ ...current, moderationStatus });
+  recordAdminAuditEvent({
+    action: "teacher.moderation_status_changed",
+    targetType: "teacher",
+    targetId: current.id,
+    details: `Set ${current.name}'s directory moderation status to "${moderationStatus}".`,
+  });
+  return updated;
 }
 
 /**
@@ -209,5 +219,35 @@ export function setLocalTeacherModerationStatus(
 export function setLocalTeacherVerified(verified: boolean): TeacherProfile | null {
   const current = getLocalTeacherSnapshot();
   if (!current) return null;
-  return commit({ ...current, verified });
+  const updated = commit({ ...current, verified });
+  recordAdminAuditEvent({
+    action: "teacher.verified_changed",
+    targetType: "teacher",
+    targetId: current.id,
+    details: `${verified ? "Marked" : "Removed verification from"} ${current.name}'s account${verified ? " as verified" : ""}.`,
+  });
+  return updated;
+}
+
+/**
+ * The account-level suspension Prompt 57 adds — distinct from
+ * `moderationStatus` (which only ever gates *public* visibility). A
+ * deactivated teacher account is blocked from its own dashboard and
+ * public profile alike (see `canViewTeacherProfile`,
+ * src/lib/accounts/teacher-visibility.ts, and the dashboard's own guard),
+ * not just delisted. Only the admin user management area calls this.
+ */
+export function setLocalTeacherAccountStatus(
+  accountStatus: TeacherProfile["accountStatus"],
+): TeacherProfile | null {
+  const current = getLocalTeacherSnapshot();
+  if (!current) return null;
+  const updated = commit({ ...current, accountStatus });
+  recordAdminAuditEvent({
+    action: "teacher.account_status_changed",
+    targetType: "teacher",
+    targetId: current.id,
+    details: `Set ${current.name}'s account status to "${accountStatus}".`,
+  });
+  return updated;
 }

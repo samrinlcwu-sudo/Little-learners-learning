@@ -142,6 +142,23 @@ function TeacherDashboard() {
     );
   }
 
+  if (teacher.accountStatus === "deactivated") {
+    return (
+      <Section surface="sunken" className="flex flex-1 flex-col justify-center">
+        <Container className="max-w-md text-center">
+          <Heading level="h1">This account has been deactivated</Heading>
+          <p className="mt-3 text-neutral-600">
+            Your dashboard and public profile aren&apos;t available while your account is deactivated. If you
+            believe this is a mistake, contact support.
+          </p>
+          <Button className="mt-6" asChild>
+            <Link href="/support">Contact support</Link>
+          </Button>
+        </Container>
+      </Section>
+    );
+  }
+
   const completion = calculateProfileCompletion(teacher);
   const ownResources = resources.filter((r) => r.author.teacherId === teacher.id);
 

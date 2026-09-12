@@ -19,6 +19,7 @@ import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import { getAllTeacherAgeGroupOptions, formatTeacherAgeGroupLabel } from "@/config/teacher-options";
 import {
+  ACCOUNT_STATUS_LABELS,
   TEACHER_MODERATION_STATUSES,
   TEACHER_MODERATION_STATUS_LABELS,
   type TeacherAgeGroup,
@@ -84,16 +85,6 @@ function AdminTeacherList() {
 
       <Section className="pt-10 sm:pt-12 lg:pt-14">
         <Container className="max-w-5xl">
-          <Alert variant="warning" className="mb-8">
-            <p className="font-semibold">This admin area isn&apos;t protected by real authentication yet.</p>
-            <p className="mt-1">
-              There&apos;s no accounts/sessions backend connected (see docs/ACCOUNTS_ARCHITECTURE.md), so — exactly
-              like every other unauthenticated area of this site — anyone with this URL can reach it today. Once
-              real accounts exist, every <code>/admin</code> route will require a signed-in account with role
-              &ldquo;admin,&rdquo; checked server-side, never a client-side flag.
-            </p>
-          </Alert>
-
           <Alert variant="info" className="mb-8">
             There&apos;s no shared backend yet, so this list can only ever show teacher accounts saved on{" "}
             <strong>this device</strong> — never another browser&apos;s. The search and filters below are real,
@@ -138,7 +129,7 @@ function AdminTeacherList() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="admin-teacher-moderation">Account status</Label>
+              <Label htmlFor="admin-teacher-moderation">Directory status</Label>
               <Select
                 id="admin-teacher-moderation"
                 value={moderationStatus}
@@ -190,7 +181,7 @@ function AdminTeacherList() {
               />
             ) : (
               <div className="overflow-x-auto rounded-xl border border-neutral-200">
-                <table className="w-full min-w-[860px] text-left text-sm">
+                <table className="w-full min-w-[980px] text-left text-sm">
                   <thead className="border-b border-neutral-200 bg-surface-sunken text-xs uppercase tracking-wide text-neutral-500">
                     <tr>
                       <th className="px-4 py-3 font-medium">Teacher</th>
@@ -200,6 +191,7 @@ function AdminTeacherList() {
                       <th className="px-4 py-3 font-medium">Verified</th>
                       <th className="px-4 py-3 font-medium">Visibility</th>
                       <th className="px-4 py-3 font-medium">Resources</th>
+                      <th className="px-4 py-3 font-medium">Account</th>
                       <th className="px-4 py-3 font-medium text-right">Actions</th>
                     </tr>
                   </thead>
@@ -253,6 +245,11 @@ function AdminTeacherList() {
                             {teacher.visibility === "public" ? "Public" : "Private"}
                           </td>
                           <td className="px-4 py-3 text-neutral-600">{resourceCount}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant={teacher.accountStatus === "active" ? "success" : "error"}>
+                              {ACCOUNT_STATUS_LABELS[teacher.accountStatus]}
+                            </Badge>
+                          </td>
                           <td className="px-4 py-3 text-right">
                             <Button size="sm" variant="outline" asChild>
                               <Link href={`/admin/teachers/${teacher.id}`}>

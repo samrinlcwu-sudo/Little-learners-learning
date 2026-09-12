@@ -51,7 +51,10 @@ function ChildOverviewCard({ child, events, progressReady, onEdit }: ChildOvervi
         <div className="flex items-center gap-3">
           <ChildAvatar avatar={child.avatar} size="lg" />
           <div>
-            <p className="font-display text-lg font-semibold text-ink">{child.name}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="font-display text-lg font-semibold text-ink">{child.name}</p>
+              {child.accountStatus === "deactivated" && <Badge variant="error">Deactivated</Badge>}
+            </div>
             <p className="text-sm text-neutral-600">
               {child.ageYears} year{child.ageYears === 1 ? "" : "s"} old
             </p>

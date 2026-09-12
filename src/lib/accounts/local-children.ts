@@ -1,4 +1,5 @@
 import type { ChildProfile } from "./types";
+import { recordAdminAuditEvent } from "@/lib/admin/audit-log";
 
 /**
  * Child profiles, stored in this browser only — there is no parent account
@@ -36,6 +37,11 @@ function isBrowser(): boolean {
   return typeof window !== "undefined";
 }
 
+/** Backfills fields added after a profile may have been created — a stored record without `accountStatus` (everything before Prompt 57) is read as "active", never as "deactivated" by omission. */
+function normalize(child: ChildProfile): ChildProfile {
+  return { ...child, accountStatus: child.accountStatus ?? "active" };
+}
+
 function readFromStorage(): ChildProfile[] {
   // Distinct from EMPTY_SNAPSHOT on purpose: this means "checked, and there
   // genuinely aren't any" — useChildProfiles' `ready` flag depends on this
@@ -46,7 +52,7 @@ function readFromStorage(): ChildProfile[] {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed.map(normalize) : [];
   } catch {
     return [];
   }
@@ -85,10 +91,40 @@ export type NewChildProfile = Pick<ChildProfile, "name" | "ageYears" | "avatar" 
 export function addLocalChild(child: NewChildProfile): ChildProfile[] {
   return commit([
     ...getLocalChildrenSnapshot(),
-    { id: crypto.randomUUID(), parentAccountId: LOCAL_PARENT_ID, createdAt: new Date().toISOString(), ...child },
+    {
+      id: crypto.randomUUID(),
+      parentAccountId: LOCAL_PARENT_ID,
+      createdAt: new Date().toISOString(),
+      accountStatus: "active",
+      ...child,
+    },
   ]);
 }
 
 export function updateLocalChild(id: string, updates: NewChildProfile): ChildProfile[] {
   return commit(getLocalChildrenSnapshot().map((existing) => (existing.id === id ? { ...existing, ...updates } : existing)));
+}
+
+/**
+ * The account-level suspension Prompt 57 adds (docs/ADMIN_ARCHITECTURE.md)
+ * — only the admin user management area calls this; a parent's own
+ * child-profile form never can (it only ever sends `NewChildProfile`,
+ * which excludes this field). A deactivated child's own view
+ * (`/dashboard/children/[childId]`) shows a real blocked state instead of
+ * the learning experience.
+ */
+export function setLocalChildAccountStatus(id: string, accountStatus: ChildProfile["accountStatus"]): ChildProfile[] {
+  const target = getLocalChildrenSnapshot().find((child) => child.id === id);
+  const result = commit(
+    getLocalChildrenSnapshot().map((existing) => (existing.id === id ? { ...existing, accountStatus } : existing)),
+  );
+  if (target) {
+    recordAdminAuditEvent({
+      action: "child.account_status_changed",
+      targetType: "child",
+      targetId: id,
+      details: `Set ${target.name}'s account status to "${accountStatus}".`,
+    });
+  }
+  return result;
 }
