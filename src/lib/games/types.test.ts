@@ -18,6 +18,7 @@ function makeGame(overrides: Partial<Game> = {}): Game {
     featured: false,
     publicationStatus: "published",
     religiousReview: "not-applicable",
+    accessTier: "free",
     ...overrides,
   };
 }

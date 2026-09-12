@@ -17,6 +17,13 @@ already uses. Nothing new was invented to fill the gap the brief warned
 about; the public `/admissions` page says as much directly ("doesn't run
 a formal enrollment process yet").
 
+Prompt 59's `Offering` model (`docs/BUSINESS_ARCHITECTURE.md`) includes a
+`"learning-program"` type for exactly this reason — the moment a real
+program (real tuition, real dates, a real accredited curriculum) exists,
+it belongs there, as a real `Offering`, not retrofitted into
+`Application`. `getAllOfferings()` returns `[]` today, so this remains
+true: no program exists yet, on either side of this relationship.
+
 ## No duplicate user system
 
 An `Application` (`src/lib/admissions/types.ts`) belongs to this

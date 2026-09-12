@@ -98,6 +98,12 @@ no entitlement checks exist. When they do, `canDownload()` is the one
 function that needs to grow (checking a real entitlement instead of just
 "is this free"); every card and page that calls it stays the same.
 
+Prompt 59 added the catalog-level layer above this one —
+`docs/BUSINESS_ARCHITECTURE.md` — a general `Offering` concept (bundles,
+programs, memberships) that can reference resources by id without
+duplicating them. `AccessTier` itself is unchanged and still lives here;
+`Offering.accessLevel` just reuses it.
+
 ## Routes
 
 - `/resources` — the library index. **Server-rendered and URL-driven**

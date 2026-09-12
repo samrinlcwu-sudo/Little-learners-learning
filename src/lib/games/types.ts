@@ -5,6 +5,7 @@ import {
   type PublicationStatus,
   type ReligiousReviewStatus,
 } from "@/lib/content/types";
+import type { AccessTier } from "@/lib/resources/types";
 
 /**
  * Extensible by design — each maps to a distinct interaction shape, not
@@ -60,6 +61,15 @@ export interface Game {
   featured: boolean;
   publicationStatus: PublicationStatus;
   religiousReview: ReligiousReviewStatus;
+  /**
+   * Reuses the exact same free/premium/membership vocabulary
+   * `Resource.accessTier` already uses (src/lib/resources/types.ts) —
+   * added in Prompt 59 to close a real gap: tiering existed on resources
+   * but was never extended to games. Every real game in this codebase
+   * today is `"free"` (see SAMPLE_GAMES) — nothing here invents a premium
+   * game that doesn't exist. See docs/BUSINESS_ARCHITECTURE.md.
+   */
+  accessTier: AccessTier;
 }
 
 /** Same gate used everywhere else: draft never shows, Qur'an-category games require explicit human verification. */

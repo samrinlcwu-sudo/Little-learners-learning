@@ -39,6 +39,7 @@ export const SAMPLE_GAMES: Game[] = [
     featured: true,
     publicationStatus: "published",
     religiousReview: "not-applicable",
+    accessTier: "free",
   },
   {
     id: "game-2",
@@ -65,6 +66,7 @@ export const SAMPLE_GAMES: Game[] = [
     featured: true,
     publicationStatus: "published",
     religiousReview: "not-applicable",
+    accessTier: "free",
   },
   {
     id: "game-3",
@@ -91,6 +93,7 @@ export const SAMPLE_GAMES: Game[] = [
     featured: false,
     publicationStatus: "published",
     religiousReview: "not-applicable",
+    accessTier: "free",
   },
   {
     id: "game-4",
@@ -117,6 +120,7 @@ export const SAMPLE_GAMES: Game[] = [
     featured: false,
     publicationStatus: "published",
     religiousReview: "not-applicable",
+    accessTier: "free",
   },
   {
     id: "game-5",
@@ -144,6 +148,7 @@ export const SAMPLE_GAMES: Game[] = [
     featured: true,
     publicationStatus: "published",
     religiousReview: "not-applicable",
+    accessTier: "free",
   },
   {
     id: "game-6",
@@ -169,5 +174,6 @@ export const SAMPLE_GAMES: Game[] = [
     // isGamePublished() must exclude this until a person verifies it, even
     // though the letter names themselves are just factual linguistic data.
     religiousReview: "pending-review",
+    accessTier: "free",
   },
 ];

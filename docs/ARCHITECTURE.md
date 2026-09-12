@@ -148,6 +148,10 @@ well-documented integrations with it; webhooks would land in
 `src/app/api/webhooks/stripe/route.ts`. No payment provider is connected, and
 none should be until a real commercial transaction flow is being built.
 
+The catalog this would eventually sell — `Offering`
+(`src/lib/offerings/types.ts`, Prompt 59, `docs/BUSINESS_ARCHITECTURE.md`)
+— is modeled and ready, with zero live instances today.
+
 ## 19. Future mobile application compatibility
 
 Business logic (validation schemas, Supabase queries) is kept in framework-
