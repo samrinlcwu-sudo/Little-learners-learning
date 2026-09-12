@@ -181,3 +181,33 @@ export function setLocalTeacherVisibility(
   if (!current) return null;
   return commit({ ...current, visibility });
 }
+
+/**
+ * The platform's side of the "two gates" (docs/TEACHER_DIRECTORY_ARCHITECTURE.md)
+ * — the human review step `moderationStatus` was always modeled for but had
+ * no real control anywhere in this codebase until the admin teacher
+ * management area (docs/ADMIN_ARCHITECTURE.md). Kept as its own function,
+ * separate from `updateLocalTeacherProfile`, for the same reason
+ * `setLocalTeacherVisibility` is: a moderation decision, not a content
+ * edit a teacher's own form could ever trigger.
+ */
+export function setLocalTeacherModerationStatus(
+  moderationStatus: TeacherProfile["moderationStatus"],
+): TeacherProfile | null {
+  const current = getLocalTeacherSnapshot();
+  if (!current) return null;
+  return commit({ ...current, moderationStatus });
+}
+
+/**
+ * The other human-review field that had no real setter anywhere in this
+ * codebase — `verified` stayed permanently `false` because nothing could
+ * set it to `true`. Only the admin teacher management area calls this; a
+ * teacher's own profile editor never can (see `TeacherProfileUpdates`
+ * above, which excludes it).
+ */
+export function setLocalTeacherVerified(verified: boolean): TeacherProfile | null {
+  const current = getLocalTeacherSnapshot();
+  if (!current) return null;
+  return commit({ ...current, verified });
+}

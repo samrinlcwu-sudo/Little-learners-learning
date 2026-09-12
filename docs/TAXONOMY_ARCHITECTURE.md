@@ -41,9 +41,11 @@ active? }` — and `getActiveOptions()`, which every accessor function
 `getAllTeacherLanguageOptions()`, `getAllTeachingInterestOptions()`,
 `getAllTeacherResourceTypeOptions()`) already filters through. `active`
 being omitted (or `true`) means the option shows up everywhere it's
-used; no admin tool sets it to `false` yet, because there's no admin UI
-to do that with — but the mechanism is real and live today, not a
-placeholder field nobody reads. `LearningCategory` keeps its own
+used; no admin tool sets it to `false` yet — `/admin/teachers`
+(`docs/ADMIN_ARCHITECTURE.md`, Prompt 56) manages teacher accounts, not
+taxonomy options, so this specific control still doesn't exist anywhere —
+but the mechanism is real and live today, not a placeholder field nobody
+reads. `LearningCategory` keeps its own
 established `slug`/`name` fields (renaming them to `id`/`label` across
 every file that already uses them would be a large, purely cosmetic
 change) but follows the identical `active` convention.

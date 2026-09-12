@@ -68,11 +68,15 @@ chain. This layer is the first place all of it is read together.
   own resources including drafts and pending submissions — the opposite of
   `public-knowledge.ts`, which only ever shows what
   `isResourcePublished()` allows.
-- No `admin-knowledge.ts` exists. There is no admin route, admin data, or
-  admin UI anywhere in this codebase yet (`AccountRole` carries `"admin"`
-  as a placeholder only — src/lib/accounts/types.ts) — inventing an
-  admin-only knowledge source now would mean modeling data that doesn't
-  exist. This module is added the day real admin data does.
+- No `admin-knowledge.ts` exists. `/admin/teachers` (Prompt 56,
+  `docs/ADMIN_ARCHITECTURE.md`) is now a real admin surface with real
+  data, but the AI assistant's own `AiAudience` type still has no
+  `"admin"` entry that maps to it (`getAiAudience()`,
+  `src/lib/ai/audience.ts`, and `AI_AUDIENCE_PERMISSIONS`,
+  `src/lib/ai/permissions.ts`, both explicitly set `admin.mayAccessAssistant: false`)
+  — the assistant was never connected to the admin area, so there is
+  still nothing here for a knowledge module to expose. This module is
+  added the day the assistant is deliberately extended to admin users.
 
 ## Parent/child/teacher/public separation
 

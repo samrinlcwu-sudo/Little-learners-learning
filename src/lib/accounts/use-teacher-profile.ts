@@ -5,6 +5,8 @@ import {
   createLocalTeacherAccount,
   getLocalTeacherSnapshot,
   getServerTeacherSnapshot,
+  setLocalTeacherModerationStatus,
+  setLocalTeacherVerified,
   setLocalTeacherVisibility,
   subscribeLocalTeacher,
   updateLocalTeacherProfile,
@@ -44,5 +46,13 @@ export function useTeacherProfile() {
     return setLocalTeacherVisibility(visibility);
   }, []);
 
-  return { teacher, ready, createAccount, updateProfile, setVisibility };
+  const setModerationStatus = React.useCallback((moderationStatus: TeacherProfile["moderationStatus"]) => {
+    return setLocalTeacherModerationStatus(moderationStatus);
+  }, []);
+
+  const setVerified = React.useCallback((verified: boolean) => {
+    return setLocalTeacherVerified(verified);
+  }, []);
+
+  return { teacher, ready, createAccount, updateProfile, setVisibility, setModerationStatus, setVerified };
 }

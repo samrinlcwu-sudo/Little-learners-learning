@@ -133,6 +133,14 @@ export type TeacherProfileVisibility = (typeof TEACHER_PROFILE_VISIBILITIES)[num
 export const TEACHER_MODERATION_STATUSES = ["pending", "approved", "rejected", "hidden"] as const;
 export type TeacherModerationStatus = (typeof TEACHER_MODERATION_STATUSES)[number];
 
+/** Shared display labels — used by the Teacher Dashboard's own read-only badge and the admin teacher management area's moderation controls (docs/ADMIN_ARCHITECTURE.md), so the wording never drifts between the two. */
+export const TEACHER_MODERATION_STATUS_LABELS: Record<TeacherModerationStatus, string> = {
+  pending: "Pending review",
+  approved: "Approved",
+  rejected: "Not approved",
+  hidden: "Hidden",
+};
+
 /**
  * The professional profile behind the /teachers page and the teacher
  * registration flow (docs/TEACHER_ARCHITECTURE.md) — separate from Account

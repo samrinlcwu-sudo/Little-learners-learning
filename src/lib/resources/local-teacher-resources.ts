@@ -135,3 +135,24 @@ export function updateLocalTeacherResource(id: string, updates: TeacherResourceU
 export function deleteLocalTeacherResource(id: string): Resource[] {
   return commit(getLocalTeacherResourcesSnapshot().filter((existing) => existing.id !== id));
 }
+
+/**
+ * The reviewer action `reviewStatus` was always modeled for but had no
+ * real control anywhere in this codebase until the admin teacher
+ * management area (docs/ADMIN_ARCHITECTURE.md) — see the comment on
+ * `Resource.reviewStatus` (src/lib/resources/types.ts). Kept separate from
+ * `updateLocalTeacherResource` for the same reason
+ * `setLocalTeacherModerationStatus` is separate from
+ * `updateLocalTeacherProfile`: a moderation decision, never something a
+ * teacher's own edit form could trigger on their own resource.
+ */
+export function setLocalTeacherResourceReviewStatus(
+  id: string,
+  reviewStatus: NonNullable<Resource["reviewStatus"]>,
+): Resource[] {
+  return commit(
+    getLocalTeacherResourcesSnapshot().map((existing) =>
+      existing.id === id ? { ...existing, reviewStatus, updatedAt: new Date().toISOString() } : existing,
+    ),
+  );
+}

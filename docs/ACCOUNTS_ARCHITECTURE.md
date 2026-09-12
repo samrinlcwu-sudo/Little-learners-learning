@@ -28,13 +28,19 @@ in between.
   added in Prompt 26). They're deliberately separate forms, not a role
   picker on one shared form — a teacher's registration needs more than a
   parent's does (country, and later a professional profile).
-- **Admin** exists in the type so the system doesn't need a breaking
-  change to add it later, but there is no `/admin` route, no admin UI, and
-  no admin sign-up path anywhere in this codebase. When admin
-  functionality is built, it must live behind real server-side role
-  checks, never a client-side flag — "don't expose admin functionality
-  publicly" means the route shouldn't exist for anyone without the role,
-  not just that it's unlinked.
+- **Admin** exists in the type, and Prompt 56 added the first real admin
+  surface — `/admin` and `/admin/teachers[/[teacherId]]`
+  (`docs/ADMIN_ARCHITECTURE.md`) — but there is still no admin sign-up
+  path, no session, and no server-side role check anywhere in this
+  codebase, because there's no accounts backend to check a role against
+  yet. Every `/admin` page discloses this plainly and is reachable by
+  anyone who has the URL today, the same as every other unauthenticated
+  area of this site. This is the honest, disclosed exception to "don't
+  expose admin functionality publicly" that the backend-less architecture
+  forces — see `docs/ADMIN_ARCHITECTURE.md` for exactly what changes once
+  a real accounts backend exists: every `/admin` route gains a real
+  server-side check that the signed-in session's `role` is `"admin"`,
+  never a client-side flag.
 - **Child** is intentionally not a role. A child doesn't hold their own
   credentials — a child is a profile a parent account manages (see
   `ChildProfile`). This matches how every mainstream product handles

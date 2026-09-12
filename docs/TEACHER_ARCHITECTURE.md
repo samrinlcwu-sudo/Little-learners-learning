@@ -101,7 +101,10 @@ permissions client-side. Once Supabase is connected, the real rule is
 server-side: a `teacher_profiles` row is scoped by Row Level Security to
 its own `accountId`, and no route or query lets a teacher account read or
 write another account's data, a parent's child profiles, or anything
-admin-only. There is still no `/admin` route anywhere in this codebase.
+admin-only. `/admin/teachers` (Prompt 56, `docs/ADMIN_ARCHITECTURE.md`) is
+now the first real `/admin` route in this codebase — see that doc for why
+it isn't yet protected by a real server-side role check either, and what
+changes once one exists.
 
 ## Data model
 
@@ -317,17 +320,16 @@ reviewStatus?: "pending" | "approved" | "rejected";
 ```
 
 `isResourcePublished()` now also requires `reviewStatus === "approved"`
-whenever `author.role === "teacher"`. No reviewer tool exists anywhere in
-this codebase, so a teacher-authored resource can be set to
-`publicationStatus: "published"` (via "Submit for review" in the
-dashboard) but can never actually pass `isResourcePublished()` — it
-stays invisible everywhere that gate is checked, exactly like a teacher
-profile stuck at `moderationStatus: "pending"` forever
-(`docs/TEACHER_DIRECTORY_ARCHITECTURE.md`). This is the same "prepared
-architecture, not simulated" rule as everywhere else: the lifecycle is
-real and will start working the moment a real review tool sets
-`reviewStatus` to `"approved"`, but nothing here pretends that reviewer
-exists today.
+whenever `author.role === "teacher"`. A teacher-authored resource is set
+to `publicationStatus: "published"` (via "Submit for review" in the
+dashboard) but stays invisible everywhere that gate is checked until a
+real admin decision sets `reviewStatus` to `"approved"` in
+`/admin/teachers/[teacherId]` — see `docs/ADMIN_ARCHITECTURE.md`
+(Prompt 56). Before that admin area existed, this was "prepared
+architecture, not simulated" with no way to ever actually reach
+`"approved"`; now the lifecycle genuinely works end to end, exactly the
+same way a teacher profile can now actually reach
+`moderationStatus: "approved"` too (`docs/TEACHER_DIRECTORY_ARCHITECTURE.md`).
 
 ### Storage: the same tiny external store pattern
 

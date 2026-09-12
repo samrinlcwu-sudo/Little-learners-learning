@@ -6,11 +6,13 @@ import {
   deleteLocalTeacherResource,
   getLocalTeacherResourcesSnapshot,
   getServerTeacherResourcesSnapshot,
+  setLocalTeacherResourceReviewStatus,
   subscribeLocalTeacherResources,
   updateLocalTeacherResource,
   type NewTeacherResource,
   type TeacherResourceUpdates,
 } from "./local-teacher-resources";
+import type { Resource } from "./types";
 
 /**
  * Same useSyncExternalStore pattern as useChildProfiles/useTeacherProfile —
@@ -40,5 +42,9 @@ export function useTeacherResources() {
     deleteLocalTeacherResource(id);
   }, []);
 
-  return { resources, ready, addResource, updateResource, deleteResource };
+  const setReviewStatus = React.useCallback((id: string, reviewStatus: NonNullable<Resource["reviewStatus"]>) => {
+    setLocalTeacherResourceReviewStatus(id, reviewStatus);
+  }, []);
+
+  return { resources, ready, addResource, updateResource, deleteResource, setReviewStatus };
 }

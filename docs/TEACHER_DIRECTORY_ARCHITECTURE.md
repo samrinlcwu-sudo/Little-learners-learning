@@ -55,12 +55,23 @@ combine, mirroring the same two-gate shape as `isResourcePublished()` and
   `moderationStatus === "approved"`. Being viewable directly isn't the
   same as being discoverable through search.
 
-Because no reviewer exists yet, no profile can reach `"approved"` today —
-so the directory is empty for every visitor, including a teacher looking
-at their own public profile from a different tab. This is deliberate:
-the alternative (showing a teacher their own profile in "the directory"
-while nobody else can) would look like inconsistent, environment-specific
-behavior rather than an honest, uniform empty state.
+A real reviewer tool now exists — `/admin/teachers/[teacherId]`
+(`docs/ADMIN_ARCHITECTURE.md`, Prompt 56) — so a profile genuinely can
+reach `moderationStatus: "approved"` today. The directory still stays
+empty for every visitor even after that, on purpose: `getApprovedTeacherDirectoryEntries()`
+(`src/lib/accounts/teacher-directory.ts`) always returns `[]` regardless
+of any local profile's moderation state, because there is still no
+cross-visitor data source for it to honestly read from — the same
+architectural gap as before, just no longer entangled with "nothing can
+ever be approved." Approving a profile today has a real, immediate effect
+elsewhere instead: `canViewTeacherProfile()` already governs the direct
+link at `/teachers/p/[slug]`, so rejecting or hiding a profile blocks that
+link right away, in this same browser. This is deliberate: showing a
+teacher their own profile in "the directory" while nobody else's approval
+could ever be shared would look like inconsistent, environment-specific
+behavior rather than an honest, uniform empty state — `canListTeacherInDirectory()`
+is real, tested, and will drive real results the moment a shared backend
+exists, without changing shape.
 
 The Teacher Dashboard shows this plainly: a "Directory listing" badge
 (Pending review / Approved / Not approved / Hidden) next to the
