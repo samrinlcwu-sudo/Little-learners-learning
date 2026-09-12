@@ -6,6 +6,8 @@ import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
 import { isResourcePublished } from "@/lib/resources/types";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
 import { isGamePublished } from "@/lib/games/types";
+import { getAllOfferings } from "@/lib/offerings/offerings";
+import { isOfferingPubliclyVisible } from "@/lib/offerings/types";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -14,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: siteConfig.url, lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: `${siteConfig.url}/support`, lastModified: now, changeFrequency: "monthly", priority: 0.3 },
     { url: `${siteConfig.url}/faq`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${siteConfig.url}/offerings`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
     ...primaryNav.map((link) => ({
       url: `${siteConfig.url}${link.href}`,
       lastModified: now,
@@ -38,5 +41,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.4,
     })),
+    ...getAllOfferings()
+      .filter(isOfferingPubliclyVisible)
+      .map((offering) => ({
+        url: `${siteConfig.url}/offerings/${offering.slug}`,
+        lastModified: offering.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.4,
+      })),
   ];
 }

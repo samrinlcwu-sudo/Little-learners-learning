@@ -99,6 +99,14 @@ export interface Offering {
   name: string;
   description: string;
   type: OfferingType;
+  /**
+   * Only ever a real, uploaded image once a real offering exists —
+   * never a placeholder or stock photo. Absent by default, the same
+   * "optional, honestly missing" treatment `Resource.thumbnail` and
+   * `Game.thumbnail` already use; `OfferingCard` falls back to a plain
+   * icon exactly the way `ResourceCard`/`GameCard` already do.
+   */
+  thumbnail?: string;
   /** LearningCategory slugs (src/config/learning-categories.ts) — never a second subject taxonomy. */
   learningAreas: string[];
   ageRange?: AgeRange;

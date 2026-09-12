@@ -71,4 +71,29 @@ describe("filterOfferings", () => {
   it("returns an empty array for an empty catalog, never an error", () => {
     expect(filterOfferings([], {})).toEqual([]);
   });
+
+  it("filters by availability", () => {
+    const items = [
+      makeOffering({ id: "o1", availability: "available" }),
+      makeOffering({ id: "o2", availability: "coming-soon" }),
+    ];
+    const result = filterOfferings(items, { availability: "coming-soon" });
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("o2");
+  });
+
+  it("filters by age, matching only an offering whose declared range covers it", () => {
+    const items = [
+      makeOffering({ id: "o1", ageRange: { minYears: 3, maxYears: 5 } }),
+      makeOffering({ id: "o2", ageRange: { minYears: 6, maxYears: 8 } }),
+    ];
+    const result = filterOfferings(items, { ageYears: 4 });
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("o1");
+  });
+
+  it("never excludes an offering with no declared age range from an age filter", () => {
+    const items = [makeOffering({ id: "o1", ageRange: undefined })];
+    expect(filterOfferings(items, { ageYears: 4 })).toHaveLength(1);
+  });
 });

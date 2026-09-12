@@ -157,39 +157,111 @@ webhook Route Handler at `src/app/api/webhooks/stripe/route.ts` — this
 prompt doesn't change that plan, only prepares the catalog model that
 would sit in front of it.
 
-## SEO / AEO
+## SEO / AEO (superseded by Prompt 60 below)
 
-No new public route was added by this prompt (there is no real offering
-to give a page to yet — adding an `/offerings` catalog page that would
-necessarily show nothing would be premature UI, not architecture). The
-moment a real, published offering exists, its public page would follow
-the exact same pattern `/resources/[slug]` and `/teachers/p/[slug]`
-already establish: a real canonical URL, `Product`/`Course`-appropriate
-structured data built from the same public fields the page renders (never
-describing something the page doesn't show), and `robots: { index: true
-}` only when `isOfferingPubliclyVisible()` says so. Nothing about
-existing SEO — the Resource Library, the Learning Hub, the teacher
-directory, `sitemap.ts`, `robots.ts` — was touched.
+Prompt 59 shipped no public route, reasoning that a catalog page showing
+nothing would be premature UI. Prompt 60 revisits that: the brief asked
+explicitly for the public catalog experience, and an honest empty state
+(see below) is not the same as premature UI. See "Prompt 60: the public
+catalog UI" for what actually shipped.
 
-## Design
+## Design (superseded by Prompt 60 below)
 
-No public-facing UI was added by this prompt. When a real offering
-catalog page is eventually built, it must reuse the existing design
-system (`Card`, `Badge`, `Button`, the same warm/colorful/playful visual
-language the Resource Library and Games Hub already use) — never a
-generic e-commerce template. The brief's own words: *"Little Learners
-should still feel primarily like an educational platform."*
+Prompt 59 added no public-facing UI. Prompt 60 does — see below.
+
+## Prompt 60: the public catalog UI
+
+Prompt 59 deliberately deferred the public-facing catalog page. Prompt 60
+builds it, without changing anything about the model, the empty-catalog
+decision, or the security posture documented above — `getAllOfferings()`
+still returns `[]`, `canAccessOffering()` is unchanged, and no price,
+product, or program was invented to make the new page look populated.
+
+### `/offerings` — the catalog page
+
+`src/app/offerings/page.tsx`. Reuses the exact filter-form pattern
+`/resources` and `/teachers` already use (`OfferingFilters`, real query
+params, `filterOfferings()`), rendering real `Offering[]` results through
+the new `OfferingCard` (`src/components/patterns/offering-card.tsx` —
+same visual language as `ResourceCard`/`GameCard`: a real thumbnail when
+one exists, a plain type icon otherwise, real badges only for fields that
+are actually set, an action gated by `canAccessOffering()`).
+
+Because the catalog is genuinely empty today, the page does two more
+things rather than just show a blank list:
+
+1. **An honest empty state** (`EmptyState`) — one message when no filters
+   are active ("The catalog is just getting started"), a distinct message
+   when filters are active and still match nothing ("No products match
+   your filters"), each with an appropriate action. Never a generic "no
+   results," and never a fake product to fill the space.
+2. **A bridge into real content** — "Explore what's free today" reuses
+   the existing `ResourceCard`/`GameCard` components against the existing
+   `SAMPLE_RESOURCES`/`SAMPLE_GAMES` data (filtered to `accessTier ===
+   "free"` and `featured`), linking out to the real `/resources` and
+   `/games` pages. This is the "connect offerings with existing resources"
+   requirement satisfied without copying a single resource's content into
+   a second place — the same `Resource`/`Game` objects render through
+   their own established cards.
+
+`CapabilityList` (already used on `/parents`/`/teachers`) closes the page
+with the same "Today / Ahead" honesty framing used everywhere else on the
+site.
+
+### `/offerings/[slug]` — the detail page
+
+`src/app/offerings/[slug]/page.tsx`, following `/resources/[resource]`'s
+established pattern exactly: `generateStaticParams()` over
+`getAllOfferings()` (empty today, so no static paths are generated —
+correct, not a bug), `generateMetadata()` returning `{}` when a slug
+doesn't resolve, and `notFound()` otherwise. Since every slug fails to
+resolve today, every `/offerings/*` URL correctly 404s — verified live.
+The render path (title, description, learning benefits pulled from the
+real `learningObjective` of each linked `includedResourceIds` resource —
+never an invented benefit, age group, learning-area badges linking to
+`/learn/[category]`, a facts `dl` for format/access/price, a real "what's
+included" list linking to each `/resources/[slug]`, and a `canAccessOffering()`-gated
+action area with an `Alert` explaining honestly why an inaccessible
+offering can't be unlocked yet) is real, tested code — ready the moment a
+real offering exists, exercising nothing invented in the meantime.
+
+Structured data uses schema.org `Product`/`Offer` (chosen over `Course`
+since `OfferingType` spans more than instructional programs), built only
+from fields the page actually renders.
+
+### Discoverability
+
+`/offerings` was added to `footerNav` (`src/config/nav.ts`) under
+"Explore" as "Catalog" — footer, not the primary header nav, matching
+this session's established precedent of keeping the header uncluttered
+while still making every real route reachable. `src/app/sitemap.ts` gained
+a static `/offerings` entry plus a mapped entry per
+`isOfferingPubliclyVisible()`-passing offering (empty today, same pattern
+`SAMPLE_RESOURCES`/`SAMPLE_GAMES` already use there).
+
+### What did not change
+
+No resource, game, or ebook was duplicated into the offerings layer —
+`includedResourceIds` are references, never copies. No existing route,
+component, or piece of content changed behavior; `/resources`, `/games`,
+`/learn`, and every existing page were regression-tested live and remain
+exactly as they were.
 
 ## Testing
 
 `src/lib/offerings/types.test.ts` — `isOfferingPubliclyVisible()` and
 `canAccessOffering()` against synthetic fixtures covering draft/archived/
 unavailable/coming-soon/every access level. `src/lib/offerings/filters.test.ts`
-— `filterOfferings()` covering type/access-level/learning-area/query
-filters, combinations, and an empty catalog. `src/lib/games/types.test.ts`
+— `filterOfferings()` covering type/access-level/learning-area/query/
+availability/age filters, combinations, and an empty catalog (extended in
+Prompt 60 with availability and age-range cases). `src/lib/games/types.test.ts`
 updated for the new required `accessTier` field. Confirmed via `grep` that
 no other file in this codebase constructs a `Game` object literal that
-needed updating. Ran typecheck, lint, the full Vitest suite, and a
-production build; confirmed every existing route still resolves and no
-existing resource, game, or teacher content changed visibility or
-behavior.
+needed updating. Ran typecheck, lint, the full Vitest suite (154 tests),
+and a production build for both Prompt 59 and Prompt 60; for Prompt 60,
+additionally live-tested in-browser: the catalog's filter form, both empty
+states, the resource/game bridge cards linking correctly to
+`/resources`/`/games`, a real `/offerings/[slug]` URL 404ing correctly,
+mobile viewport rendering, and a full regression pass over `/resources`,
+`/resources/[resource]`, `/games`, and `/learn` confirming no existing
+route, component, or content changed.

@@ -1,4 +1,4 @@
-import { isOfferingPubliclyVisible, type Offering, type OfferingType } from "./types";
+import { isOfferingPubliclyVisible, type Offering, type OfferingAvailability, type OfferingType } from "./types";
 import type { AccessTier } from "@/lib/resources/types";
 
 export interface OfferingFilters {
@@ -6,6 +6,9 @@ export interface OfferingFilters {
   type?: OfferingType;
   learningArea?: string;
   accessLevel?: AccessTier;
+  /** Matched the same permissive way `ResourceFilters.ageYears` is (src/lib/resources/filters.ts): an offering with no declared `ageRange` is never excluded by this filter, since a program without a stated age boundary is presumably broad, not irrelevant. */
+  ageYears?: number;
+  availability?: OfferingAvailability;
 }
 
 /**
@@ -22,7 +25,11 @@ export function filterOfferings(items: Offering[], filters: OfferingFilters): Of
     if (!isOfferingPubliclyVisible(item)) return false;
     if (filters.type && item.type !== filters.type) return false;
     if (filters.accessLevel && item.accessLevel !== filters.accessLevel) return false;
+    if (filters.availability && item.availability !== filters.availability) return false;
     if (filters.learningArea && !item.learningAreas.includes(filters.learningArea)) return false;
+    if (filters.ageYears != null && item.ageRange && (filters.ageYears < item.ageRange.minYears || filters.ageYears > item.ageRange.maxYears)) {
+      return false;
+    }
     if (filters.query) {
       const q = filters.query.trim().toLowerCase();
       const haystack = `${item.name} ${item.description}`.toLowerCase();
