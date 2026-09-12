@@ -223,6 +223,17 @@ passphrase, which has nothing to do with any teacher account.
   (`/teachers`, `/teachers/p/[slug]`) and the parent/child dashboards are
   otherwise unchanged — deactivation only adds a guard clause, not a
   redesign.
+- **`SiteHeader` doesn't render on `/admin/*` routes** (Prompt 58
+  checkpoint fix) — every route in this app shares one root layout, so
+  before this fix the public header's "Sign in / Create account" rendered
+  directly above the admin bar's real "Sign out," showing two
+  contradictory identity states on the same authenticated page. Real
+  authentication (Prompt 57) made this visible in a way Prompt 56's
+  unauthenticated version never surfaced. `SiteHeader` now checks
+  `usePathname()` and returns `null` for `/admin*` — the admin
+  `(protected)` layout's own bar is the only navigation shown there. The
+  public footer is untouched (it carries no identity state, so it isn't
+  contradictory the same way).
 
 ## SEO / AEO
 

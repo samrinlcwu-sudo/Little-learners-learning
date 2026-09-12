@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Menu, X, Search, Sparkles } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { primaryNav, type NavLink } from "@/config/nav";
@@ -71,6 +72,8 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
   const toggleRef = React.useRef<HTMLButtonElement>(null);
   const audience = useAiAudience();
   const assistantAvailable = AI_AUDIENCE_PERMISSIONS[audience].mayAccessAssistant;
+  const pathname = usePathname();
+  const isAdminRoute = pathname?.startsWith("/admin") ?? false;
 
   React.useEffect(() => {
     if (!mobileOpen) return;
@@ -93,6 +96,15 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
     query.addEventListener("change", onChange);
     return () => query.removeEventListener("change", onChange);
   }, []);
+
+  // The admin area (src/app/admin/(protected)/layout.tsx) has its own real
+  // sign-in state and its own nav bar — showing the public "Sign in /
+  // Create account" header above it would display two contradictory
+  // identity states on the same authenticated page. This is the one route
+  // family this header deliberately doesn't render on.
+  if (isAdminRoute) {
+    return null;
+  }
 
   return (
     <NotificationCenter>
