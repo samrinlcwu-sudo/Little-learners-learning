@@ -97,25 +97,14 @@ account status) are real, tested logic
 returns — no unsupported filter (no fake "last login," no invented
 "engagement score") was added.
 
-### "Parent" and "Administrator" are deliberately absent as rows
+### "Administrator" is deliberately absent as a row
 
-Neither has a persisted account record anywhere in this codebase:
-
-- **Parent** — `/sign-up` validates and discards everything
-  (`docs/ACCOUNTS_ARCHITECTURE.md`: "the password is validated for format
-  and then discarded"). Only a fixed placeholder id
-  (`local-browser-only`) links a `ChildProfile` to "its parent" — there is
-  no real parent name, email, or registration date stored anywhere to
-  show. A child's own row already shows that placeholder id (`admin-child-detail.tsx`,
-  "Parent (this device)") so the relationship is visible without
-  inventing a parent record.
-- **Administrator** — there's a single shared admin passphrase (see
-  above), not a multi-admin table. There is no "administrator account" to
-  list.
-
-Inventing rows for either would be exactly the fake user data the brief
-forbids. This is the same "prepared, not fabricated" rule the rest of
-this codebase already follows everywhere a real record doesn't exist yet.
+There's a single shared admin passphrase (see above), not a multi-admin
+table. There is no "administrator account" to list — inventing one would
+be exactly the fake user data the brief forbids. ("Parent" used to be
+absent for the same reason; Prompt 65 changed that — see "Parent
+management" below, which explains why a parent row is now real rather
+than fabricated.)
 
 ### Future membership visibility (Prompt 62)
 
@@ -125,6 +114,87 @@ invite seeding fake data to look populated. The natural future
 integration point is this same `/admin/users` area: a membership status
 badge on a real account's detail view, reading `hasActiveMembership()`
 for that account, rather than a separate membership-management screen.
+
+## Parent management (Prompt 65)
+
+Prompt 65 asks for professional parent management without inventing a
+parent account this codebase has never had. The resolution: a `"parent"`
+row is now real, built entirely from data that already exists —
+`buildParentRows()` (`src/lib/accounts/admin-user-rows.ts`) groups every
+real `ChildProfile` by its real `parentAccountId`. This is a genuine
+extension of the existing architecture, not a new duplicate system: it's
+the same `AdminUserRow` shape the table already renders, computed by
+`groupBy` over data `useChildProfiles()` already provides.
+
+### What a parent row actually shows, and why each field is honest
+
+- **Name** — `"Parent (this device)"` for the one placeholder id every
+  browser in this codebase currently uses (`LOCAL_PARENT_ID`), or the raw
+  id itself for any other value the grouping ever encounters. Never an
+  invented name — none is stored anywhere (`/sign-up` validates and
+  discards everything, `docs/ACCOUNTS_ARCHITECTURE.md`).
+- **Account status** — a real derived rollup: `"active"` if any child in
+  the family is active, `"deactivated"` only if every one of them is.
+  There is no independent parent account record to hold its own status,
+  so this is the honest alternative to fabricating one.
+- **Registered** — the earliest real child's `createdAt` in that family,
+  labeled "First child profile added" on the detail page (not "parent
+  registered on," which would overstate what's actually known — no
+  parent ever registers anything today).
+- **Associated children** — the real, unfiltered list of that family's
+  `ChildProfile` rows, each linking to its own existing
+  `AdminChildDetail` page (unchanged).
+- **Family activity** — see below.
+
+### Family-level activity summary, and how it differs from child privacy
+
+`getFamilyActivitySummary()` (`src/lib/accounts/admin-parent-activity.ts`)
+aggregates real `ProgressEvent`s (`src/lib/progress/types.ts`) across a
+family's children into exactly two numbers: a total count and the most
+recent `occurredAt`. This is a **different privacy decision** than
+`AdminChildDetail`'s, which still shows zero progress data for a single
+child (see "Child privacy" above, unchanged) — a coarse family-level
+count answers "is this account actually in use," which is legitimate
+account-management context, while a per-child breakdown of *what* was
+played, read, or scored would be exactly the unnecessary child-data
+exposure the brief still warns against. Neither the child's own admin
+page nor the child's own row in the table shows this — it only appears
+on the new parent/family view, aggregated across the whole family, never
+attributed to one child by name.
+
+### Sorting, and why there's no pagination yet
+
+`sortAdminUsers()` (`src/lib/accounts/admin-user-sort.ts`) adds
+Name/Newest/Oldest sorting to the table, mirroring `sortResources()`'s
+exact convention (`src/lib/resources/filters.ts`). Pagination was
+deliberately not added: every real row count this codebase can produce
+today is a single browser's own accounts — realistically single or low
+double digits — so a plain scrollable table is the right amount of UI for
+what actually exists, not a missing feature. `PaginatedResult`
+(`src/lib/resources/filters.ts`) is the existing precedent to reach for
+if that ever changes.
+
+### Permissions (unchanged, restated)
+
+- A parent can only ever see their own family: every browser holds
+  exactly one local family (`docs/ACCOUNTS_ARCHITECTURE.md`), so
+  `buildParentRows()` structurally cannot mix one family's children into
+  another's row — it groups by the real `parentAccountId` on each child,
+  and two different ids always produce two different rows.
+  `AdminParentDetail` validates its `parentId` route param against real
+  computed rows (`buildParentRows(children).find(...)`) exactly like
+  `AdminChildDetail` already validates `childId` — an invalid or
+  guessed id renders the same honest "not found" state, never another
+  family's data.
+- A teacher has no path into any of this: teacher authentication
+  (`docs/TEACHER_ARCHITECTURE.md`) and admin authentication
+  (`src/lib/admin/session.ts`) are two entirely separate systems: knowing
+  a teacher passphrase/session grants zero access to `/admin/*`, which
+  Proxy gates independently.
+- Admin's own access is unchanged: one flat, shared admin level (see
+  "Real server-side authentication" above) — no granular admin
+  permission tiers exist, and none were added, because nothing in this
+  codebase yet needs more than one.
 
 ## Account status: a new, real, functioning control
 
@@ -403,3 +473,23 @@ typecheck, lint, the full Vitest suite (including new tests for
 `filterAdminUsers` and a dedicated `session.test.ts` covering passphrase
 verification, token round-tripping, tampering, wrong-secret, and expiry),
 and a production build.
+
+**Prompt 65**: `buildParentRows()` tested for empty input, multi-family
+grouping, the placeholder-id label, both directions of the account-status
+rollup, earliest-`createdAt` registration, and the detail-route shape
+(`admin-user-rows.test.ts`); `sortAdminUsers()` tested for all three
+orders and non-mutation (`admin-user-sort.test.ts`);
+`getFamilyActivitySummary()` tested for an empty family, cross-family
+isolation (an unrelated child's events never counted), and correct
+most-recent-date selection (`admin-parent-activity.test.ts`); a new
+`filterAdminUsers` case confirms the `"parent"` role filters correctly.
+Live-verified: `/admin/users` now lists a real "Parent (this device)" row
+alongside real teacher/child rows with correct sort/search/role/status
+filtering and a working loading skeleton; `/admin/users/parents/[parentId]`
+shows real associated children and a real (zero, in this fresh browser)
+activity count, and an invalid `parentId` renders the same honest
+"not found" state `AdminChildDetail` already uses rather than leaking
+another shape of error. Confirmed unauthenticated access to the new route
+redirects the same way every other `/admin/*` route does (Proxy's
+matcher already covers it — no proxy change was needed). Confirmed the
+public site and every other admin page are unaffected.

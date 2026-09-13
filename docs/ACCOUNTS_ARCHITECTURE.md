@@ -196,6 +196,11 @@ server that actually has the data:
   `accountId` matches that child's real `parentAccountId` before granting
   anything, so a membership can never reach into an unrelated family's
   children.
+- The admin "parent" view (`docs/ADMIN_ARCHITECTURE.md`, "Parent
+  management," Prompt 65) never invents a parent name, email, password, or
+  account beyond what's described above — it's a real grouping of
+  existing `ChildProfile` rows by their real `parentAccountId`, still no
+  more, no less.
 
 ## SEO / AEO
 

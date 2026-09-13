@@ -27,6 +27,16 @@ describe("filterAdminUsers", () => {
     expect(filterAdminUsers(rows, { role: "child" })[0].role).toBe("child");
   });
 
+  it("filters by the parent role", () => {
+    const rows = [
+      makeRow({ role: "teacher" }),
+      makeRow({ id: "2", role: "parent", name: "Parent (this device)", summary: "2 children" }),
+    ];
+    const result = filterAdminUsers(rows, { role: "parent" });
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("2");
+  });
+
   it("filters by account status", () => {
     const rows = [makeRow({ accountStatus: "active" }), makeRow({ id: "2", accountStatus: "deactivated" })];
     const result = filterAdminUsers(rows, { accountStatus: "deactivated" });
