@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ShoppingBag, Library, Gamepad2 } from "lucide-react";
+import { ShoppingBag, Library, Gamepad2, Gift, Sparkles, Users, GraduationCap, BookOpen, type LucideIcon } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/patterns/page-header";
 import { CapabilityList } from "@/components/patterns/capability-list";
@@ -32,6 +34,7 @@ import { SAMPLE_GAMES } from "@/lib/games/sample-games";
 import { isGamePublished } from "@/lib/games/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { MEMBERSHIP_TYPE_DESCRIPTIONS, MEMBERSHIP_TYPE_LABELS, type MembershipType } from "@/lib/memberships/types";
 
 const description =
   "Browse Little Learners Learning's catalog of learning products — worksheet bundles, digital resources, learning programs, and memberships — organized by subject, age, and access level.";
@@ -63,9 +66,21 @@ const aheadCapabilities = [
   },
   {
     title: "Memberships and future services",
-    description: "The catalog is built to hold these the moment a real one is decided — see docs/BUSINESS_ARCHITECTURE.md.",
+    description: "The catalog is built to hold these the moment a real one is decided — see docs/MEMBERSHIP_ARCHITECTURE.md.",
   },
 ];
+
+/** Every real membership type except "free" — a visitor already has free access without any membership, so it isn't a card to preview here. See docs/MEMBERSHIP_ARCHITECTURE.md. */
+const MEMBERSHIP_TYPES_TO_PREVIEW: MembershipType[] = ["premium", "family", "teacher", "resource", "learning-program"];
+
+const MEMBERSHIP_TYPE_ICONS: Record<MembershipType, LucideIcon> = {
+  free: Gift,
+  premium: Sparkles,
+  family: Users,
+  teacher: GraduationCap,
+  resource: Library,
+  "learning-program": BookOpen,
+};
 
 /**
  * The Prompt 60 catalog — an additional, honest layer above the Resource
@@ -308,6 +323,37 @@ export default async function OfferingsPage({ searchParams }: PageProps<"/offeri
       )}
 
       <Section className="py-12 sm:py-16">
+        <Container>
+          <Heading level="h2">Membership types we&apos;re preparing for</Heading>
+          <p className="mt-2 max-w-2xl text-neutral-600">
+            No membership can be purchased yet — there&apos;s no pricing, no
+            sign-up, and nothing here is a real plan. This is the shape a
+            future membership could take, so it&apos;s honest about what
+            might come rather than a surprise later.
+          </p>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {MEMBERSHIP_TYPES_TO_PREVIEW.map((type) => {
+              const Icon = MEMBERSHIP_TYPE_ICONS[type];
+              return (
+                <Card key={type} className="flex h-full flex-col gap-3 p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-primary-100 text-primary-700">
+                      <Icon className="size-5" aria-hidden="true" />
+                    </div>
+                    <Badge variant="neutral">Not available yet</Badge>
+                  </div>
+                  <div>
+                    <p className="font-display text-lg font-semibold text-ink">{MEMBERSHIP_TYPE_LABELS[type]}</p>
+                    <p className="mt-1 text-sm text-neutral-600">{MEMBERSHIP_TYPE_DESCRIPTIONS[type]}</p>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </Container>
+      </Section>
+
+      <Section surface="tint-secondary" className="py-12 sm:py-16">
         <Container className="max-w-3xl">
           <Heading level="h2">What you can do here</Heading>
           <p className="mt-2 text-neutral-600">A clear line between what already works and what&apos;s still being built.</p>

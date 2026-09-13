@@ -117,6 +117,15 @@ Inventing rows for either would be exactly the fake user data the brief
 forbids. This is the same "prepared, not fabricated" rule the rest of
 this codebase already follows everywhere a real record doesn't exist yet.
 
+### Future membership visibility (Prompt 62)
+
+`docs/MEMBERSHIP_ARCHITECTURE.md` prepares a `Membership` model but adds
+no admin page for it — an always-empty table would either sit unused or
+invite seeding fake data to look populated. The natural future
+integration point is this same `/admin/users` area: a membership status
+badge on a real account's detail view, reading `hasActiveMembership()`
+for that account, rather than a separate membership-management screen.
+
 ## Account status: a new, real, functioning control
 
 `AccountStatus` (`"active" | "deactivated"`, `src/lib/accounts/types.ts`)

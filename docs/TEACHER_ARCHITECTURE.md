@@ -384,3 +384,14 @@ real backend serves it, exactly the same limitation the public profile
 route already has ("a public profile link only works in the browser it
 was created in"). Not a bug introduced here — the inherent shape of
 "real backend-free architecture" this entire codebase already commits to.
+
+## Teacher Membership is a separate future product (Prompt 62)
+
+`docs/MEMBERSHIP_ARCHITECTURE.md` models a `"teacher"` membership type,
+kept structurally independent from everything documented above. Having a
+`TeacherProfile` — even a fully `verified`, `moderationStatus: "approved"`
+one — implies nothing about premium access. `Membership.accountId` for a
+teacher membership references the teacher's own `Account.id`; no code
+path derives it from `TeacherProfile`, and no code path treats "is a
+teacher" as "has Teacher Membership." A teacher who wanted it would need
+a real order and a real membership, exactly like a parent would.

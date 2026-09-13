@@ -31,7 +31,11 @@ Product (Offering) → Checkout → Payment → Order → Access → Receipt
   current `status`/`paymentStatus`.
 - **Access** — `hasValidEntitlement()` (`src/lib/payments/entitlements.ts`)
   — the one function a real access check calls, built only from a
-  genuinely completed, genuinely paid `Order`.
+  genuinely completed, genuinely paid `Order`. For a `membership`-type
+  offering specifically, an `Order` is also what would establish an
+  ongoing `Membership` (`src/lib/memberships/types.ts`, Prompt 62) —
+  `hasActiveMembership()` is the membership-scoped counterpart to
+  `hasValidEntitlement()`; see `docs/MEMBERSHIP_ARCHITECTURE.md`.
 - **Receipt** — not modeled in this prompt. A receipt is a presentation of
   a real completed `Order`; since no code path can create one yet, there
   is nothing honest to render. The `Order` fields already captured

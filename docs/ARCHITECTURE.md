@@ -157,7 +157,10 @@ provider (Stripe or otherwise) so that choice is still open.
 
 The catalog this would eventually sell — `Offering`
 (`src/lib/offerings/types.ts`, Prompt 59, `docs/BUSINESS_ARCHITECTURE.md`)
-— is modeled and ready, with zero live instances today.
+— is modeled and ready, with zero live instances today. So is the ongoing
+membership layer an `Order` for a `"membership"`-type `Offering` would
+create — `Membership` (`src/lib/memberships/types.ts`, Prompt 62,
+`docs/MEMBERSHIP_ARCHITECTURE.md`) — also zero live instances.
 
 ## 19. Future mobile application compatibility
 

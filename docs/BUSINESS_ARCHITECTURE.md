@@ -158,7 +158,11 @@ only prepares the catalog model that would sit in front of it. Prompt 61
 layer itself: `hasValidEntitlement()` is the function `canAccessOffering()`
 above would eventually be composed with (`canAccessOffering(offering) ||
 hasValidEntitlement(offering.id, orders)`) — `canAccessOffering()` itself
-was left unchanged.
+was left unchanged. Prompt 62 (`docs/MEMBERSHIP_ARCHITECTURE.md`) added a
+third layer for the `"membership"` offering type specifically:
+`hasActiveMembership()`, composed the same way
+(`... || hasActiveMembership(accountId, memberships)`) — again without
+changing `canAccessOffering()`.
 
 ## SEO / AEO (superseded by Prompt 60 below)
 

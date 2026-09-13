@@ -25,7 +25,8 @@ import { recordAdminAuditEvent } from "@/lib/admin/audit-log";
  * (`ChildProfile`) already matches what that table needs.
  */
 const STORAGE_KEY = "little-learners-learning:child-profiles";
-const LOCAL_PARENT_ID = "local-browser-only";
+/** Exported so anything else needing "this browser's one local parent" (e.g. the dashboard's membership status card, src/components/patterns/parent-dashboard.tsx) references the same id rather than a second copy of the literal. */
+export const LOCAL_PARENT_ID = "local-browser-only";
 
 /** The one stable reference returned before the real data has loaded — same object every call, which useSyncExternalStore requires. */
 const EMPTY_SNAPSHOT: ChildProfile[] = [];

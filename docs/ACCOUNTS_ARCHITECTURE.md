@@ -190,6 +190,12 @@ server that actually has the data:
 - `isSupabaseConfigured` reads only `NEXT_PUBLIC_*` values — safe to
   evaluate in the browser, and it's the only thing gating every form's
   real submission path.
+- A future family membership (`docs/MEMBERSHIP_ARCHITECTURE.md`, Prompt
+  62) never grants access to a child profile by id alone —
+  `hasAuthorizedChildAccess()` also checks that the membership's own
+  `accountId` matches that child's real `parentAccountId` before granting
+  anything, so a membership can never reach into an unrelated family's
+  children.
 
 ## SEO / AEO
 

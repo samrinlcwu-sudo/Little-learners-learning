@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, BookOpen, Library, Gamepad2, ClipboardList, Bell, Settings, ShieldCheck, Sparkles } from "lucide-react";
+import { Plus, BookOpen, Library, Gamepad2, ClipboardList, Bell, Settings, ShieldCheck, Sparkles, Crown } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -26,6 +26,9 @@ import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
 import { useProgressEvents } from "@/lib/progress/use-progress-events";
 import type { ChildProfileValues } from "@/lib/validations/child-profile";
 import type { ChildProfile } from "@/lib/accounts/types";
+import { LOCAL_PARENT_ID } from "@/lib/accounts/local-children";
+import { getAllMemberships } from "@/lib/memberships/memberships";
+import { hasActiveMembership } from "@/lib/memberships/access";
 
 const quickLinks = [
   {
@@ -88,6 +91,12 @@ function ParentDashboard() {
   const { events, ready: progressReady } = useProgressEvents();
   const [modalOpen, setModalOpen] = React.useState(false);
   const [editingChild, setEditingChild] = React.useState<ChildProfile | null>(null);
+
+  // Always false today — getAllMemberships() returns [] because no
+  // checkout flow anywhere in this codebase can create one (see
+  // docs/MEMBERSHIP_ARCHITECTURE.md). Real, working logic against a real
+  // (currently empty) source, not a hardcoded "Free" label.
+  const isPremium = hasActiveMembership(LOCAL_PARENT_ID, getAllMemberships());
 
   function openAddModal() {
     setEditingChild(null);
@@ -232,6 +241,24 @@ function ParentDashboard() {
                 </div>
                 <Button variant="outline" asChild>
                   <Link href="/privacy">Open</Link>
+                </Button>
+              </div>
+              <div className="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 p-5 sm:col-span-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-11 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
+                    <Crown className="size-5" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-ink">Membership</p>
+                    <p className="text-sm text-neutral-600">
+                      {isPremium
+                        ? "You have an active membership."
+                        : "Free access — no membership yet. Every free resource and game stays available either way."}
+                    </p>
+                  </div>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link href="/offerings">See what&apos;s planned</Link>
                 </Button>
               </div>
             </div>
