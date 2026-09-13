@@ -7,12 +7,17 @@ import { Button } from "@/components/ui/button";
 import { recordAdminAuditEvent } from "@/lib/admin/audit-log";
 import { adminLogoutAction } from "@/lib/admin/actions";
 
-/** Clears the real server-side session cookie, records the real audit event, then navigates — same order and reasoning as `AdminLoginForm`. */
-function AdminSignOutButton() {
+/**
+ * Clears the real server-side session cookie, records the real audit
+ * event, then navigates — same order and reasoning as `AdminLoginForm`.
+ * Shared by `AdminSignOutButton` (standalone) and `AdminAccountMenu`
+ * (dropdown item) so the sign-out sequence exists in exactly one place.
+ */
+function useAdminSignOut() {
   const router = useRouter();
   const [pending, setPending] = React.useState(false);
 
-  async function handleClick() {
+  async function signOut() {
     setPending(true);
     await adminLogoutAction();
     recordAdminAuditEvent({
@@ -24,12 +29,18 @@ function AdminSignOutButton() {
     router.refresh();
   }
 
+  return { signOut, pending };
+}
+
+function AdminSignOutButton() {
+  const { signOut, pending } = useAdminSignOut();
+
   return (
-    <Button variant="ghost" size="sm" onClick={handleClick} disabled={pending}>
+    <Button variant="ghost" size="sm" onClick={signOut} disabled={pending}>
       <LogOut aria-hidden="true" />
       Sign out
     </Button>
   );
 }
 
-export { AdminSignOutButton };
+export { AdminSignOutButton, useAdminSignOut };

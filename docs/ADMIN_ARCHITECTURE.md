@@ -209,8 +209,9 @@ passphrase, which has nothing to do with any teacher account.
 
 - **`/admin`** — the shared index, now behind the real login gate. Links
   to Teacher management and User management, plus the real activity
-  panel. The `(protected)` route group's `layout.tsx` renders the admin
-  top bar (Teachers / Users nav, Sign out) — reaching any page inside it
+  panel and the Prompt 64 Roadmap panel (see below). The `(protected)`
+  route group's `layout.tsx` renders the admin dashboard shell (sidebar +
+  header — see "Dashboard shell" below) — reaching any page inside it
   already proves a valid session exists (Proxy runs first), so the layout
   itself performs no additional check; duplicating one would be exactly
   the redundant, easy-to-drift client-side check the brief warns against.
@@ -243,6 +244,108 @@ passphrase, which has nothing to do with any teacher account.
   `(protected)` layout's own bar is the only navigation shown there. The
   public footer is untouched (it carries no identity state, so it isn't
   contradictory the same way).
+
+## Dashboard shell (Prompt 64)
+
+Prompt 64 replaces the single top bar above with a professional dashboard
+shell — sidebar, header, account menu, notification area, loading/error
+states — without changing anything about *what* is protected or *how*:
+Proxy (`src/proxy.ts`) and `src/lib/admin/session.ts` are completely
+unchanged. This section is purely additive UI architecture.
+
+### Navigation
+
+`src/config/admin-nav.ts` — one array (`adminNav`), the same
+"single source of truth every surface reads" convention `src/config/nav.ts`
+already establishes for the public site. It holds exactly three entries
+today: Dashboard (`/admin`), Users (`/admin/users`), Teachers
+(`/admin/teachers`) — the only admin routes that actually exist. The
+brief's much longer suggested nav (Resources, Games, Applications,
+Business, Content, SEO, Settings) is **not** in this file, per its own
+instruction: "Only expose sections that actually exist in the current
+implementation." Adding a real future section later is exactly one object
+in this array — both the desktop sidebar and the mobile nav read from it,
+so neither can drift out of sync with the other.
+
+`src/components/patterns/admin-nav-links.tsx` renders that array once;
+`AdminSidebar` (desktop, `hidden lg:flex`) and `AdminHeader`'s mobile
+panel (`lg:hidden`) both use it, so "the sidebar" and "the mobile menu"
+are never two implementations of the same list. `isAdminNavActive()`
+matches `/admin` exactly (so it doesn't prefix-match every other admin
+route) and prefix-matches everything else (so `/admin/teachers/[id]`
+still highlights "Teachers").
+
+### Layout
+
+`src/app/admin/(protected)/layout.tsx` composes `AdminSidebar` +
+`AdminHeader` around `children` — a two-line change from the previous
+single-bar version. `AdminHeader`'s mobile nav toggle mirrors
+`SiteHeader`'s exact collapsible-panel technique (`src/components/layout/site-header.tsx`
+— grid-template-rows transition, `inert` on the closed panel, Escape-to-close,
+auto-close when the viewport grows past `lg`) so mobile nav behaves
+identically everywhere in this app, not as a second, differently-behaved
+pattern.
+
+### Account menu & notifications
+
+`AdminAccountMenu` (`src/components/patterns/admin-account-menu.tsx`) is
+the brief's "account/profile menu" — honestly scoped to what this
+codebase actually has: one shared admin passphrase, not a multi-admin
+accounts table (see "'Parent' and 'Administrator' are deliberately absent
+as rows" above). It shows a generic "Signed in as Admin" label, never an
+invented name, email, or avatar, with a Sign out item. The sign-out
+sequence itself (`useAdminSignOut()`) was extracted out of the pre-existing
+`AdminSignOutButton` so the standalone button and the new dropdown item
+share one implementation rather than two copies of the same
+clear-cookie-then-audit-then-navigate sequence.
+
+`AdminNotificationBell` (`src/components/patterns/admin-notification-bell.tsx`)
+is the brief's "notification area" — built on the same real
+`useAdminAuditLog()` hook `AdminAuditPanel` already uses (see
+"Auditability" above), not a second, disconnected notification system.
+There is no "read/unread" concept anywhere in this codebase, so the badge
+shows a plain real count of recent events, never a fabricated "unread"
+number.
+
+### Loading & error states
+
+`src/app/admin/(protected)/loading.tsx` and `.../error.tsx` are standard
+Next.js route-segment conventions (confirmed unchanged in this Next.js
+version via `node_modules/next/dist/docs/.../loading.md` and `error.md`
+before writing either file) — Next wraps every page in this route group
+in a Suspense boundary using the first, and an error boundary using the
+second, automatically. `error.tsx` uses `retry()`, the name
+`node_modules/next/dist/docs/.../error.md` documents as stable since
+Next.js 16.3 (this project is on 16.3.4) and recommends over the older
+`reset()`. Both reuse existing components (`Skeleton`, `EmptyState`
+variant `"error"`) rather than inventing new ones.
+
+### Roadmap panel
+
+`/admin` gained a "Roadmap" card using the existing `CapabilityList`
+component (the same "Today vs. Ahead" honesty pattern `/parents`,
+`/teachers`, and `/offerings` already use) listing the real future admin
+sections named in the brief — Resources/Games/categories,
+Applications/Admissions, Business (Offerings/Memberships), Content/SEO/
+Settings. None of these is a link; the panel says so explicitly ("nothing
+below is a link, because none of it has a page yet"). This is the
+"scalable architecture future prompts can extend" requirement made
+visible without fabricating a single page, button, or dataset.
+
+### Design
+
+The sidebar uses `bg-surface-sunken` (the same warm cream token every
+public alternate-section background already uses) rather than a flat
+white or grey panel, with the existing teal/terracotta color tokens for
+active-state and icon-tint treatment — deliberately **not** introducing a
+"friendly blue" or "purple accent" the brief's generic suggestion
+mentions: `docs/DESIGN_SYSTEM.md` is explicit that this brand
+"deliberately exclud[es] a rainbow of hues," and every existing color
+family (primary teal, secondary terracotta, accent gold, plus semantic
+success/warning/error) is reused as-is. Adding two new hues never asked
+for by name, to an admin-only surface, for a brief that also says "DO NOT
+change the existing brand identity," would be the wrong call — existing
+brand identity took precedence over the suggestion list.
 
 ## SEO / AEO
 

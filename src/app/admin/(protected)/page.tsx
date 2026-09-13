@@ -4,8 +4,36 @@ import { GraduationCap, Users } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Card } from "@/components/ui/card";
+import { Heading } from "@/components/ui/heading";
 import { PageHeader } from "@/components/patterns/page-header";
 import { AdminAuditPanel } from "@/components/patterns/admin-audit-panel";
+import { CapabilityList } from "@/components/patterns/capability-list";
+
+/**
+ * The honest "what this dashboard will grow into" panel (Prompt 64) —
+ * same `CapabilityList` pattern `/parents`, `/teachers`, and `/offerings`
+ * already use for this exact distinction. These are real future admin
+ * sections named in the brief, not sidebar links, because none has a
+ * page yet — see docs/ADMIN_ARCHITECTURE.md, "Dashboard shell (Prompt 64)."
+ */
+const roadmapCapabilities = [
+  {
+    title: "Resources, games & learning categories",
+    description: "Manage worksheets, ebooks, activities, games, and the subject taxonomy from one place.",
+  },
+  {
+    title: "Applications & admissions",
+    description: "Review real submitted applications alongside the tracking experience families already see.",
+  },
+  {
+    title: "Business: offerings & memberships",
+    description: "Visibility into the real (currently empty) Offering/Membership catalog — see docs/BUSINESS_ARCHITECTURE.md.",
+  },
+  {
+    title: "Content, SEO & platform settings",
+    description: "Manage page copy, metadata, and platform-wide configuration without editing code.",
+  },
+];
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -16,7 +44,7 @@ export const metadata: Metadata = {
 /**
  * `/admin` (Prompt 56, extended in Prompt 57 — docs/ADMIN_ARCHITECTURE.md).
  * Reaching this page at all already proves a valid signed admin session
- * exists — `src/middleware.ts` runs before this component does — so
+ * exists — `src/proxy.ts` runs before this component does — so
  * there's no "not protected yet" disclosure here anymore, unlike Prompt
  * 56's version of this page.
  */
@@ -64,6 +92,21 @@ export default function AdminPage() {
           </div>
 
           <AdminAuditPanel />
+
+          <Card className="p-6">
+            <Heading level="h3" as="h2">
+              Roadmap
+            </Heading>
+            <p className="mt-1 text-sm text-neutral-600">
+              This dashboard is built to grow into — nothing below is a link, because none of it has a page yet.
+            </p>
+            <CapabilityList
+              className="mt-4"
+              title="Ahead"
+              status="coming"
+              items={roadmapCapabilities}
+            />
+          </Card>
         </Container>
       </Section>
     </>
