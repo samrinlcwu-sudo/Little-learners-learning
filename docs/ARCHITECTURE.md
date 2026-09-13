@@ -143,10 +143,17 @@ Not connected.
 
 ## 18. Future payment architecture (not connected)
 
-Planned around Stripe (Checkout/Billing) given Next.js/Supabase have mature,
-well-documented integrations with it; webhooks would land in
-`src/app/api/webhooks/stripe/route.ts`. No payment provider is connected, and
-none should be until a real commercial transaction flow is being built.
+Full detail in `docs/PAYMENT_ARCHITECTURE.md` (Prompt 61): a
+provider-independent `Order`/`PaymentStatus`/`PaymentProviderAdapter`
+model (`src/lib/payments/`), a documented-but-unapplied Postgres schema
+(no Supabase project exists to apply it to), and `hasValidEntitlement()`
+as the one function real premium access should ever check. No payment
+provider is connected, no checkout exists, and no `Order` can be created
+by any code path in this codebase — none should be until a real
+commercial transaction flow is actually being built. Webhooks would land
+in `src/app/api/webhooks/payments/route.ts` once a provider is chosen;
+`PaymentProviderAdapter` is intentionally not written against any one
+provider (Stripe or otherwise) so that choice is still open.
 
 The catalog this would eventually sell — `Offering`
 (`src/lib/offerings/types.ts`, Prompt 59, `docs/BUSINESS_ARCHITECTURE.md`)

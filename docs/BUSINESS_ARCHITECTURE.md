@@ -152,10 +152,13 @@ now or later — the same rule this codebase already applies to
 `isAdmin`-style checks (`docs/ADMIN_ARCHITECTURE.md`).
 
 The planned payment integration point remains exactly what
-`docs/ARCHITECTURE.md` §18 already names — Stripe Checkout/Billing, a
-webhook Route Handler at `src/app/api/webhooks/stripe/route.ts` — this
-prompt doesn't change that plan, only prepares the catalog model that
-would sit in front of it.
+`docs/ARCHITECTURE.md` §18 names — this prompt doesn't change that plan,
+only prepares the catalog model that would sit in front of it. Prompt 61
+(`docs/PAYMENT_ARCHITECTURE.md`) later built the `Order`/`PaymentStatus`
+layer itself: `hasValidEntitlement()` is the function `canAccessOffering()`
+above would eventually be composed with (`canAccessOffering(offering) ||
+hasValidEntitlement(offering.id, orders)`) — `canAccessOffering()` itself
+was left unchanged.
 
 ## SEO / AEO (superseded by Prompt 60 below)
 
