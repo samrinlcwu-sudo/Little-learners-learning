@@ -243,9 +243,9 @@ function ParentDashboard() {
                   <Link href="/privacy">Open</Link>
                 </Button>
               </div>
-              <div className="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 p-5 sm:col-span-2">
+              <div className="flex flex-col items-start gap-4 rounded-xl border border-neutral-200 p-5 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-11 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
                     <Crown className="size-5" aria-hidden="true" />
                   </div>
                   <div>
@@ -257,7 +257,7 @@ function ParentDashboard() {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" asChild>
+                <Button variant="outline" asChild className="w-full sm:w-auto">
                   <Link href="/offerings">See what&apos;s planned</Link>
                 </Button>
               </div>
