@@ -50,6 +50,16 @@ describe("filterAdminTeachers", () => {
     expect(result[0].id).toBe("t2");
   });
 
+  it("filters by the needs-changes moderation status", () => {
+    const entries = [
+      makeTeacher({ id: "t1", moderationStatus: "needs-changes" }),
+      makeTeacher({ id: "t2", moderationStatus: "approved" }),
+    ];
+    const result = filterAdminTeachers(entries, { moderationStatus: "needs-changes" });
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("t1");
+  });
+
   it("matches expertise as a case-insensitive substring", () => {
     const entries = [
       makeTeacher({ expertise: ["Special needs support"] }),

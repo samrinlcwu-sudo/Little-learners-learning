@@ -45,6 +45,10 @@ describe("canViewTeacherProfile", () => {
     expect(canViewTeacherProfile(makeTeacher({ visibility: "public", moderationStatus: "hidden" }))).toBe(false);
   });
 
+  it("is true for a public profile marked needs-changes — still viewable via direct link, same as pending", () => {
+    expect(canViewTeacherProfile(makeTeacher({ visibility: "public", moderationStatus: "needs-changes" }))).toBe(true);
+  });
+
   it("is false for a deactivated account, even public and approved", () => {
     expect(
       canViewTeacherProfile(
@@ -65,5 +69,11 @@ describe("canListTeacherInDirectory", () => {
 
   it("is false for a private profile even if somehow approved", () => {
     expect(canListTeacherInDirectory(makeTeacher({ visibility: "private", moderationStatus: "approved" }))).toBe(false);
+  });
+
+  it("is false for a public profile marked needs-changes — visible directly, never directory-listed", () => {
+    expect(canListTeacherInDirectory(makeTeacher({ visibility: "public", moderationStatus: "needs-changes" }))).toBe(
+      false,
+    );
   });
 });

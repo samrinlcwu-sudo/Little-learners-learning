@@ -293,7 +293,12 @@ passphrase, which has nothing to do with any teacher account.
   banners are gone (no longer true), the moderation-status filter is
   relabeled "Directory status" (to disambiguate from the new Account
   status), an "Account" column was added to the list, and the detail page
-  gained its own "Account status" card with Deactivate/Reactivate.
+  gained its own "Account status" card with Deactivate/Reactivate. Prompt
+  66 added a fifth moderation outcome, "Needs changes" — the existing
+  generic button loop and filter dropdown picked it up automatically; see
+  `docs/TEACHER_ARCHITECTURE.md`, "Registration & expertise management,"
+  for the full reasoning (including why "Under Review" was deliberately
+  not added alongside it).
 - **`/admin/users`** / **`/admin/users/children/[childId]`** — new this
   prompt, described above.
 - Visual language matches the rest of the site — the same `Card`,

@@ -395,3 +395,155 @@ teacher membership references the teacher's own `Account.id`; no code
 path derives it from `TeacherProfile`, and no code path treats "is a
 teacher" as "has Teacher Membership." A teacher who wanted it would need
 a real order and a real membership, exactly like a parent would.
+
+## Registration & expertise management (Prompt 66)
+
+Prompt 66 asked for "a professional teacher registration and
+administration system" naming a long list of professional-information
+fields, a five-status review workflow, and admin review tooling. The
+finding, after inspecting the existing architecture first (per the
+prompt's own instruction): **almost everything named already existed**,
+built across Prompts 27–29, 42, and 56. This section documents exactly
+what was genuinely new versus what was simply confirmed and left alone —
+"do not rebuild" applied literally.
+
+### What already covered the brief, unchanged
+
+| Brief asks for | Already exists as |
+|---|---|
+| Full name, profile photo, professional bio | `TeacherProfile.name`/`.photo`/`.bio` — registration + profile editor |
+| Education, qualifications, certifications, professional training | `.education` and `.certifications` (the latter's own field label already reads "Certifications, teacher training, or workshops") |
+| Years of experience, teaching experience, age groups taught | `.yearsExperience`, `.ageGroupsTaught` |
+| Languages | `.languages` |
+| Region/location at an appropriate privacy level | `.countryRegion` — always a coarse region, never a street address, and already included in `PublicTeacherProfile` |
+| Teaching interests | `.teachingInterests` |
+| Resources created | Already shown on the Teacher Dashboard, the public profile, and `AdminTeacherDetail` |
+| Extensible expertise categories | `subjects` (from `src/config/learning-categories.ts`, already config-driven and extensible) plus the free-text `expertise` field |
+
+None of these needed a new field, a new form section, or a new taxonomy —
+adding one would have been exactly the duplicate system the brief warns
+against.
+
+### The "Expertise" list: mapped, not duplicated
+
+The brief's 16-item expertise list is, on inspection, almost identical to
+what `subjects` (13 of the 16 items, verbatim) and `ageGroupsTaught`
+already cover:
+
+- "Preschool" and "Kindergarten" are not new — `TEACHER_AGE_GROUP_OPTIONS`
+  (`src/config/teacher-options.ts`) already displays the `"preschool"` and
+  `"early-primary"` age bands under exactly those labels ("Preschool
+  (3–5)", "Kindergarten (5–6)").
+- "Early Childhood Education" has no single existing checkbox because it
+  isn't a distinct selectable category anywhere in early-years
+  education — it's the umbrella term for the whole 2–8 age range this
+  platform already covers; a teacher communicates it by selecting age
+  groups, not by a 17th redundant checkbox.
+- The remaining 13 items (English & Early Literacy, Mathematics, Early
+  Writing, Science & Discovery, World Around Us, Life Skills,
+  Social & Emotional Learning, Creativity, Quran Learning — Nazra, Arabic
+  Letters, Foundational Quran Reading, Educational Activities, Learning
+  Games) are exactly 13 of the 16 real `learning-categories.ts` slugs
+  already selectable under "Subjects / learning areas" — the three
+  excluded (Puzzles, Mazes, Coloring) are resource *formats*, not subject
+  expertise, so the brief's own list correctly excludes them too.
+
+Given that, creating a second, parallel "expertise taxonomy" duplicating
+13 of 16 entries from an existing one — just to also cover two labels
+that already exist under different field names — would be the "duplicate
+system" the brief explicitly forbids. The only change made was a
+one-line, zero-risk clarification: the profile form's "Teaching" section
+now opens with "Your expertise — the age groups and subjects you're
+equipped to teach, plus languages and approach," so the connection to the
+brief's terminology is explicit without moving or renaming any field.
+
+### The one genuinely new thing: "Needs Changes"
+
+The brief's workflow (`Pending → Under Review → Approved / Rejected /
+Needs Changes`) doesn't fully fit this codebase's architecture, and the
+brief itself says to "only implement statuses that fit the existing
+architecture" — so only part of it was built:
+
+- **"Needs Changes" was added** — a real, admin-triggerable
+  `TeacherModerationStatus` value with its own real effect: it behaves
+  like `"pending"` for visibility (still viewable via direct link,
+  `docs/TEACHER_DIRECTORY_ARCHITECTURE.md`) but is never directory-listed,
+  and the Teacher Dashboard shows a clear, specific message ("An admin
+  has asked for changes...") distinct from the generic pending message.
+  `TEACHER_MODERATION_STATUSES` (`src/lib/accounts/types.ts`) is the one
+  place it's declared; `AdminTeacherDetail`'s moderation buttons already
+  iterate that array generically, so no new button-specific code was
+  needed there.
+- **"Under Review" was deliberately not added.** This codebase has no
+  reviewer-assignment system, no multi-admin identity, and no queue — a
+  single shared admin passphrase either has or hasn't acted on a profile
+  (`docs/ADMIN_ARCHITECTURE.md`). A status meaning "an admin is looking
+  at this right now" would carry no real, distinguishable information
+  beyond "pending" — nothing in this codebase could ever set it honestly.
+  Adding it would be exactly the kind of status the brief's own qualifier
+  ("only implement statuses that fit the existing architecture") warns
+  against.
+
+### Consolidation triggered by the new status
+
+Adding a fifth status revealed that `MODERATION_BADGE_VARIANT` had been
+independently reinvented, identically, in three separate files
+(`admin-teacher-list.tsx`, `admin-teacher-detail.tsx`,
+`teacher-dashboard.tsx`) — each would have needed the same one-line
+addition. Rather than editing three copies, all three now import one
+shared `TEACHER_MODERATION_BADGE_VARIANT` from `src/lib/accounts/types.ts`,
+alongside the `TEACHER_MODERATION_STATUS_LABELS` map that already
+existed for exactly this "never let the wording drift" reason.
+`teacher-dashboard.tsx` also had its own duplicate copy of
+`TEACHER_MODERATION_STATUS_LABELS` itself (never actually importing the
+shared one) — that's now consolidated too.
+
+### Security and privacy, reconfirmed rather than rebuilt
+
+- **"Approval must happen server-side"** — read literally, this can't be
+  true today: no API route exists anywhere in this codebase
+  (`docs/ADMIN_ARCHITECTURE.md`, "Security"), so there is no server-side
+  mutation endpoint for anything, including this. What *is* server-side,
+  and unchanged by this prompt, is the only real security boundary that
+  exists: Proxy (`src/proxy.ts`) blocks the request for the entire
+  `/admin/*` page — HTML and JS bundle both — before it ever reaches an
+  unauthenticated browser. The moderation buttons are plain client code,
+  but no one who isn't already authenticated can ever load the page that
+  contains them. Adding "needs-changes" changes nothing about this
+  boundary.
+- **Never allow a teacher to access unrelated private parent
+  information** — already structurally impossible: teacher
+  authentication and admin authentication are two entirely separate
+  systems (`docs/ADMIN_ARCHITECTURE.md`, "Parent management," Prompt 65);
+  a teacher session grants zero path into `/admin/*`.
+- **A teacher can only edit their own permitted profile** —
+  `updateLocalTeacherProfile()`'s own type (`TeacherProfileUpdates`,
+  `src/lib/accounts/local-teacher.ts`) structurally excludes
+  `moderationStatus`, `verified`, and `accountStatus` — a teacher's own
+  form cannot construct a request that touches them, regardless of what
+  values it might contain.
+- **Public directory exposure** — `toPublicTeacherProfile()`
+  (`src/lib/accounts/teacher-public-profile.ts`) already excludes email,
+  `accountId`, `moderationStatus`, `visibility`, and `accountStatus` from
+  every public-facing view; adding `"needs-changes"` to the
+  `moderationStatus` union changes nothing about that exclusion — it was
+  never a value on the allowlist to begin with.
+
+### What was not built
+
+- No "future services offered" field — that's what the `Offering`/
+  `Membership` architecture (`docs/BUSINESS_ARCHITECTURE.md`,
+  `docs/MEMBERSHIP_ARCHITECTURE.md`) already models at the platform
+  level; a teacher-specific "service" would be a real future `Offering`
+  or `"teacher"`-type `Membership`, not a free-text profile field
+  inviting an unfulfillable promise.
+- No admin "review notes" field — the brief's PRIVACY section only says
+  such notes must never be public if they exist; none were added, since
+  the plain moderation-status change plus its existing audit-log entry
+  (`recordAdminAuditEvent`, unchanged) already gives the admin side a
+  real record without inventing a new sensitive-data field to then have
+  to protect.
+- No teacher self-service resubmission button or status-change
+  confirmation flow — editing and saving the profile (already fully
+  working) is the entire "resubmit" action; a separate button would just
+  call the same save path.

@@ -27,16 +27,9 @@ import {
   ACCOUNT_STATUS_LABELS,
   TEACHER_MODERATION_STATUSES,
   TEACHER_MODERATION_STATUS_LABELS,
-  type TeacherModerationStatus,
+  TEACHER_MODERATION_BADGE_VARIANT,
 } from "@/lib/accounts/types";
 import { cn } from "@/lib/utils/cn";
-
-const MODERATION_BADGE_VARIANT: Record<TeacherModerationStatus, "neutral" | "success" | "error"> = {
-  pending: "neutral",
-  approved: "success",
-  rejected: "error",
-  hidden: "error",
-};
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
 const ageGroupOptionById = new Map(getAllTeacherAgeGroupOptions().map((o) => [o.id, o] as const));
@@ -147,7 +140,7 @@ function AdminTeacherDetail() {
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               <div>
                 <p className="text-sm font-medium text-neutral-500">Directory moderation</p>
-                <Badge className="mt-1" variant={MODERATION_BADGE_VARIANT[teacher.moderationStatus]}>
+                <Badge className="mt-1" variant={TEACHER_MODERATION_BADGE_VARIANT[teacher.moderationStatus]}>
                   {TEACHER_MODERATION_STATUS_LABELS[teacher.moderationStatus]}
                 </Badge>
               </div>
@@ -183,7 +176,9 @@ function AdminTeacherDetail() {
               <p className="mt-2 text-xs text-neutral-500">
                 Approving lets this profile appear in the searchable directory once a real backend exists (see
                 docs/TEACHER_DIRECTORY_ARCHITECTURE.md); rejecting or hiding blocks it from{" "}
-                <code>/teachers/p/{teacher.slug}</code> immediately, even via direct link.
+                <code>/teachers/p/{teacher.slug}</code> immediately, even via direct link. &quot;Needs changes&quot;
+                keeps the profile visible via direct link (like pending) but never lists it in the directory — the
+                teacher sees a clear message on their own dashboard asking them to revise and resubmit.
               </p>
             </div>
 

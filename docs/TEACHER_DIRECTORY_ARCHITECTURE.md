@@ -37,10 +37,15 @@ human approval**, not just the teacher's own opt-in. See "Two gates," below.
 `TeacherProfile` carries two independent fields:
 
 - `visibility: "private" | "public"` — the teacher's own choice (Prompt 27).
-- `moderationStatus: "pending" | "approved" | "rejected" | "hidden"` — the
-  platform's side (Prompt 29 Part 7), defaulting to `"pending"` on every
-  new profile. Nothing in this codebase ever sets it to `"approved"`
-  automatically — the same rule `verified` already follows.
+- `moderationStatus: "pending" | "approved" | "rejected" | "needs-changes" | "hidden"`
+  — the platform's side (Prompt 29 Part 7, extended in Prompt 66),
+  defaulting to `"pending"` on every new profile. Nothing in this
+  codebase ever sets it to `"approved"` automatically — the same rule
+  `verified` already follows. `"needs-changes"` (Prompt 66) is a real,
+  admin-triggerable outcome distinct from an outright rejection — see
+  `docs/TEACHER_ARCHITECTURE.md`, "Registration & expertise
+  management," for why the brief's alternative suggestion ("Under
+  Review") wasn't added alongside it.
 
 `src/lib/accounts/teacher-visibility.ts` defines exactly how they
 combine, mirroring the same two-gate shape as `isResourcePublished()` and
@@ -48,12 +53,13 @@ combine, mirroring the same two-gate shape as `isResourcePublished()` and
 
 - `canViewTeacherProfile(teacher)` — `visibility === "public"` AND
   moderation hasn't actively blocked it (`rejected`/`hidden` fail this;
-  `pending` passes). A brand-new public profile is viewable via its
-  direct link right away — reviewed-or-not isn't the same question as
-  banned-or-not.
+  `pending` and `needs-changes` both pass). A brand-new public profile is
+  viewable via its direct link right away — reviewed-or-not isn't the
+  same question as banned-or-not, and "still being revised" isn't either.
 - `canListTeacherInDirectory(teacher)` — everything above, AND
   `moderationStatus === "approved"`. Being viewable directly isn't the
-  same as being discoverable through search.
+  same as being discoverable through search — `"needs-changes"` fails
+  this the same way `"pending"` always has.
 
 A real reviewer tool now exists — `/admin/teachers/[teacherId]`
 (`docs/ADMIN_ARCHITECTURE.md`, Prompt 56) — so a profile genuinely can

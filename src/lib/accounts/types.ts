@@ -144,6 +144,19 @@ export type TeacherProfileVisibility = (typeof TEACHER_PROFILE_VISIBILITIES)[num
  *   (/teachers). Only a real human review step sets this.
  * - "rejected" — declined; hidden everywhere public, including the
  *   direct profile link.
+ * - "needs-changes" (Prompt 66) — reviewed, but not ready to approve or
+ *   reject outright; the teacher should revise their profile and it will
+ *   be looked at again. Behaves like "pending" for visibility purposes
+ *   (`canViewTeacherProfile()` still allows the direct link — "innocent
+ *   until reviewed" applies just as much to "still being revised"), but
+ *   never lists in the directory (`canListTeacherInDirectory()` only ever
+ *   allows "approved"). A deliberately narrower addition than the brief's
+ *   suggested "Under Review": this codebase has no reviewer-assignment or
+ *   multi-stage queue, so a status meaning "an admin is looking at this
+ *   right now" would carry no real information beyond "pending" — nothing
+ *   sets it, so it isn't included. "needs-changes" is included because it
+ *   IS a real, distinct, admin-triggerable outcome with its own real
+ *   effect (see `TeacherDashboard`'s message for this status).
  * - "hidden" — previously approved, later unlisted (e.g. a policy
  *   concern found after the fact) — distinct from "rejected" as a
  *   history, but has the identical effect on visibility.
@@ -152,7 +165,7 @@ export type TeacherProfileVisibility = (typeof TEACHER_PROFILE_VISIBILITIES)[num
  * combines with `visibility`, and docs/TEACHER_DIRECTORY_ARCHITECTURE.md
  * for the full reasoning.
  */
-export const TEACHER_MODERATION_STATUSES = ["pending", "approved", "rejected", "hidden"] as const;
+export const TEACHER_MODERATION_STATUSES = ["pending", "approved", "rejected", "needs-changes", "hidden"] as const;
 export type TeacherModerationStatus = (typeof TEACHER_MODERATION_STATUSES)[number];
 
 /** Shared display labels — used by the Teacher Dashboard's own read-only badge and the admin teacher management area's moderation controls (docs/ADMIN_ARCHITECTURE.md), so the wording never drifts between the two. */
@@ -160,7 +173,17 @@ export const TEACHER_MODERATION_STATUS_LABELS: Record<TeacherModerationStatus, s
   pending: "Pending review",
   approved: "Approved",
   rejected: "Not approved",
+  "needs-changes": "Needs changes",
   hidden: "Hidden",
+};
+
+/** Shared badge color per status, same "one source, never drifts" reasoning as the labels above — consolidated in Prompt 66 from three separate copies of this exact map. */
+export const TEACHER_MODERATION_BADGE_VARIANT: Record<TeacherModerationStatus, "neutral" | "success" | "error" | "warning"> = {
+  pending: "neutral",
+  approved: "success",
+  rejected: "error",
+  "needs-changes": "warning",
+  hidden: "error",
 };
 
 /**

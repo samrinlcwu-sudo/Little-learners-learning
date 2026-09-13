@@ -22,16 +22,10 @@ import {
   ACCOUNT_STATUS_LABELS,
   TEACHER_MODERATION_STATUSES,
   TEACHER_MODERATION_STATUS_LABELS,
+  TEACHER_MODERATION_BADGE_VARIANT,
   type TeacherAgeGroup,
   type TeacherModerationStatus,
 } from "@/lib/accounts/types";
-
-const MODERATION_BADGE_VARIANT: Record<TeacherModerationStatus, "neutral" | "success" | "error"> = {
-  pending: "neutral",
-  approved: "success",
-  rejected: "error",
-  hidden: "error",
-};
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
 const ageGroupOptionById = new Map(getAllTeacherAgeGroupOptions().map((o) => [o.id, o] as const));
@@ -232,7 +226,7 @@ function AdminTeacherList() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <Badge variant={MODERATION_BADGE_VARIANT[teacher.moderationStatus]}>
+                            <Badge variant={TEACHER_MODERATION_BADGE_VARIANT[teacher.moderationStatus]}>
                               {TEACHER_MODERATION_STATUS_LABELS[teacher.moderationStatus]}
                             </Badge>
                           </td>

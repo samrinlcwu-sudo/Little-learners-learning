@@ -46,27 +46,17 @@ import {
 } from "@/config/teacher-options";
 import type { NewTeacherResource } from "@/lib/resources/local-teacher-resources";
 import type { Resource } from "@/lib/resources/types";
-import type { TeacherModerationStatus, TeacherProfileVisibility } from "@/lib/accounts/types";
+import {
+  TEACHER_MODERATION_STATUS_LABELS,
+  TEACHER_MODERATION_BADGE_VARIANT,
+  type TeacherProfileVisibility,
+} from "@/lib/accounts/types";
 import { cn } from "@/lib/utils/cn";
 
 const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
 const ageGroupOptionById = new Map(getAllTeacherAgeGroupOptions().map((o) => [o.id, o] as const));
 const languageLabelById = new Map(getAllTeacherLanguageOptions().map((o) => [o.id, o.label] as const));
 const interestLabelById = new Map(getAllTeachingInterestOptions().map((o) => [o.id, o.label] as const));
-
-const MODERATION_STATUS_LABELS: Record<TeacherModerationStatus, string> = {
-  pending: "Pending review",
-  approved: "Approved",
-  rejected: "Not approved",
-  hidden: "Hidden",
-};
-
-const MODERATION_BADGE_VARIANT: Record<TeacherModerationStatus, "neutral" | "success" | "error"> = {
-  pending: "neutral",
-  approved: "success",
-  rejected: "error",
-  hidden: "error",
-};
 
 const futureFeatures = [
   {
@@ -408,8 +398,8 @@ function TeacherDashboard() {
                 {teacher.visibility === "public" && (
                   <div className="mt-3 flex items-center justify-between gap-2 rounded-md bg-neutral-100 px-3 py-2">
                     <span className="text-xs font-medium text-neutral-600">Directory listing</span>
-                    <Badge variant={MODERATION_BADGE_VARIANT[teacher.moderationStatus]}>
-                      {MODERATION_STATUS_LABELS[teacher.moderationStatus]}
+                    <Badge variant={TEACHER_MODERATION_BADGE_VARIANT[teacher.moderationStatus]}>
+                      {TEACHER_MODERATION_STATUS_LABELS[teacher.moderationStatus]}
                     </Badge>
                   </div>
                 )}
@@ -422,6 +412,13 @@ function TeacherDashboard() {
                     </Link>{" "}
                     once a human reviews and approves it — nothing here is automatic.
                   </p>
+                )}
+                {teacher.moderationStatus === "needs-changes" && (
+                  <Alert variant="warning" className="mt-3">
+                    An admin has asked for changes before this profile can be approved. Review your professional
+                    information below and update anything that needs it — there&apos;s no separate form, just edit
+                    and save as usual.
+                  </Alert>
                 )}
               </Card>
             </div>

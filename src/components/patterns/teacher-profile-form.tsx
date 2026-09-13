@@ -255,6 +255,9 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
         <Heading level="h4" as="h2">
           Teaching
         </Heading>
+        <p className="mt-1 text-sm text-neutral-600">
+          Your expertise — the age groups and subjects you&apos;re equipped to teach, plus languages and approach.
+        </p>
         <div className="mt-4 space-y-6">
           <fieldset>
             <legend className="mb-2 block text-sm font-medium text-ink">Age groups</legend>
