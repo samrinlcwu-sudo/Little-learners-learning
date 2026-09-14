@@ -11,11 +11,15 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { ResourceCard } from "@/components/patterns/resource-card";
 import { GameCard } from "@/components/patterns/game-card";
+import { BlogArticleCard } from "@/components/patterns/blog-article-card";
 import { TrackPageView } from "@/components/patterns/track-page-view";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
+import { getAllBlogTopics } from "@/config/blog-topics";
 import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
 import { isGamePublished } from "@/lib/games/types";
+import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
+import { isArticlePublished } from "@/lib/blog/types";
 import {
   ACCESS_TIER_LABELS,
   RESOURCE_TYPE_LABELS,
@@ -108,6 +112,13 @@ export default async function ResourceDetailPage({
   const relatedGame = resource.category
     ? SAMPLE_GAMES.find((g) => g.category === resource.category && isGamePublished(g))
     : undefined;
+
+  // A real, computed backlink — never a field on Resource itself, just
+  // whichever published blog article (if any) actually names this
+  // resource's slug in its own relatedResourceSlugs (src/lib/blog/sample-articles.ts).
+  const relatedArticle = SAMPLE_ARTICLES.find(
+    (article) => isArticlePublished(article) && article.relatedResourceSlugs?.includes(resource.slug),
+  );
 
   // Structured data reflects only fields the model actually carries — no
   // ratings, review counts, or other social-proof properties, since none exist.
@@ -310,6 +321,20 @@ export default async function ResourceDetailPage({
             )}
           </div>
         </div>
+
+        {relatedArticle && (
+          <div className="mt-12 max-w-3xl border-t border-neutral-200 pt-8">
+            <Heading level="h4" as="h2" className="text-neutral-500">
+              From the blog
+            </Heading>
+            <div className="mt-4 max-w-sm">
+              <BlogArticleCard
+                article={relatedArticle}
+                topicName={getAllBlogTopics().find((t) => t.slug === relatedArticle.topic)?.name}
+              />
+            </div>
+          </div>
+        )}
 
         {relatedGame && category && (
           <div className="mt-12 max-w-3xl border-t border-neutral-200 pt-8">

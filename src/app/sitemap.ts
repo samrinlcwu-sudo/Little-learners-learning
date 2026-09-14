@@ -8,6 +8,8 @@ import { SAMPLE_GAMES } from "@/lib/games/sample-games";
 import { isGamePublished } from "@/lib/games/types";
 import { getAllOfferings } from "@/lib/offerings/offerings";
 import { isOfferingPubliclyVisible } from "@/lib/offerings/types";
+import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
+import { isArticlePublished } from "@/lib/blog/types";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -49,5 +51,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "monthly" as const,
         priority: 0.4,
       })),
+    ...SAMPLE_ARTICLES.filter(isArticlePublished).map((article) => ({
+      url: `${siteConfig.url}/blog/${article.slug}`,
+      lastModified: article.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
+    })),
   ];
 }
