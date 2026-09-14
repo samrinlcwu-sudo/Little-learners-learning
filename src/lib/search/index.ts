@@ -5,6 +5,9 @@ import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
 import { isResourcePublished } from "@/lib/resources/types";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
 import { isGamePublished } from "@/lib/games/types";
+import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
+import { isArticlePublished } from "@/lib/blog/types";
+import { rankBySearchMatch } from "./relevance";
 
 export interface SearchEntry {
   title: string;
@@ -65,17 +68,30 @@ function buildSearchIndex(): SearchEntry[] {
     group: "Games",
   }));
 
-  return [...STATIC_PAGES, ...categories, ...content, ...resources, ...games];
+  const articles: SearchEntry[] = SAMPLE_ARTICLES.filter(isArticlePublished).map((article) => ({
+    title: article.title,
+    description: article.excerpt,
+    href: `/blog/${article.slug}`,
+    group: "Blog",
+  }));
+
+  return [...STATIC_PAGES, ...categories, ...content, ...resources, ...games, ...articles];
 }
 
 export const SEARCH_INDEX: SearchEntry[] = buildSearchIndex();
 
-/** Simple substring match over title + description — plenty for a catalog this size; swap for a real search engine if it ever grows past that. */
+/**
+ * Ranked by the same transparent title-first relevance rule the full
+ * `/search` page uses (src/lib/search/relevance.ts) — a title match
+ * always outranks a description-only one, so typing "counting" surfaces
+ * "Counting Animals Worksheet" before an unrelated item that only
+ * happens to mention counting in passing. Still a plain in-memory index;
+ * swap for a real search engine if the catalog ever grows past what this
+ * comfortably ranks.
+ */
 export function searchSite(query: string, limit = 8): SearchEntry[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return [];
-  return SEARCH_INDEX.filter((entry) => `${entry.title} ${entry.description}`.toLowerCase().includes(q)).slice(
-    0,
-    limit,
-  );
+  return rankBySearchMatch(query, SEARCH_INDEX, (entry) => ({
+    title: entry.title,
+    description: entry.description,
+  })).slice(0, limit);
 }

@@ -6,7 +6,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Search as SearchIcon, X } from "lucide-react";
 import { searchSite, type SearchEntry } from "@/lib/search";
 
-const GROUP_ORDER = ["Pages", "Subjects", "Games", "Resources", "Learning Hub"];
+const GROUP_ORDER = ["Pages", "Subjects", "Resources", "Games", "Blog", "Learning Hub"];
 
 function groupResults(results: SearchEntry[]) {
   const byGroup = new Map<string, SearchEntry[]>();
@@ -26,7 +26,7 @@ export interface SiteSearchProps {
 
 /**
  * A real, working search — not a "coming soon" placeholder. It's a plain
- * substring match over subjects, resources, and games (see
+ * substring match over subjects, resources, games, and articles (see
  * src/lib/search/index.ts), wrapped in an accessible dialog. Any number of
  * trigger elements can live inside as children (the desktop icon button and
  * the mobile drawer's search row both open the same instance).
@@ -57,7 +57,7 @@ function SiteSearch({ children }: SiteSearchProps) {
         >
           <DialogPrimitive.Title className="sr-only">Search Little Learners Learning</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">
-            Search subjects, resources, and games across the site.
+            Search subjects, resources, games, and articles across the site.
           </DialogPrimitive.Description>
 
           <div className="flex items-center gap-3 border-b border-neutral-200 px-4 py-3">
@@ -67,7 +67,7 @@ function SiteSearch({ children }: SiteSearchProps) {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search subjects, resources, games…"
+              placeholder="Search subjects, resources, games, articles…"
               className="h-9 w-full border-0 bg-transparent text-sm text-ink outline-none placeholder:text-neutral-400"
             />
             <DialogPrimitive.Close className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
@@ -79,7 +79,7 @@ function SiteSearch({ children }: SiteSearchProps) {
           <div className="max-h-[60vh] overflow-y-auto p-2">
             {query.trim() === "" ? (
               <p className="px-3 py-8 text-center text-sm text-neutral-500">
-                Start typing to search subjects, resources, and games.
+                Start typing to search subjects, resources, games, and articles.
               </p>
             ) : grouped.length === 0 ? (
               <div className="px-3 py-8 text-center">
@@ -101,36 +101,53 @@ function SiteSearch({ children }: SiteSearchProps) {
                   >
                     Resources
                   </Link>{" "}
-                  or{" "}
+                  ,{" "}
                   <Link
                     href="/games"
                     onClick={() => handleOpenChange(false)}
                     className="text-primary-700 underline-offset-4 hover:underline"
                   >
                     Games
+                  </Link>{" "}
+                  or the{" "}
+                  <Link
+                    href="/blog"
+                    onClick={() => handleOpenChange(false)}
+                    className="text-primary-700 underline-offset-4 hover:underline"
+                  >
+                    Blog
                   </Link>
                   .
                 </p>
               </div>
             ) : (
-              grouped.map(({ group, items }) => (
-                <div key={group} className="mb-2 last:mb-0">
-                  <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                    {group}
-                  </p>
-                  {items.map((item) => (
-                    <Link
-                      key={`${item.group}-${item.href}-${item.title}`}
-                      href={item.href}
-                      onClick={() => handleOpenChange(false)}
-                      className="block rounded-lg px-3 py-2 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
-                    >
-                      <p className="text-sm font-medium text-ink">{item.title}</p>
-                      <p className="truncate text-xs text-neutral-500">{item.description}</p>
-                    </Link>
-                  ))}
-                </div>
-              ))
+              <>
+                {grouped.map(({ group, items }) => (
+                  <div key={group} className="mb-2 last:mb-0">
+                    <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                      {group}
+                    </p>
+                    {items.map((item) => (
+                      <Link
+                        key={`${item.group}-${item.href}-${item.title}`}
+                        href={item.href}
+                        onClick={() => handleOpenChange(false)}
+                        className="block rounded-lg px-3 py-2 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
+                      >
+                        <p className="text-sm font-medium text-ink">{item.title}</p>
+                        <p className="truncate text-xs text-neutral-500">{item.description}</p>
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+                <Link
+                  href={`/search?q=${encodeURIComponent(query.trim())}`}
+                  onClick={() => handleOpenChange(false)}
+                  className="mt-1 block rounded-lg px-3 py-2.5 text-center text-sm font-medium text-primary-700 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
+                >
+                  See all results, with filters →
+                </Link>
+              </>
             )}
           </div>
         </DialogPrimitive.Content>

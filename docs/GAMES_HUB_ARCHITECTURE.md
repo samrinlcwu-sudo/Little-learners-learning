@@ -7,7 +7,11 @@ be shown" — a game is working software, so the honest move here isn't an
 empty state, it's actually building one. Prompt 67
 (`docs/CONTENT_MANAGEMENT_ARCHITECTURE.md`) adds a read-only admin search/
 filter view over this same catalog — deliberately not full CRUD, since no
-game-authoring flow exists anywhere in this codebase yet.
+game-authoring flow exists anywhere in this codebase yet. Prompt 72
+(`docs/SEARCH_ARCHITECTURE.md`) adds the public-facing counterpart,
+`src/lib/games/filters.ts` — a published-only `filterGames`/`sortGames`/
+`paginateGames`, the same shape `Resource`/`BlogArticle` already had,
+used by the site-wide `/search` page.
 
 ## Data model
 

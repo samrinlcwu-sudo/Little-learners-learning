@@ -2,8 +2,10 @@
 
 Introduced in Prompt 69, extended in Prompt 70 (`reviewer` field, real
 author linking and structured data — see `docs/AUTHOR_ARCHITECTURE.md`)
-and Prompt 71 (category-matched cross-links to learning categories,
-games, and resources — see `docs/INTERNAL_LINKING_ARCHITECTURE.md`).
+Prompt 71 (category-matched cross-links to learning categories,
+games, and resources — see `docs/INTERNAL_LINKING_ARCHITECTURE.md`), and
+Prompt 72 (articles are now searchable from the header quick-search and
+the site-wide `/search` page — see `docs/SEARCH_ARCHITECTURE.md`).
 Built on the same primitives as the Resource Library
 (`docs/RESOURCE_LIBRARY_ARCHITECTURE.md`) and the shared content model
 (`docs/LEARNING_ARCHITECTURE.md`) — read those first, since `BlogArticle`

@@ -6,7 +6,10 @@ Prompt 67 (`docs/CONTENT_MANAGEMENT_ARCHITECTURE.md`) adds optional SEO
 override fields (`seoTitle`, `metaDescription`, `canonicalUrl`) and an
 admin-authoring layer on top of this same `Resource` type — read that doc
 for the admin side; this one still covers the type itself and the public
-library pages.
+library pages. Prompt 72 (`docs/SEARCH_ARCHITECTURE.md`) reuses
+`filterResources`/`sortResources`/`paginateResources` unchanged inside the
+new site-wide `/search` page, layering relevance ranking on top rather
+than replacing this module's own query matching.
 
 ## Why a separate `Resource` type, not a reuse of `LearningContent`
 
