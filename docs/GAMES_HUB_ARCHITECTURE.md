@@ -4,7 +4,10 @@ Introduced in Prompt 13; five real games built in Prompt 14; progress and
 reward architecture added in Prompt 15. Unlike the Resource Library
 (Prompts 9–12), games aren't "content that needs a real file before it can
 be shown" — a game is working software, so the honest move here isn't an
-empty state, it's actually building one.
+empty state, it's actually building one. Prompt 67
+(`docs/CONTENT_MANAGEMENT_ARCHITECTURE.md`) adds a read-only admin search/
+filter view over this same catalog — deliberately not full CRUD, since no
+game-authoring flow exists anywhere in this codebase yet.
 
 ## Data model
 

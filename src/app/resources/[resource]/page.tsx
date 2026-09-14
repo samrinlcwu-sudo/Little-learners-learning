@@ -25,6 +25,7 @@ import {
   type Resource,
 } from "@/lib/resources/types";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 
 export function generateStaticParams() {
   return SAMPLE_RESOURCES.filter(isResourcePublished).map((resource) => ({
@@ -43,10 +44,18 @@ export async function generateMetadata({
   const resource = findPublishedResource(slug);
   if (!resource) return {};
 
+  // Every field here has a real computed default; `seoTitle`/`metaDescription`/
+  // `canonicalUrl` (Prompt 67) only ever override it — an admin who never
+  // touches them gets exactly the metadata this page always generated.
+  const title = resource.seoTitle || resource.title;
+  const description = resource.metaDescription || resource.description;
+  const canonicalUrl = resource.canonicalUrl || `${siteConfig.url}/resources/${resource.slug}`;
+
   return {
-    title: resource.title,
-    description: resource.description,
-    alternates: { canonical: `${siteConfig.url}/resources/${resource.slug}` },
+    title,
+    description,
+    alternates: { canonical: canonicalUrl },
+    ...buildSocialMetadata(title, description, `/resources/${resource.slug}`),
   };
 }
 
@@ -62,7 +71,7 @@ export default async function ResourceDetailPage({
 
   const category = resource.category ? getLearningCategoryBySlug(resource.category) : undefined;
   const downloadable = canDownload(resource);
-  const canonicalUrl = `${siteConfig.url}/resources/${resource.slug}`;
+  const canonicalUrl = resource.canonicalUrl || `${siteConfig.url}/resources/${resource.slug}`;
   const isActivity = resource.resourceType === "activity";
   const isEbook = resource.resourceType === "ebook";
   const instructionsLabel = isActivity ? "Steps" : "Instructions";

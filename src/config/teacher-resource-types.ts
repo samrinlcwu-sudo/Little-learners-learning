@@ -50,3 +50,19 @@ export function getAllTeacherResourceTypeOptions(): TeacherResourceTypeOption[] 
 export function getTeacherResourceTypeIcon(id: ResourceType) {
   return RESOURCE_TYPE_ICONS[id];
 }
+
+/**
+ * Every real `ResourceType` (Prompt 67) — the admin content library manages
+ * the whole catalog, not just what a teacher is allowed to author, so it
+ * needs `teacher-resource`/`parent-resource`/`writing-practice` too. Reuses
+ * the exact same `RESOURCE_TYPE_LABELS` vocabulary rather than declaring a
+ * parallel list, for the same "one classification system" reason
+ * `TEACHER_RESOURCE_TYPE_IDS` above does.
+ */
+const ALL_RESOURCE_TYPE_OPTIONS: TeacherResourceTypeOption[] = (
+  Object.keys(RESOURCE_TYPE_LABELS) as ResourceType[]
+).map((id) => ({ id, label: RESOURCE_TYPE_LABELS[id] }));
+
+export function getAllResourceTypeOptions(): TeacherResourceTypeOption[] {
+  return getActiveOptions(ALL_RESOURCE_TYPE_OPTIONS);
+}

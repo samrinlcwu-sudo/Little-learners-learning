@@ -2,6 +2,11 @@
 
 Introduced in Prompt 9. Distinct from, but built on the same primitives as,
 the learning-content model from [LEARNING_ARCHITECTURE.md](LEARNING_ARCHITECTURE.md).
+Prompt 67 (`docs/CONTENT_MANAGEMENT_ARCHITECTURE.md`) adds optional SEO
+override fields (`seoTitle`, `metaDescription`, `canonicalUrl`) and an
+admin-authoring layer on top of this same `Resource` type — read that doc
+for the admin side; this one still covers the type itself and the public
+library pages.
 
 ## Why a separate `Resource` type, not a reuse of `LearningContent`
 

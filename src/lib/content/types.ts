@@ -35,7 +35,36 @@ export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
 
 export type DifficultyLevel = "beginner" | "intermediate" | "advanced";
 
-export type PublicationStatus = "draft" | "published" | "archived";
+/**
+ * "review" (Prompt 67) sits between "draft" (still being written) and
+ * "published" (live) — a deliberate checkpoint for content that's finished
+ * but hasn't been given the final, confirmed publish action yet. Every
+ * existing gate below (`isPubliclyVisible`, `isResourcePublished`,
+ * `isGamePublished`) already only special-cases `"published"` and treats
+ * every other value as "not visible," so adding this required no change to
+ * any of them — the same reason `"needs-changes"` slotted into
+ * `TeacherModerationStatus` without touching `teacher-visibility.ts` (see
+ * docs/TEACHER_ARCHITECTURE.md).
+ */
+export type PublicationStatus = "draft" | "review" | "published" | "archived";
+
+export const PUBLICATION_STATUS_LABELS: Record<PublicationStatus, string> = {
+  draft: "Draft",
+  review: "In review",
+  published: "Published",
+  archived: "Archived",
+};
+
+/** Shared across every admin content table (resources, and future games/lessons) so a badge never drifts between them. */
+export const PUBLICATION_STATUS_BADGE_VARIANT: Record<
+  PublicationStatus,
+  "neutral" | "warning" | "success" | "error"
+> = {
+  draft: "neutral",
+  review: "warning",
+  published: "success",
+  archived: "error",
+};
 
 /**
  * Every piece of Qur'an/Islamic content must carry this status, and only

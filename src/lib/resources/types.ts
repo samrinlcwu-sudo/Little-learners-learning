@@ -163,6 +163,20 @@ export interface Resource {
   reviewStatus?: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;
+  /**
+   * SEO overrides (Prompt 67) — every one is optional, and every page that
+   * renders a resource already has a correct computed default without
+   * these (title, description, and `${siteConfig.url}/resources/[slug]`
+   * respectively — see src/app/resources/[resource]/page.tsx). These exist
+   * so an admin can deliberately override one of those defaults for a
+   * specific resource, not because a default is missing. Never fabricate a
+   * value into these fields — an absent override must fall back to the
+   * real computed default, the same way `thumbnail`/`downloadFile` fall
+   * back to "nothing to show" rather than a placeholder.
+   */
+  seoTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
 }
 
 /**

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GraduationCap, Users } from "lucide-react";
+import { GraduationCap, Library, Users } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Card } from "@/components/ui/card";
@@ -18,8 +18,8 @@ import { CapabilityList } from "@/components/patterns/capability-list";
  */
 const roadmapCapabilities = [
   {
-    title: "Resources, games & learning categories",
-    description: "Manage worksheets, ebooks, activities, games, and the subject taxonomy from one place.",
+    title: "Learning category taxonomy",
+    description: "Edit the subject list itself (src/config/learning-categories.ts) from the dashboard, not code.",
   },
   {
     title: "Applications & admissions",
@@ -85,6 +85,20 @@ export default function AdminPage() {
                   <p className="font-display text-lg font-semibold text-ink">User management</p>
                   <p className="mt-1 text-sm text-neutral-600">
                     Search and filter every real account this device holds, and manage account status.
+                  </p>
+                </div>
+              </Card>
+            </Link>
+
+            <Link href="/admin/content" className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
+              <Card interactive className="flex h-full items-center gap-4 p-5">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent-100 text-accent-700">
+                  <Library className="size-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="font-display text-lg font-semibold text-ink">Content library</p>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    Create, edit, and publish resources; review the games catalog.
                   </p>
                 </div>
               </Card>

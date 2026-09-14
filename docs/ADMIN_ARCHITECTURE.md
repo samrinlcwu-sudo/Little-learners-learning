@@ -332,15 +332,16 @@ unchanged. This section is purely additive UI architecture.
 
 `src/config/admin-nav.ts` — one array (`adminNav`), the same
 "single source of truth every surface reads" convention `src/config/nav.ts`
-already establishes for the public site. It holds exactly three entries
-today: Dashboard (`/admin`), Users (`/admin/users`), Teachers
-(`/admin/teachers`) — the only admin routes that actually exist. The
-brief's much longer suggested nav (Resources, Games, Applications,
-Business, Content, SEO, Settings) is **not** in this file, per its own
-instruction: "Only expose sections that actually exist in the current
-implementation." Adding a real future section later is exactly one object
-in this array — both the desktop sidebar and the mobile nav read from it,
-so neither can drift out of sync with the other.
+already establishes for the public site. It holds four entries today:
+Dashboard (`/admin`), Users (`/admin/users`), Teachers
+(`/admin/teachers`), and Content (`/admin/content`, added Prompt 67 — see
+"Content management" below) — the only admin routes that actually exist.
+The brief's much longer suggested nav (Applications, Business, SEO,
+Settings) is **not** in this file, per its own instruction: "Only expose
+sections that actually exist in the current implementation." Adding a
+real future section later is exactly one object in this array — both the
+desktop sidebar and the mobile nav read from it, so neither can drift out
+of sync with the other.
 
 `src/components/patterns/admin-nav-links.tsx` renders that array once;
 `AdminSidebar` (desktop, `hidden lg:flex`) and `AdminHeader`'s mobile
@@ -405,7 +406,10 @@ Applications/Admissions, Business (Offerings/Memberships), Content/SEO/
 Settings. None of these is a link; the panel says so explicitly ("nothing
 below is a link, because none of it has a page yet"). This is the
 "scalable architecture future prompts can extend" requirement made
-visible without fabricating a single page, button, or dataset.
+visible without fabricating a single page, button, or dataset. (Prompt 67
+built the resources/games half of the first roadmap item — see "Content
+management" below — so that line was narrowed to just the remaining
+learning-category taxonomy editor.)
 
 ### Design
 
@@ -421,6 +425,21 @@ success/warning/error) is reused as-is. Adding two new hues never asked
 for by name, to an admin-only surface, for a brief that also says "DO NOT
 change the existing brand identity," would be the wrong call — existing
 brand identity took precedence over the suggestion list.
+
+## Content management (Prompt 67)
+
+The full write-up of this system lives in
+`docs/CONTENT_MANAGEMENT_ARCHITECTURE.md` — this section is a short
+pointer. In brief: `/admin/content` is a two-tab page (Resources, Games).
+Resources gets real create/edit/publish/archive CRUD backed by a new
+`src/lib/resources/local-admin-resources.ts` (same browser-local
+architecture as `local-teacher-resources.ts`), combined for display with
+the checked-in sample library and teacher submissions via
+`admin-resource-rows.ts` — only admin-created rows are editable. Games
+stays read-only (search/filter over `SAMPLE_GAMES`), since no game
+authoring flow exists anywhere in this codebase to manage. Publishing and
+archiving both require a confirmed `window.confirm()` — creating or
+editing a resource can never itself make it live.
 
 ## SEO / AEO
 
@@ -498,3 +517,13 @@ another shape of error. Confirmed unauthenticated access to the new route
 redirects the same way every other `/admin/*` route does (Proxy's
 matcher already covers it — no proxy change was needed). Confirmed the
 public site and every other admin page are unaffected.
+
+**Prompt 67**: see `docs/CONTENT_MANAGEMENT_ARCHITECTURE.md`, "Testing,"
+for the full detail — summarized here: created a real resource through
+`/admin/content/new`, confirmed it lands as "In review," confirmed
+clicking "Published" without accepting the confirmation dialog leaves
+status unchanged, confirmed accepting it publishes, edited and deleted it,
+and confirmed the public `/resources` page and every resource detail page
+are completely unaffected (the new resource never appears there — no
+shared backend exists to make that honest). Ran typecheck, lint, the full
+Vitest suite (13 new tests), and a production build — all clean.
