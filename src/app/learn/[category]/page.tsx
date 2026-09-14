@@ -17,11 +17,15 @@ import { LearningContentBrowser } from "@/components/patterns/learning-content-b
 import { LearningJourneySteps } from "@/components/patterns/learning-journey-steps";
 import { GameCard } from "@/components/patterns/game-card";
 import { ResourceCard } from "@/components/patterns/resource-card";
+import { BlogArticleCard } from "@/components/patterns/blog-article-card";
 import { TrackPageView } from "@/components/patterns/track-page-view";
 import { LearningAreaStructuredData } from "@/components/patterns/learning-area-structured-data";
 import { CONTENT_TYPE_LABELS } from "@/lib/content/types";
 import { getCategoryJourney } from "@/lib/learning-journey";
 import { getLearningAreaKnowledge } from "@/lib/ai/knowledge/public-knowledge";
+import { getAllBlogTopics } from "@/config/blog-topics";
+import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
+import { isArticlePublished } from "@/lib/blog/types";
 import { siteConfig } from "@/config/site";
 
 export function generateStaticParams() {
@@ -58,6 +62,10 @@ export default async function LearnCategoryPage({
   const categoryResources = journey?.resources ?? [];
   const relatedCategories = getRelatedCategories(category.slug);
   const areaKnowledge = getLearningAreaKnowledge(category.slug);
+  const categoryArticles = SAMPLE_ARTICLES.filter(
+    (article) => article.category === category.slug && isArticlePublished(article),
+  );
+  const topicNameBySlug = new Map(getAllBlogTopics().map((t) => [t.slug, t.name] as const));
 
   return (
     <Section>
@@ -172,6 +180,31 @@ export default async function LearnCategoryPage({
                 action={
                   <Button size="sm" variant="outline" asChild>
                     <Link href={`/resources?category=${category.slug}`}>Search resources</Link>
+                  </Button>
+                }
+              />
+            )}
+          </div>
+        </div>
+
+        <div id="articles" className="mt-12 scroll-mt-20 border-t border-neutral-200 pt-8">
+          <Heading level="h4" as="h2" className="text-neutral-500">
+            Articles for parents and teachers
+          </Heading>
+          <div className="mt-4">
+            {categoryArticles.length > 0 ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {categoryArticles.map((article) => (
+                  <BlogArticleCard key={article.id} article={article} topicName={topicNameBySlug.get(article.topic)} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No articles for this subject yet"
+                description="Guidance for parents and teachers on this subject is still being added. Browse the full blog in the meantime."
+                action={
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href="/blog">Browse the blog</Link>
                   </Button>
                 }
               />

@@ -9,6 +9,15 @@ published in each subject), and `src/lib/progress` (what a specific child
 has actually done — see docs/PROGRESS_ARCHITECTURE.md, whose own "Future
 scalability" section named this exact feature before it existed).
 
+Prompt 71 (`docs/INTERNAL_LINKING_ARCHITECTURE.md`) added a fourth,
+sibling section to the category page — "Articles for parents and
+teachers" — deliberately kept *outside* this `CategoryJourney`/"Learn →
+Practice → Play" model rather than added as a fourth step: the journey
+steps are things a *child* moves through, while a blog article is
+guidance for the *adult* reading alongside them. It's fetched and
+filtered directly in `src/app/learn/[category]/page.tsx`, the same way
+"Related categories" already sits beside the journey rather than inside it.
+
 All of it lives in one module, `src/lib/learning-journey.ts`, with two
 pure functions.
 

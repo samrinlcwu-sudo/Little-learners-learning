@@ -8,12 +8,15 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { BlogArticleCard } from "@/components/patterns/blog-article-card";
 import { ResourceCard } from "@/components/patterns/resource-card";
+import { GameCard } from "@/components/patterns/game-card";
 import { AuthorLink } from "@/components/patterns/author-link";
 import { getBlogTopicBySlug, getAllBlogTopics } from "@/config/blog-topics";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
 import { BLOG_AUDIENCE_LABELS, isArticlePublished, type BlogArticle } from "@/lib/blog/types";
 import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
+import { SAMPLE_GAMES } from "@/lib/games/sample-games";
+import { isGamePublished } from "@/lib/games/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 import { buildAuthorSchema } from "@/lib/seo/author-schema";
@@ -61,6 +64,13 @@ export default async function BlogArticlePage({ params }: PageProps<"/blog/[arti
 
   const publishedOthers = SAMPLE_ARTICLES.filter((a) => a.slug !== article.slug && isArticlePublished(a));
   const relatedArticles = publishedOthers.filter((a) => a.topic === article.topic).slice(0, 3);
+
+  // Same category match connecting adult-facing guidance to a real,
+  // published game a child could actually play on the same subject —
+  // the reverse of the game detail page's own "From the blog" link.
+  const relatedGame = article.category
+    ? SAMPLE_GAMES.find((g) => g.category === article.category && isGamePublished(g))
+    : undefined;
 
   // Structured data reflects only fields the model actually carries — no
   // ratings, review counts, or author credentials this platform can't back.
@@ -193,6 +203,17 @@ export default async function BlogArticlePage({ params }: PageProps<"/blog/[arti
             </div>
           )}
         </div>
+
+        {relatedGame && (
+          <div className="mt-12 max-w-3xl border-t border-neutral-200 pt-8">
+            <Heading level="h4" as="h2" className="text-neutral-500">
+              Practice the same skill with a game
+            </Heading>
+            <div className="mt-4 max-w-sm">
+              <GameCard game={relatedGame} categoryName={category?.name} />
+            </div>
+          </div>
+        )}
 
         {relatedResources.length > 0 && (
           <div className="mt-12 max-w-3xl border-t border-neutral-200 pt-8">

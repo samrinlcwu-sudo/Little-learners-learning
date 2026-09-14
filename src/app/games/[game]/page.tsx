@@ -10,13 +10,17 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GameCard } from "@/components/patterns/game-card";
 import { ResourceCard } from "@/components/patterns/resource-card";
+import { BlogArticleCard } from "@/components/patterns/blog-article-card";
 import { GamePlayer } from "@/components/games/game-player";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
+import { getAllBlogTopics } from "@/config/blog-topics";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
 import { isGamePlayable } from "@/lib/games/registry";
 import { GAME_TYPE_LABELS, isGamePublished, type Game } from "@/lib/games/types";
 import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
 import { isResourcePublished } from "@/lib/resources/types";
+import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
+import { isArticlePublished } from "@/lib/blog/types";
 import { siteConfig } from "@/config/site";
 
 const DIFFICULTY_LABELS: Record<Game["difficulty"], string> = {
@@ -70,6 +74,13 @@ export default async function GameDetailPage({
   // published resource actually exists in this game's category.
   const relatedResource = game.category
     ? SAMPLE_RESOURCES.find((r) => r.category === game.category && isResourcePublished(r))
+    : undefined;
+
+  // Same category match connecting a game to adult-facing guidance about
+  // the same subject — only when a real, published article actually
+  // exists in this game's category.
+  const relatedArticle = game.category
+    ? SAMPLE_ARTICLES.find((a) => a.category === game.category && isArticlePublished(a))
     : undefined;
 
   // Structured data reflects only fields the model actually carries.
@@ -178,6 +189,20 @@ export default async function GameDetailPage({
             </Heading>
             <div className="mt-4 max-w-sm">
               <ResourceCard resource={relatedResource} categoryName={category.name} isSample />
+            </div>
+          </div>
+        )}
+
+        {relatedArticle && (
+          <div className="mt-12 max-w-2xl border-t border-neutral-200 pt-8">
+            <Heading level="h4" as="h2" className="text-neutral-500">
+              From the blog
+            </Heading>
+            <div className="mt-4 max-w-sm">
+              <BlogArticleCard
+                article={relatedArticle}
+                topicName={getAllBlogTopics().find((t) => t.slug === relatedArticle.topic)?.name}
+              />
             </div>
           </div>
         )}

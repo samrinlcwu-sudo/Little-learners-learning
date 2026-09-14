@@ -109,6 +109,7 @@ const ctaLinks = [
   { label: "Explore Learning", href: "/learn" },
   { label: "Explore Resources", href: "/resources" },
   { label: "Explore Games", href: "/games" },
+  { label: "Read the Blog", href: "/blog" },
   { label: "For Parents", href: "/parents" },
   { label: "For Teachers", href: "/teachers" },
 ];
