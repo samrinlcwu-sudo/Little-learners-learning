@@ -132,6 +132,31 @@ data genuinely is live at `/resources/[slug]` — the detail page shows a
 "View live page" link only for that case (`isLivePublic` in
 `admin-resource-detail.tsx`), never for an `admin`-sourced resource.
 
+## Checkpoint fix (Prompt 68): admin content routes were missing `noindex`
+
+The Prompt 68 quality-control checkpoint found a real regression: `/admin/content`,
+`/admin/content/new`, and `/admin/content/[resourceId]/edit` were built as
+`"use client"` page files with all of their UI (including the route's
+`metadata` export requirement) inline. A client component **cannot** export
+`metadata` in Next.js, so unlike every other `/admin/*` page in this
+codebase, these three had no `robots: { index: false, follow: false }` —
+silently reachable by a crawler if one ever found the URL. Fixed by moving
+each page's UI into its own client pattern component
+(`admin-content-tabs.tsx`, `admin-resource-create.tsx`,
+`admin-resource-edit.tsx`) and turning the route `page.tsx` files back into
+plain server components that export `metadata` and render the client
+component — the exact same split `admin-teacher-list.tsx` and
+`admin-user-list.tsx` already use. `/admin/content/[resourceId]/page.tsx`
+was already a server component but had simply never been given a
+`metadata` export either; that was added directly. Verified live:
+`document.querySelector('meta[name="robots"]').content` now reads
+`"noindex, nofollow"` on all four routes, and each page renders identically
+to before the fix. `src/app/robots.ts` also gained an explicit
+`disallow: "/admin"` rule as defense in depth on top of the per-page
+meta tag (the meta tag remains the actual enforcement; Proxy, `src/proxy.ts`,
+remains the actual access control — this is SEO hygiene, not a security
+boundary).
+
 ## Games: read-only by design
 
 `/admin/content`'s Games tab (`admin-game-list.tsx`) is deliberately not

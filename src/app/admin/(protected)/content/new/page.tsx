@@ -1,44 +1,12 @@
-"use client";
+import type { Metadata } from "next";
+import { AdminResourceCreate } from "@/components/patterns/admin-resource-create";
 
-import { useRouter } from "next/navigation";
-import { Container } from "@/components/ui/container";
-import { Section } from "@/components/ui/section";
-import { Card } from "@/components/ui/card";
-import { PageHeader } from "@/components/patterns/page-header";
-import { AdminResourceForm } from "@/components/patterns/admin-resource-form";
-import { useAdminResources } from "@/lib/resources/use-admin-resources";
-import type { NewAdminResource } from "@/lib/resources/local-admin-resources";
+export const metadata: Metadata = {
+  title: "New Resource",
+  description: "Create a new resource for the Little Learners Learning content library.",
+  robots: { index: false, follow: false },
+};
 
 export default function NewAdminResourcePage() {
-  const router = useRouter();
-  const { addResource } = useAdminResources();
-
-  function handleSave(values: NewAdminResource, status?: "draft" | "review") {
-    addResource(values, status);
-    router.push("/admin/content");
-  }
-
-  return (
-    <>
-      <PageHeader
-        breadcrumb={[
-          { label: "Home", href: "/" },
-          { label: "Admin", href: "/admin" },
-          { label: "Content", href: "/admin/content" },
-          { label: "New resource" },
-        ]}
-        eyebrow="Admin · Content library"
-        title="New resource"
-        description="Create a new resource for the content library. It starts as a draft or in review — publishing is always a separate, confirmed step."
-        surface="tint-secondary"
-      />
-      <Section className="pt-10 sm:pt-12 lg:pt-14">
-        <Container className="max-w-2xl">
-          <Card className="p-6">
-            <AdminResourceForm onSave={handleSave} onCancel={() => router.push("/admin/content")} />
-          </Card>
-        </Container>
-      </Section>
-    </>
-  );
+  return <AdminResourceCreate />;
 }
