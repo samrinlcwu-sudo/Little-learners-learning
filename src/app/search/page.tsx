@@ -239,12 +239,15 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap gap-2 border-b border-neutral-200 pb-4">
+        <div className="mt-6 flex flex-wrap gap-2 border-b border-neutral-200 pb-4" role="tablist" aria-label="Content type">
           {TYPE_TABS.map((tab) => (
             <Link
               key={tab}
               href={buildHref({ type: tab, page: undefined })}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              role="tab"
+              aria-selected={type === tab}
+              aria-current={type === tab ? "page" : undefined}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30 ${
                 type === tab ? "bg-primary-600 text-white" : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
               }`}
             >
