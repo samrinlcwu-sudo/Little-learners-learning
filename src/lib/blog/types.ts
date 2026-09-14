@@ -61,6 +61,21 @@ export interface BlogArticle {
   faq?: BlogFaqItem[];
   thumbnail?: string;
   author: ContentAuthor;
+  /**
+   * A second, real person who checked this article's accuracy before
+   * publishing — deliberately optional and unset everywhere in this
+   * codebase today (Prompt 70: "only implement reviewer functionality if
+   * the architecture supports genuine human review"). There is no named
+   * human reviewer identity anywhere yet: admin authentication is a single
+   * shared passphrase with no per-admin identity (docs/ADMIN_ARCHITECTURE.md,
+   * "a single shared admin passphrase authenticates 'the admin,' not a
+   * specific admin identity"), so there is no real name this field could
+   * honestly hold. The field exists so a genuine future reviewer role can
+   * populate it without a schema change — never to display a fabricated
+   * "Reviewed by" credit. Every UI that reads this must render nothing
+   * when it's absent, never a placeholder.
+   */
+  reviewer?: ContentAuthor;
   featured: boolean;
   publicationStatus: PublicationStatus;
   religiousReview: ReligiousReviewStatus;

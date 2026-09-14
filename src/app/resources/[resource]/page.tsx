@@ -30,6 +30,8 @@ import {
 } from "@/lib/resources/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { buildAuthorSchema } from "@/lib/seo/author-schema";
+import { AuthorLink } from "@/components/patterns/author-link";
 
 export function generateStaticParams() {
   return SAMPLE_RESOURCES.filter(isResourcePublished).map((resource) => ({
@@ -134,7 +136,7 @@ export default async function ResourceDetailPage({
     typicalAgeRange: `${resource.ageRange.minYears}-${resource.ageRange.maxYears}`,
     inLanguage: "en",
     isAccessibleForFree: resource.accessTier === "free",
-    author: { "@type": "Organization", name: resource.author.name },
+    author: buildAuthorSchema(resource.author),
     datePublished: resource.createdAt,
     dateModified: resource.updatedAt,
     ...(resource.pageCount ? { numberOfPages: resource.pageCount } : {}),
@@ -277,7 +279,9 @@ export default async function ResourceDetailPage({
             )}
             <div>
               <dt className="text-sm font-semibold text-neutral-500">Creator</dt>
-              <dd className="mt-1 text-sm text-ink">{resource.author.name}</dd>
+              <dd className="mt-1 text-sm text-ink">
+                <AuthorLink author={resource.author} />
+              </dd>
             </div>
           </dl>
 

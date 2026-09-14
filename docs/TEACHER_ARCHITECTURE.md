@@ -12,7 +12,10 @@ separately in `docs/TAXONOMY_ARCHITECTURE.md`; the public directory,
 search, filters, and moderation states are covered in
 `docs/TEACHER_DIRECTORY_ARCHITECTURE.md`; teacher-authored resource
 creation and its own review lifecycle is covered below, in "Resource
-creation (Prompt 42)."
+creation (Prompt 42)." How a resource's or blog article's author byline
+links back to this real public profile — and the Person structured data
+on the profile page itself — is covered in `docs/AUTHOR_ARCHITECTURE.md`
+(Prompt 70).
 
 ## Why a dedicated flow, not a role picker
 

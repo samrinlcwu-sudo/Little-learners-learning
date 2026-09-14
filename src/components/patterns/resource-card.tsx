@@ -3,6 +3,7 @@ import { Lock } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AuthorLink } from "@/components/patterns/author-link";
 import {
   ACCESS_TIER_LABELS,
   ACTIVITY_SUBTYPE_LABELS,
@@ -77,7 +78,11 @@ function ResourceCard({ resource, categoryName, isSample, showAuthor = true }: R
         </Badge>
         <CardTitle className="mt-2">{resource.title}</CardTitle>
         {resource.subtitle && <p className="mt-0.5 text-sm text-neutral-500">{resource.subtitle}</p>}
-        {isTeacherAuthored && showAuthor && <p className="mt-0.5 text-sm text-neutral-500">By {resource.author.name}</p>}
+        {isTeacherAuthored && showAuthor && (
+          <p className="mt-0.5 text-sm text-neutral-500">
+            By <AuthorLink author={resource.author} />
+          </p>
+        )}
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-3">
         <p className="text-sm text-neutral-600">{resource.description}</p>

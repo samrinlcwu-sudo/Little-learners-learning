@@ -12,6 +12,9 @@ import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import { toPublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
 import { canViewTeacherProfile } from "@/lib/accounts/teacher-visibility";
 import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
+import { buildTeacherPersonSchema } from "@/lib/seo/author-schema";
+import { getAllLearningCategories } from "@/config/learning-categories";
+import { siteConfig } from "@/config/site";
 
 /**
  * The real public route (/teachers/p/[slug]) — genuinely gated by
@@ -82,11 +85,25 @@ function TeacherPublicProfilePage() {
     );
   }
 
+  const profile = toPublicTeacherProfile(teacher);
+  const categoryNameBySlug = new Map(getAllLearningCategories().map((c) => [c.slug, c.name] as const));
+  // Real subject/expertise names this teacher entered themselves — never a
+  // fabricated specialty. See src/lib/seo/author-schema.ts.
+  const knowsAbout = [...profile.subjects.map((slug) => categoryNameBySlug.get(slug) ?? slug), ...profile.expertise];
+  const personSchema = buildTeacherPersonSchema({
+    name: profile.name,
+    url: `${siteConfig.url}/teachers/p/${profile.slug}`,
+    headline: profile.headline,
+    bio: profile.bio,
+    knowsAbout,
+  });
+
   return (
     <Section surface="sunken" className="py-12 sm:py-16">
       <Container className="max-w-2xl">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
         <TeacherPublicProfileContent
-          profile={toPublicTeacherProfile(teacher)}
+          profile={profile}
           resources={resources.filter((r) => r.author.teacherId === teacher.id)}
         />
       </Container>

@@ -8,6 +8,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { BlogArticleCard } from "@/components/patterns/blog-article-card";
 import { ResourceCard } from "@/components/patterns/resource-card";
+import { AuthorLink } from "@/components/patterns/author-link";
 import { getBlogTopicBySlug, getAllBlogTopics } from "@/config/blog-topics";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
@@ -15,6 +16,7 @@ import { BLOG_AUDIENCE_LABELS, isArticlePublished, type BlogArticle } from "@/li
 import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { buildAuthorSchema } from "@/lib/seo/author-schema";
 
 export function generateStaticParams() {
   return SAMPLE_ARTICLES.filter(isArticlePublished).map((article) => ({ article: article.slug }));
@@ -62,6 +64,8 @@ export default async function BlogArticlePage({ params }: PageProps<"/blog/[arti
 
   // Structured data reflects only fields the model actually carries — no
   // ratings, review counts, or author credentials this platform can't back.
+  // author uses Person for a real named teacher, Organization for the
+  // platform itself — see src/lib/seo/author-schema.ts.
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -69,7 +73,7 @@ export default async function BlogArticlePage({ params }: PageProps<"/blog/[arti
     description: article.excerpt,
     url: canonicalUrl,
     inLanguage: "en",
-    author: { "@type": "Organization", name: article.author.name },
+    author: buildAuthorSchema(article.author),
     publisher: { "@type": "Organization", name: siteConfig.name },
     datePublished: article.createdAt,
     dateModified: article.updatedAt,
@@ -128,13 +132,19 @@ export default async function BlogArticlePage({ params }: PageProps<"/blog/[arti
           </div>
 
           <p className="mt-4 text-sm text-neutral-500">
-            By {article.author.name} · Published{" "}
+            By <AuthorLink author={article.author} /> · Published{" "}
             {new Date(article.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
             {article.updatedAt !== article.createdAt && (
               <>
                 {" "}
                 · Updated{" "}
                 {new Date(article.updatedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+              </>
+            )}
+            {article.reviewer && (
+              <>
+                {" "}
+                · Reviewed by <AuthorLink author={article.reviewer} />
               </>
             )}
           </p>

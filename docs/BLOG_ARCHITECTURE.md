@@ -1,9 +1,11 @@
 # Blog Architecture
 
-Introduced in Prompt 69. Built on the same primitives as the Resource
-Library (`docs/RESOURCE_LIBRARY_ARCHITECTURE.md`) and the shared content
-model (`docs/LEARNING_ARCHITECTURE.md`) — read those first, since
-`BlogArticle` deliberately reuses their `ContentAuthor`, `PublicationStatus`,
+Introduced in Prompt 69, extended in Prompt 70 (`reviewer` field, real
+author linking and structured data — see `docs/AUTHOR_ARCHITECTURE.md`).
+Built on the same primitives as the Resource Library
+(`docs/RESOURCE_LIBRARY_ARCHITECTURE.md`) and the shared content model
+(`docs/LEARNING_ARCHITECTURE.md`) — read those first, since `BlogArticle`
+deliberately reuses their `ContentAuthor`, `PublicationStatus`,
 `ReligiousReviewStatus`, and `AgeRange` types rather than redeclaring them.
 
 ## Why a new content type, not a `Resource`
