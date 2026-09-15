@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import { ComingSoonSection } from "@/components/patterns/coming-soon-section";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+
+const description =
+  "Little Learners Learning's Privacy Policy — not yet written or finalized.";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
+  description,
   robots: { index: false, follow: true },
   alternates: { canonical: `${siteConfig.url}/privacy` },
+  ...buildSocialMetadata("Privacy Policy — " + siteConfig.name, description, "/privacy"),
 };
 
 export default function PrivacyPage() {
