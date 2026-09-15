@@ -28,6 +28,8 @@ import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
 import { isArticlePublished } from "@/lib/blog/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { getSubtopicsForCategory, subtopicMatchesSkill, subtopicMatchesTags } from "@/config/subtopics";
+import { FileText, Gamepad2, Newspaper, BookOpen, type LucideIcon } from "lucide-react";
 
 export function generateStaticParams() {
   return getAllLearningCategories().map((category) => ({ category: category.slug }));
@@ -68,6 +70,31 @@ export default async function LearnCategoryPage({
     (article) => article.category === category.slug && isArticlePublished(article),
   );
   const topicNameBySlug = new Map(getAllBlogTopics().map((t) => [t.slug, t.name] as const));
+
+  // The subtopic outline (Prompt 75) — each entry only appears when real,
+  // already-published content in this category actually matches it (see
+  // src/config/subtopics.ts). A subtopic with zero real matches is simply
+  // omitted, never shown with a fake/empty item list.
+  type SubtopicLink = { title: string; href: string; icon: LucideIcon };
+  const subtopicSections = getSubtopicsForCategory(category.slug)
+    .map((subtopic) => {
+      const links: SubtopicLink[] = [
+        ...categoryContent
+          .filter((item) => subtopicMatchesTags(subtopic, item.tags))
+          .map((item) => ({ title: item.title, href: `/learn/${category.slug}#content`, icon: BookOpen })),
+        ...categoryResources
+          .filter((item) => subtopicMatchesTags(subtopic, item.tags))
+          .map((item) => ({ title: item.title, href: `/resources/${item.slug}`, icon: FileText })),
+        ...categoryGames
+          .filter((item) => subtopicMatchesSkill(subtopic, item.skill))
+          .map((item) => ({ title: item.title, href: `/games/${item.slug}`, icon: Gamepad2 })),
+        ...categoryArticles
+          .filter((item) => subtopicMatchesTags(subtopic, item.tags))
+          .map((item) => ({ title: item.title, href: `/blog/${item.slug}`, icon: Newspaper })),
+      ];
+      return { subtopic, links };
+    })
+    .filter((section) => section.links.length > 0);
 
   return (
     <Section>
@@ -116,6 +143,38 @@ export default async function LearnCategoryPage({
               ))}
             </ul>
           </div>
+
+          {subtopicSections.length > 0 && (
+            <div className="mt-8">
+              <Heading level="h4" as="h2" className="text-neutral-500">
+                Explore by subtopic
+              </Heading>
+              <p className="mt-1 text-sm text-neutral-500">
+                {category.name} broken down into the specific skills real content here builds.
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                {subtopicSections.map(({ subtopic, links }) => (
+                  <div key={subtopic.slug} className="rounded-xl border border-neutral-200 p-4">
+                    <p className="font-display font-semibold text-ink">{subtopic.name}</p>
+                    <p className="mt-1 text-sm text-neutral-600">{subtopic.description}</p>
+                    <ul className="mt-3 space-y-1.5">
+                      {links.map((link) => (
+                        <li key={link.href + link.title}>
+                          <Link
+                            href={link.href}
+                            className="flex items-center gap-2 text-sm text-primary-700 hover:underline"
+                          >
+                            <link.icon className="size-4 shrink-0" aria-hidden="true" />
+                            {link.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {journey && (
             <div className="mt-8">

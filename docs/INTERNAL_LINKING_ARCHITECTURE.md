@@ -4,6 +4,10 @@ Prompt 71. This doc covers what changed and, just as importantly, what
 was reviewed and found already correct — most of the discovery system
 the brief asks for already existed from Prompts 9–70; this prompt filled
 in the real gaps and documents the rest as confirmed, not rebuilt.
+Prompt 75 (`docs/TOPIC_ARCHITECTURE.md`) adds one more layer on top of
+this category-level linking: a subtopic grouping within
+`/learn/[category]` itself, for the specific cases where real content
+shares a tag more precise than the category alone.
 
 ## What already existed (confirmed, not touched)
 

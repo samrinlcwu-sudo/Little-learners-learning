@@ -2,7 +2,10 @@
 
 How the platform's subject content is modeled, routed, and will eventually
 be searched — introduced in Prompt 7. No real lesson/resource content exists
-yet; this is the structure it will fill.
+yet; this is the structure it will fill. Prompt 75
+(`docs/TOPIC_ARCHITECTURE.md`) adds a subtopic layer on top of the 16
+categories here — grouping the real content that now exists by the
+specific skill it teaches, without adding a new route or category.
 
 ## Content model
 
