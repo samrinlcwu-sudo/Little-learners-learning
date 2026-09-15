@@ -213,3 +213,24 @@ Introducing a new abstraction and retrofitting it across 20+ existing
 page files would be exactly the unnecessary rebuild this prompt's own
 "do not rebuild the project" instruction warns against, for a
 consistency problem that doesn't actually exist today.
+
+## Prompt 76: on-page content audit
+
+A page-by-page content audit (title, H1/H2 hierarchy, intro copy, alt
+text, internal links) across the homepage, About, category pages,
+resource/game/blog pages, and teacher profiles — checking for keyword
+stuffing, generic filler, repetitive meta-description templates, and
+missing on-page elements, not just the technical metadata Prompt 74
+already covered. Found one real, if small, content gap: `/about`'s "What
+we offer" list was written before the blog existed (Prompt 69) and never
+mentioned it — of the platform's five real content formats, only four
+were listed. Added a fifth "The Blog" entry, matching the same one-line,
+non-promotional description style every other entry already uses. No
+other page needed a content change: titles/descriptions are already
+unique per record (never a shared template), alt text already describes
+each image's real purpose (`"Cover of {title}"`, a person's own name for
+a profile photo) rather than a keyword-stuffed string, heading hierarchy
+on every audited page has exactly one H1 with a logical H2/H3 structure
+and no decorative heading misuse, and every dynamic page's copy already
+comes from that specific record's own real fields rather than a
+generated template — confirmed again, not rewritten.

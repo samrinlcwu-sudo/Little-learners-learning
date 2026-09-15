@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileText, NotebookPen, Library, Gamepad2, Compass, ShieldCheck, Accessibility } from "lucide-react";
+import { FileText, NotebookPen, Library, Gamepad2, Newspaper, Compass, ShieldCheck, Accessibility } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -45,6 +45,11 @@ const offerings = [
     icon: NotebookPen,
     title: "The Learning Hub",
     description: "A subject-by-subject map of everything the platform covers.",
+  },
+  {
+    icon: Newspaper,
+    title: "The Blog",
+    description: "Practical guidance for parents and teachers, connected to the subjects it's about.",
   },
 ];
 
