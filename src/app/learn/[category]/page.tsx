@@ -27,6 +27,7 @@ import { getAllBlogTopics } from "@/config/blog-topics";
 import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
 import { isArticlePublished } from "@/lib/blog/types";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 
 export function generateStaticParams() {
   return getAllLearningCategories().map((category) => ({ category: category.slug }));
@@ -43,6 +44,7 @@ export async function generateMetadata({
     title: category.name,
     description: category.description,
     alternates: { canonical: `${siteConfig.url}/learn/${category.slug}` },
+    ...buildSocialMetadata(`${category.name} — ${siteConfig.name}`, category.description, `/learn/${category.slug}`),
   };
 }
 

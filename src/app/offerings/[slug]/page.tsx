@@ -21,6 +21,7 @@ import {
   type Offering,
 } from "@/lib/offerings/types";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 
 export function generateStaticParams() {
   return getAllOfferings().map((offering) => ({ slug: offering.slug }));
@@ -44,6 +45,7 @@ export async function generateMetadata({ params }: PageProps<"/offerings/[slug]"
     title: offering.name,
     description: offering.description,
     alternates: { canonical: `${siteConfig.url}/offerings/${offering.slug}` },
+    ...buildSocialMetadata(`${offering.name} — ${siteConfig.name}`, offering.description, `/offerings/${offering.slug}`),
   };
 }
 

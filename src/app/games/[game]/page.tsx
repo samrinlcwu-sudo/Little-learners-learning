@@ -22,6 +22,7 @@ import { isResourcePublished } from "@/lib/resources/types";
 import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
 import { isArticlePublished } from "@/lib/blog/types";
 import { siteConfig } from "@/config/site";
+import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 
 const DIFFICULTY_LABELS: Record<Game["difficulty"], string> = {
   beginner: "Beginner",
@@ -48,6 +49,7 @@ export async function generateMetadata({
     title: game.title,
     description: game.description,
     alternates: { canonical: `${siteConfig.url}/games/${game.slug}` },
+    ...buildSocialMetadata(`${game.title} — ${siteConfig.name}`, game.description, `/games/${game.slug}`),
   };
 }
 
