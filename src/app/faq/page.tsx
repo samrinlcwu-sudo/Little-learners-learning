@@ -6,6 +6,7 @@ import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { PageHeader } from "@/components/patterns/page-header";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { buildFaqPageSchema } from "@/lib/seo/faq-schema";
 
 const description =
   "Answers to common questions about Little Learners Learning — for parents, teachers, and anyone exploring the platform.";
@@ -170,20 +171,10 @@ const faqGroups: FaqGroup[] = [
 ];
 
 export default function FaqPage() {
-  // Built directly from the same faqGroups content rendered below — the
-  // schema can never claim a question exists that isn't actually visible
-  // on the page.
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqGroups.flatMap((group) =>
-      group.items.map((item) => ({
-        "@type": "Question",
-        name: item.question,
-        acceptedAnswer: { "@type": "Answer", text: item.answer },
-      })),
-    ),
-  };
+  // Built directly from the same faqGroups content rendered below (via the
+  // shared builder in src/lib/seo/faq-schema.ts) — the schema can never
+  // claim a question exists that isn't actually visible on the page.
+  const structuredData = buildFaqPageSchema(faqGroups.flatMap((group) => group.items));
 
   return (
     <>

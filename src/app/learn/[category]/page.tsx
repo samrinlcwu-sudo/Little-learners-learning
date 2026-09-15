@@ -29,6 +29,8 @@ import { isArticlePublished } from "@/lib/blog/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 import { getSubtopicsForCategory, subtopicMatchesSkill, subtopicMatchesTags } from "@/config/subtopics";
+import { buildCategoryFaq } from "@/lib/faq/category-faq";
+import { FaqSection } from "@/components/patterns/faq-section";
 import { FileText, Gamepad2, Newspaper, BookOpen, type LucideIcon } from "lucide-react";
 
 export function generateStaticParams() {
@@ -70,6 +72,7 @@ export default async function LearnCategoryPage({
     (article) => article.category === category.slug && isArticlePublished(article),
   );
   const topicNameBySlug = new Map(getAllBlogTopics().map((t) => [t.slug, t.name] as const));
+  const categoryFaq = buildCategoryFaq(category, journey, categoryArticles.length);
 
   // The subtopic outline (Prompt 75) — each entry only appears when real,
   // already-published content in this category actually matches it (see
@@ -272,6 +275,12 @@ export default async function LearnCategoryPage({
             )}
           </div>
         </div>
+
+        <FaqSection
+          title={`${category.name} — questions parents and teachers ask`}
+          items={categoryFaq}
+          className="mt-12 max-w-3xl border-t border-neutral-200 pt-8"
+        />
 
         {relatedCategories.length > 0 && (
           <div className="mt-12 border-t border-neutral-200 pt-8">

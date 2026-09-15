@@ -20,6 +20,7 @@ import { isGamePublished } from "@/lib/games/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 import { buildAuthorSchema } from "@/lib/seo/author-schema";
+import { buildFaqPageSchema } from "@/lib/seo/faq-schema";
 
 export function generateStaticParams() {
   return SAMPLE_ARTICLES.filter(isArticlePublished).map((article) => ({ article: article.slug }));
@@ -89,18 +90,7 @@ export default async function BlogArticlePage({ params }: PageProps<"/blog/[arti
     dateModified: article.updatedAt,
   };
 
-  const faqStructuredData =
-    article.faq && article.faq.length > 0
-      ? {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: article.faq.map((item) => ({
-            "@type": "Question",
-            name: item.question,
-            acceptedAnswer: { "@type": "Answer", text: item.answer },
-          })),
-        }
-      : null;
+  const faqStructuredData = article.faq ? buildFaqPageSchema(article.faq) : null;
 
   return (
     <Section>

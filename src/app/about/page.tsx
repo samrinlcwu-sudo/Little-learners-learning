@@ -10,10 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DecorativeBlob } from "@/components/ui/decorative-blob";
 import { IconFeature } from "@/components/patterns/icon-feature";
-import { learningCategoryGroups } from "@/config/learning-categories";
+import { learningCategoryGroups, getAllLearningCategories } from "@/config/learning-categories";
 import { parentValuePoints, teacherValuePoints } from "@/config/audience-value-points";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { FaqSection } from "@/components/patterns/faq-section";
+import type { FaqItem } from "@/lib/seo/faq-schema";
+import { joinWithAnd } from "@/lib/utils/join-with-and";
 
 const description =
   "What Little Learners Learning is, who it's for, and the approach behind an early-years learning platform built for parents and teachers.";
@@ -50,6 +53,26 @@ const offerings = [
     icon: Newspaper,
     title: "The Blog",
     description: "Practical guidance for parents and teachers, connected to the subjects it's about.",
+  },
+];
+
+// Deliberately just two questions, and deliberately not a re-statement of
+// anything already asked on /faq (e.g. "Who is Little Learners Learning
+// for?", "Is the platform free?") — this is a small, distinct addition, not
+// the same FAQ block repeated on another page. The second answer is
+// computed from the real category count and group names rather than a
+// hand-typed number, so it can never drift from src/config/learning-categories.ts.
+const categoryCount = getAllLearningCategories().length;
+const groupNames = learningCategoryGroups.map((group) => group.group);
+const aboutFaq: FaqItem[] = [
+  {
+    question: "What is Little Learners Learning?",
+    answer:
+      "An early-years learning platform for children roughly ages 2 to 8, organized around real subjects, resources, and games — built as a shared tool for the parents and teachers guiding that learning, not just something handed to a child alone.",
+  },
+  {
+    question: "What can children learn here?",
+    answer: `${categoryCount} subjects, grouped into ${joinWithAnd(groupNames)} — see the full map on the Learning Hub.`,
   },
 ];
 
@@ -112,6 +135,8 @@ export default function AboutPage() {
             specifically for early-years learners rather than adapted down
             from material meant for older kids.
           </p>
+
+          <FaqSection title="Quick answers" items={aboutFaq} className="mt-10 border-t border-neutral-200 pt-8" />
         </Container>
       </Section>
 

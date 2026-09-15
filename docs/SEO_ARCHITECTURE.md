@@ -121,7 +121,7 @@ isn't real.
 |---|---|---|
 | `Organization` + `WebSite` | Every page (`src/app/layout.tsx`) | `src/components/patterns/site-structured-data.tsx` — name, url, logo only; no fake founding date or social profiles |
 | `BreadcrumbList` | Every page with a breadcrumb trail | `src/components/ui/breadcrumb.tsx` — generated from the exact same `items` prop that renders the visible trail, so it can't drift from what a visitor sees |
-| `FAQPage` | `/faq`, and any `/blog/[article]` whose real `faq` array is non-empty | Built directly from the same array the visible accordion/FAQ section renders — a schema can never claim a question exists that isn't actually on the page |
+| `FAQPage` | `/faq`, any `/blog/[article]` whose real `faq` array is non-empty, every `/learn/[category]` page, and `/about` | Built by the one shared `buildFaqPageSchema()` (`src/lib/seo/faq-schema.ts`, Prompt 77) from the same array the visible accordion (`FaqSection`, `src/components/patterns/faq-section.tsx`) renders — a schema can never claim a question exists that isn't actually on the page. See `docs/AEO_ARCHITECTURE.md` |
 | `LearningResource` (+ `Book` for ebooks) | `/resources/[resource]` | Every field maps to a real field on the `Resource` record — no ratings |
 | `LearningResource` + `Game` | `/games/[game]` | Same pattern, from the `Game` record |
 | `BlogPosting` | `/blog/[article]` (Prompt 69) | Real title/excerpt/dates from the `BlogArticle` record — see `docs/BLOG_ARCHITECTURE.md` |
