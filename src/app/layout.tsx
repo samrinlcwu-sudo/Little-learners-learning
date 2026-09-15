@@ -27,8 +27,14 @@ export const metadata: Metadata = {
     template: `%s — ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  // A dedicated small favicon, not the full brand logo file — browsers
+  // fetch this on every page load, so it's a real, measurable amount of
+  // unnecessary network weight if it's the same 1254x1254, ~2.3MB source
+  // image used for print-quality brand usage elsewhere. Generated once
+  // from that same source (public/brand/favicon.png, 64x64) — same
+  // artwork, no visual change, ~99% smaller.
   icons: {
-    icon: "/brand/little-learners-learning-logo.png",
+    icon: "/brand/favicon.png",
   },
   // Site-wide fallback — a page that sets its own `openGraph`/`twitter`
   // (via buildSocialMetadata) replaces this entirely rather than merging
