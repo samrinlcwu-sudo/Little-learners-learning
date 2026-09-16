@@ -5,6 +5,8 @@ import Link from "next/link";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Search as SearchIcon, X } from "lucide-react";
 import { searchSite, type SearchEntry } from "@/lib/search";
+import { cn } from "@/lib/utils/cn";
+import { DIALOG_OVERLAY_TRANSITION, DIALOG_CONTENT_TRANSITION } from "@/lib/utils/dialog-transitions";
 
 const GROUP_ORDER = ["Pages", "Subjects", "Resources", "Games", "Blog", "Learning Hub"];
 
@@ -47,13 +49,16 @@ function SiteSearch({ children }: SiteSearchProps) {
     <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
       {children}
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out" />
+        <DialogPrimitive.Overlay className={cn("fixed inset-0 z-50 bg-ink/40", DIALOG_OVERLAY_TRANSITION)} />
         <DialogPrimitive.Content
           onOpenAutoFocus={(event) => {
             event.preventDefault();
             inputRef.current?.focus();
           }}
-          className="fixed left-1/2 top-24 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 overflow-hidden rounded-xl border border-neutral-200 bg-surface shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out"
+          className={cn(
+            "fixed left-1/2 top-24 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 overflow-hidden rounded-xl border border-neutral-200 bg-surface shadow-xl",
+            DIALOG_CONTENT_TRANSITION,
+          )}
         >
           <DialogPrimitive.Title className="sr-only">Search Little Learners Learning</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">

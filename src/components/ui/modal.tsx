@@ -4,6 +4,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { DIALOG_OVERLAY_TRANSITION, DIALOG_CONTENT_TRANSITION } from "@/lib/utils/dialog-transitions";
 
 const Modal = DialogPrimitive.Root;
 const ModalTrigger = DialogPrimitive.Trigger;
@@ -16,12 +17,11 @@ function ModalContent({
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out" />
+      <DialogPrimitive.Overlay className={cn("fixed inset-0 z-50 bg-ink/40", DIALOG_OVERLAY_TRANSITION)} />
       <DialogPrimitive.Content
         className={cn(
           "fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-neutral-200 bg-surface p-6 shadow-lg",
-          "data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95",
-          "data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95",
+          DIALOG_CONTENT_TRANSITION,
           className,
         )}
         {...props}

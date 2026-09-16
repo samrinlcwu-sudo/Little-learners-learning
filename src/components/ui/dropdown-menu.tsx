@@ -4,6 +4,7 @@ import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { DIALOG_CONTENT_TRANSITION } from "@/lib/utils/dialog-transitions";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
@@ -22,8 +23,7 @@ function DropdownMenuContent({
         sideOffset={sideOffset}
         className={cn(
           "z-50 min-w-40 overflow-hidden rounded-md border border-neutral-200 bg-surface p-1 shadow-md",
-          "data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95",
-          "data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95",
+          DIALOG_CONTENT_TRANSITION,
           className,
         )}
         {...props}

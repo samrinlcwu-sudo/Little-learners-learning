@@ -19,6 +19,7 @@ import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 import { getChildProgressKnowledge } from "@/lib/ai/knowledge/progress-knowledge";
 import { getTeacherResourceKnowledge } from "@/lib/ai/knowledge/teacher-knowledge";
 import { cn } from "@/lib/utils/cn";
+import { DIALOG_OVERLAY_TRANSITION, DIALOG_CONTENT_TRANSITION } from "@/lib/utils/dialog-transitions";
 
 const AUDIENCE_GREETING: Record<AiAudience, string> = {
   public: "Ask about subjects, resources, games, or how Little Learners Learning works.",
@@ -221,8 +222,13 @@ function AiAssistantPanel({ open, onOpenChange }: AiAssistantPanelProps) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 flex max-h-[85vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-neutral-200 bg-surface shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out">
+        <DialogPrimitive.Overlay className={cn("fixed inset-0 z-50 bg-ink/40", DIALOG_OVERLAY_TRANSITION)} />
+        <DialogPrimitive.Content
+          className={cn(
+            "fixed left-1/2 top-1/2 z-50 flex max-h-[85vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-neutral-200 bg-surface shadow-xl",
+            DIALOG_CONTENT_TRANSITION,
+          )}
+        >
           <div className="flex items-start justify-between gap-3 border-b border-neutral-200 px-5 py-4">
             <div>
               <div className="flex items-center gap-2">
