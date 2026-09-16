@@ -140,8 +140,8 @@ function AdminParentDetail() {
                     className="flex items-center gap-3 rounded-lg border border-neutral-200 p-3 transition-colors hover:border-primary-200 hover:bg-neutral-50"
                   >
                     <ChildAvatar avatar={child.avatar} />
-                    <div className="flex-1">
-                      <p className="font-medium text-ink">{child.name}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-ink">{child.name}</p>
                       <p className="text-xs text-neutral-500">
                         {child.ageYears} year{child.ageYears === 1 ? "" : "s"} old
                       </p>

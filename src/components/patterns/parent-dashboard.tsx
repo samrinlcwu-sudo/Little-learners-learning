@@ -141,13 +141,15 @@ function ParentDashboard() {
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700">
                   <Sparkles className="size-5" aria-hidden="true" />
                 </div>
-                <div className="flex-1">
-                  <p className="font-display text-lg font-semibold text-ink">Ask about learning</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-display text-lg font-semibold text-ink">Ask about learning</p>
+                    <Badge variant="warning">Development preview</Badge>
+                  </div>
                   <p className="mt-1 text-sm text-neutral-600">
                     Find resources, understand a subject, or see progress-related help for your children.
                   </p>
                 </div>
-                <Badge variant="warning">Development preview</Badge>
               </Card>
             </button>
           </AiAssistantTrigger>

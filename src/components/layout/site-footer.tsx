@@ -31,12 +31,12 @@ function SiteFooter() {
           {footerNav.map((group) => (
             <nav key={group.title} aria-label={group.title}>
               <h2 className="text-sm font-semibold text-white">{group.title}</h2>
-              <ul className="mt-3 space-y-2.5">
+              <ul className="mt-1">
                 {group.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-neutral-400 transition-colors hover:text-white"
+                      className="inline-block py-2 text-sm text-neutral-400 transition-colors hover:text-white"
                     >
                       {link.label}
                     </Link>
