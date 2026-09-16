@@ -472,6 +472,31 @@ this prompt.
   per-admin audit trail (`details` describes the action, not who
   performed it) until real multi-admin accounts exist. This is stated
   plainly here, not hidden.
+- **Brute-force throttling (Prompt 84)**: `adminLoginAction` locks out
+  further attempts for 5 minutes after 5 consecutive wrong passphrases
+  (`src/lib/admin/login-rate-limit.ts`) — in-memory, so it resets on a
+  server restart and applies globally rather than per-caller, the same
+  honest trade-off as everything else in this section that has no
+  external datastore behind it.
+- **Why logout can't be a real server-side revocation yet (Prompt 85)**:
+  `adminLogoutAction` deletes the session cookie, which is genuinely
+  effective against the common case (a normal sign-out on the device that
+  was signed in) — but it does not revoke the *token itself*, so a copy
+  captured before logout would still verify until its natural 8-hour
+  expiry. A real fix (every token embeds an "epoch" that logout advances,
+  checked on every verification) was built and tested — and empirically
+  fails: `src/proxy.ts` is compiled and instantiated as its own isolated
+  bundle, separate from the Server Action bundle `adminLoginAction`/
+  `adminLogoutAction` run in, even though Next.js 16 runs Proxy in the
+  Node.js runtime. A module-level variable in `session.ts` is not the
+  same value in both bundles, so a token's epoch set at login could never
+  match the epoch `proxy.ts` checks it against — confirmed by watching a
+  freshly issued, correctly signed, unexpired token get rejected
+  immediately after a real successful login. Closing this for real would
+  need state shared between those two bundles from outside either of
+  them — a database row or a Redis key — which this project doesn't have.
+  Stated here plainly rather than shipping a fix that looks like it works
+  and doesn't.
 
 ## Testing
 

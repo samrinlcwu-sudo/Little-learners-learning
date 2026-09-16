@@ -12,6 +12,23 @@
  * `src/middleware.ts` uses) rather than Node's `crypto` module, so the
  * exact same signing/verification code runs in both places without a
  * runtime-specific branch.
+ *
+ * Prompt 85 looked hard at making logout a real server-side revocation
+ * (not just deleting the browser's cookie) via an in-memory "epoch" every
+ * token would have to match. It does not work in this framework and was
+ * reverted: `proxy.ts` is compiled and instantiated as its own isolated
+ * bundle, separate from the Server Action bundle `adminLoginAction`/
+ * `adminLogoutAction` run in — confirmed empirically, not just in theory,
+ * by adding the epoch check and watching a freshly-created, correctly
+ * signed, unexpired token get rejected by `proxy.ts` immediately after a
+ * real successful login, in the same single dev-server process. The two
+ * bundles each get their own independent copy of any module-level
+ * variable in this file, so an epoch set by a Server Action is never the
+ * same value `proxy.ts` reads. See docs/ADMIN_ARCHITECTURE.md,
+ * "Why logout can't be a real server-side revocation yet," for the
+ * honest limitation this leaves and what would actually be needed to
+ * close it (a shared external store both bundles can read/write — Redis,
+ * a database row — which this project does not have).
  */
 
 export const ADMIN_SESSION_COOKIE = "llad_session";

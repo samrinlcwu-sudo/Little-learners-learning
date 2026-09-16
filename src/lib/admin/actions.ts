@@ -60,7 +60,16 @@ export async function adminLoginAction(_prevState: AdminLoginState, formData: Fo
   return { success: true };
 }
 
-/** Clears the real session cookie server-side. Same reasoning as `adminLoginAction` for not redirecting here. */
+/**
+ * Clears the real session cookie server-side. Same reasoning as
+ * `adminLoginAction` for not redirecting here.
+ *
+ * This removes the browser's copy of the token but does not revoke the
+ * token itself — see the comment at the top of `session.ts`, "Why logout
+ * can't be a real server-side revocation yet," for why an in-memory
+ * revocation list was tried and reverted, and what would actually be
+ * needed to close that gap.
+ */
 export async function adminLogoutAction(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_SESSION_COOKIE);
