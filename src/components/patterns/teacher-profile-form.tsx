@@ -26,6 +26,7 @@ import {
 } from "@/lib/validations/teacher";
 import type { TeacherProfile } from "@/lib/accounts/types";
 import { cn } from "@/lib/utils/cn";
+import { validateUploadedFile } from "@/lib/utils/file-validation";
 
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 
@@ -94,12 +95,13 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
     if (!file) return;
     setPhotoError(null);
 
-    if (!file.type.startsWith("image/")) {
-      setPhotoError("Please choose an image file.");
-      return;
-    }
-    if (file.size > MAX_PHOTO_BYTES) {
-      setPhotoError("Image must be under 2MB.");
+    const error = validateUploadedFile(file, {
+      acceptedTypePrefixes: ["image/"],
+      maxBytes: MAX_PHOTO_BYTES,
+      typeDescription: "an image",
+    });
+    if (error) {
+      setPhotoError(error);
       return;
     }
 

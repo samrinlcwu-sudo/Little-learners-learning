@@ -21,6 +21,7 @@ import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 import { buildAuthorSchema } from "@/lib/seo/author-schema";
 import { buildFaqPageSchema } from "@/lib/seo/faq-schema";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 export function generateStaticParams() {
   return SAMPLE_ARTICLES.filter(isArticlePublished).map((article) => ({ article: article.slug }));
@@ -95,9 +96,9 @@ export default async function BlogArticlePage({ params }: PageProps<"/blog/[arti
   return (
     <Section>
       <Container>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }} />
         {faqStructuredData && (
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(faqStructuredData) }} />
         )}
 
         <div className="max-w-3xl">

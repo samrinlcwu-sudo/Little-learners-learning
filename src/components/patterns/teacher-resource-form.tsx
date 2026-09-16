@@ -18,6 +18,7 @@ import {
 } from "@/lib/validations/teacher-resource";
 import type { NewTeacherResource } from "@/lib/resources/local-teacher-resources";
 import type { Resource, ResourceType } from "@/lib/resources/types";
+import { validateUploadedFile } from "@/lib/utils/file-validation";
 
 const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
 
@@ -74,12 +75,13 @@ function TeacherResourceForm({ resource, onSave, onCancel }: TeacherResourceForm
     if (!file) return;
     setThumbnailError(null);
 
-    if (!file.type.startsWith("image/")) {
-      setThumbnailError("Please choose an image file.");
-      return;
-    }
-    if (file.size > MAX_THUMBNAIL_BYTES) {
-      setThumbnailError("Image must be under 2MB.");
+    const error = validateUploadedFile(file, {
+      acceptedTypePrefixes: ["image/"],
+      maxBytes: MAX_THUMBNAIL_BYTES,
+      typeDescription: "an image",
+    });
+    if (error) {
+      setThumbnailError(error);
       return;
     }
 

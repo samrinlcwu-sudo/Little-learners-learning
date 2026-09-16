@@ -1,4 +1,5 @@
 import { siteConfig } from "@/config/site";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 /**
  * The two schemas that describe the site itself, not any one page —
@@ -26,8 +27,8 @@ function SiteStructuredData() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(organization) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(website) }} />
     </>
   );
 }

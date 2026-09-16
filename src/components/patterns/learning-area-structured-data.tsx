@@ -1,5 +1,6 @@
 import { siteConfig } from "@/config/site";
 import type { LearningAreaKnowledge } from "@/lib/ai/knowledge/types";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 /**
  * An `ItemList` naming exactly the resources and games actually rendered
@@ -28,7 +29,7 @@ function LearningAreaStructuredData({ area }: { area: LearningAreaKnowledge }) {
     })),
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />;
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(itemList) }} />;
 }
 
 export { LearningAreaStructuredData };

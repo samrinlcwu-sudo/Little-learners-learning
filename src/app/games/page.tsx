@@ -10,6 +10,7 @@ import { isGamePublished } from "@/lib/games/types";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 const description =
   "The Little Learners Learning Games Hub — educational games for letter recognition, counting, shapes, and more.";
@@ -48,7 +49,7 @@ export default function GamesPage() {
       {structuredData && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }}
         />
       )}
       <PageHeader

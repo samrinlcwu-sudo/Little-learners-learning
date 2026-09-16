@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/patterns/page-header";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 import { buildFaqPageSchema } from "@/lib/seo/faq-schema";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 const description =
   "Answers to common questions about Little Learners Learning — for parents, teachers, and anyone exploring the platform.";
@@ -180,7 +181,7 @@ export default function FaqPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }}
       />
       <PageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "FAQ" }]}

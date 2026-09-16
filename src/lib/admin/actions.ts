@@ -8,6 +8,12 @@ import {
   createAdminSessionToken,
   verifyAdminPassphrase,
 } from "./session";
+import {
+  getLockoutRemainingMinutes,
+  isLoginLocked,
+  recordFailedLoginAttempt,
+  recordSuccessfulLogin,
+} from "./login-rate-limit";
 
 export interface AdminLoginState {
   error?: string;
@@ -28,12 +34,19 @@ export async function adminLoginAction(_prevState: AdminLoginState, formData: Fo
     return { error: "Admin login isn't configured on this deployment yet — see docs/ADMIN_ARCHITECTURE.md." };
   }
 
+  if (isLoginLocked()) {
+    const minutes = getLockoutRemainingMinutes();
+    return { error: `Too many incorrect attempts. Try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.` };
+  }
+
   const passphrase = String(formData.get("passphrase") ?? "");
   const valid = await verifyAdminPassphrase(passphrase);
   if (!valid) {
+    recordFailedLoginAttempt();
     return { error: "Incorrect passphrase." };
   }
 
+  recordSuccessfulLogin();
   const token = await createAdminSessionToken();
   const cookieStore = await cookies();
   cookieStore.set(ADMIN_SESSION_COOKIE, token, {

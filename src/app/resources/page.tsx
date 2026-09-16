@@ -23,6 +23,7 @@ import { RESOURCE_TYPE_LABELS, type ResourceType } from "@/lib/resources/types";
 import type { DifficultyLevel } from "@/lib/content/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 const description =
   "Browse Little Learners Learning's resource library — worksheets, activities, ebooks, and teacher & parent resources.";
@@ -126,7 +127,7 @@ export default async function ResourcesPage({
       {structuredData && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }}
         />
       )}
       <PageHeader

@@ -15,6 +15,19 @@
  * a file-type allowlist and an upload size limit — is enforced here, and
  * this is the one place that check would move server-side later.
  */
+/**
+ * Excluded from every "image/" upload rule below, not just disallowed by
+ * convention: an SVG is XML that can carry a `<script>` or an
+ * `onload`/event-handler attribute. Every current use of these uploaded
+ * images renders them through a plain `<img>` (browsers don't execute
+ * script inside an SVG loaded that way), but that's a property of today's
+ * call sites, not a guarantee — a photo/thumbnail upload has no real
+ * reason to ever need vector art, so this closes the risk at the
+ * validation layer instead of depending on every future caller getting
+ * the rendering context right forever.
+ */
+const REJECTED_IMAGE_SUBTYPES = ["image/svg+xml"];
+
 export interface FileValidationRule {
   /** e.g. ["image/"] to accept any image/*, or exact types like ["application/pdf"]. */
   acceptedTypePrefixes: string[];
@@ -25,7 +38,7 @@ export interface FileValidationRule {
 
 export function validateUploadedFile(file: File, rule: FileValidationRule): string | null {
   const matchesType = rule.acceptedTypePrefixes.some((prefix) => file.type.startsWith(prefix));
-  if (!matchesType) {
+  if (!matchesType || REJECTED_IMAGE_SUBTYPES.includes(file.type)) {
     return `Please choose ${rule.typeDescription} file.`;
   }
   if (file.size > rule.maxBytes) {

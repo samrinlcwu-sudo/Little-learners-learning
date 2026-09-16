@@ -23,6 +23,7 @@ import {
 import { BLOG_AUDIENCE_LABELS, isArticlePublished, type BlogAudience } from "@/lib/blog/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 const description =
   "Practical, honest guidance for parents and early-years teachers — early childhood education, classroom ideas, learning through play, and more from Little Learners Learning.";
@@ -103,7 +104,7 @@ export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
   return (
     <>
       {structuredData && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }} />
       )}
       <PageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Blog" }]}

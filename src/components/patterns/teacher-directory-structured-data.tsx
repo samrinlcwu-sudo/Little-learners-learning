@@ -1,4 +1,5 @@
 import { siteConfig } from "@/config/site";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 import type { PublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
 
 /**
@@ -27,7 +28,7 @@ function TeacherDirectoryStructuredData({ teachers }: { teachers: PublicTeacherP
     })),
   };
 
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />;
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(itemList) }} />;
 }
 
 export { TeacherDirectoryStructuredData };

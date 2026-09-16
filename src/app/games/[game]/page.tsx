@@ -23,6 +23,7 @@ import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
 import { isArticlePublished } from "@/lib/blog/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 const DIFFICULTY_LABELS: Record<Game["difficulty"], string> = {
   beginner: "Beginner",
@@ -104,7 +105,7 @@ export default async function GameDetailPage({
       <Container>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }}
         />
 
         <div className="max-w-2xl">

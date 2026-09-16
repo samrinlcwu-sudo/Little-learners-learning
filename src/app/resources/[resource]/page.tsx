@@ -32,6 +32,7 @@ import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 import { buildAuthorSchema } from "@/lib/seo/author-schema";
 import { AuthorLink } from "@/components/patterns/author-link";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 export function generateStaticParams() {
   return SAMPLE_RESOURCES.filter(isResourcePublished).map((resource) => ({
@@ -147,7 +148,7 @@ export default async function ResourceDetailPage({
       <Container>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }}
         />
         <TrackPageView
           type="resource_viewed"

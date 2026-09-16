@@ -35,6 +35,7 @@ import { isGamePublished } from "@/lib/games/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
 import { MEMBERSHIP_TYPE_DESCRIPTIONS, MEMBERSHIP_TYPE_LABELS, type MembershipType } from "@/lib/memberships/types";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 const description =
   "Browse Little Learners Learning's catalog of learning products — worksheet bundles, digital resources, learning programs, and memberships — organized by subject, age, and access level.";
@@ -144,7 +145,7 @@ export default async function OfferingsPage({ searchParams }: PageProps<"/offeri
   return (
     <>
       {structuredData && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }} />
       )}
       <PageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Catalog" }]}

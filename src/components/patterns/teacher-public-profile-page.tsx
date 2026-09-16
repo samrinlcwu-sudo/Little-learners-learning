@@ -13,6 +13,7 @@ import { toPublicTeacherProfile } from "@/lib/accounts/teacher-public-profile";
 import { canViewTeacherProfile } from "@/lib/accounts/teacher-visibility";
 import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 import { buildTeacherPersonSchema } from "@/lib/seo/author-schema";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import { siteConfig } from "@/config/site";
 
@@ -101,7 +102,7 @@ function TeacherPublicProfilePage() {
   return (
     <Section surface="sunken" className="py-12 sm:py-16">
       <Container className="max-w-2xl">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(personSchema) }} />
         <TeacherPublicProfileContent
           profile={profile}
           resources={resources.filter((r) => r.author.teacherId === teacher.id)}

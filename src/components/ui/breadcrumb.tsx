@@ -2,6 +2,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 import { cn } from "@/lib/utils/cn";
 
 export interface BreadcrumbItem {
@@ -36,7 +37,7 @@ function Breadcrumb({ items, className, ...props }: BreadcrumbProps) {
     <nav aria-label="Breadcrumb" className={cn(className)} {...props}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }}
       />
       <ol className="flex flex-wrap items-center gap-1.5 text-sm text-neutral-600">
         {items.map((item, index) => {

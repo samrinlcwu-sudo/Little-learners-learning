@@ -2,6 +2,7 @@ import * as React from "react";
 import { Heading } from "@/components/ui/heading";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { buildFaqPageSchema, type FaqItem } from "@/lib/seo/faq-schema";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 import { cn } from "@/lib/utils/cn";
 
 export interface FaqSectionProps {
@@ -30,7 +31,7 @@ function FaqSection({ title, description, items, className, headingAs = "h2" }: 
 
   return (
     <div className={cn(className)}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }} />
       <Heading level="h4" as={headingAs} className="text-neutral-500">
         {title}
       </Heading>

@@ -22,6 +22,7 @@ import {
 } from "@/lib/offerings/types";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { toJsonLdHtml } from "@/lib/seo/json-ld";
 
 export function generateStaticParams() {
   return getAllOfferings().map((offering) => ({ slug: offering.slug }));
@@ -105,7 +106,7 @@ export default async function OfferingDetailPage({ params }: PageProps<"/offerin
   return (
     <Section>
       <Container>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLdHtml(structuredData) }} />
 
         <div className="max-w-3xl">
           <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Catalog", href: "/offerings" }, { label: offering.name }]} />
