@@ -19,12 +19,15 @@ import {
 } from "lucide-react";
 import type { AgeRange, ContentType } from "@/lib/content/types";
 import { isActive } from "@/lib/taxonomy/types";
+import type { CategoryTone } from "@/lib/utils/category-tone";
 
 export interface LearningCategory {
   slug: string;
   name: string;
   description: string;
   icon: LucideIcon;
+  /** Which coordinated color identity this category's cards/icons/badges use everywhere it's shown (Prompt 91). */
+  color: CategoryTone;
   /** The platform's own target range for this category — a design decision, not a claim of external endorsement. */
   ageRange: AgeRange;
   /** Which content types this category is expected to eventually contain. */
@@ -60,6 +63,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "English & Early Literacy",
         description: "Letters, phonics, and the building blocks of reading.",
         icon: BookOpen,
+        color: "blue",
         ageRange: { minYears: 3, maxYears: 6 },
         contentTypes: ["lesson", "worksheet", "activity", "ebook"],
         learningObjectives: ["Recognize letters and their sounds", "Build early reading confidence"],
@@ -69,6 +73,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Mathematics",
         description: "Numbers, counting, and early problem-solving.",
         icon: Calculator,
+        color: "purple",
         ageRange: { minYears: 3, maxYears: 6 },
         contentTypes: ["lesson", "worksheet", "activity", "game"],
         learningObjectives: ["Understand numbers and counting", "Recognize shapes and simple patterns"],
@@ -78,6 +83,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Early Writing",
         description: "Pencil control, letter formation, and first words.",
         icon: PenLine,
+        color: "green",
         ageRange: { minYears: 4, maxYears: 7 },
         contentTypes: ["worksheet", "writing-practice"],
         learningObjectives: ["Develop pencil grip and control", "Form letters correctly"],
@@ -87,6 +93,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "World Around Us",
         description: "Nature, seasons, and how the world works.",
         icon: Globe2,
+        color: "primary",
         ageRange: { minYears: 3, maxYears: 7 },
         contentTypes: ["lesson", "ebook", "activity"],
         learningObjectives: ["Explore nature and everyday environments", "Understand seasons and time"],
@@ -96,6 +103,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Science & Discovery",
         description: "Curiosity-led exploration of how things work.",
         icon: FlaskConical,
+        color: "accent",
         ageRange: { minYears: 4, maxYears: 7 },
         contentTypes: ["lesson", "activity", "ebook"],
         learningObjectives: ["Ask questions and observe closely", "Explore simple cause and effect"],
@@ -105,6 +113,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Life Skills",
         description: "Everyday routines, independence, and self-care.",
         icon: Heart,
+        color: "secondary",
         ageRange: { minYears: 2, maxYears: 6 },
         contentTypes: ["lesson", "activity"],
         learningObjectives: ["Build everyday independence", "Practice self-care routines"],
@@ -114,6 +123,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Social & Emotional Learning",
         description: "Understanding feelings, sharing, and kindness.",
         icon: Smile,
+        color: "blue",
         ageRange: { minYears: 2, maxYears: 6 },
         contentTypes: ["lesson", "activity", "ebook"],
         learningObjectives: ["Name and understand feelings", "Practice sharing and kindness"],
@@ -123,6 +133,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Creativity",
         description: "Art, imagination, and creative expression.",
         icon: Palette,
+        color: "coral",
         ageRange: { minYears: 2, maxYears: 7 },
         contentTypes: ["activity", "coloring"],
         learningObjectives: ["Express ideas through art", "Build confidence through imaginative play"],
@@ -137,6 +148,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Quran Learning — Nazra",
         description: "Foundational Qur'an reading practice.",
         icon: BookMarked,
+        color: "primary",
         ageRange: { minYears: 4, maxYears: 8 },
         contentTypes: ["lesson"],
         learningObjectives: ["Introduce foundational Qur'an reading practice", "Build familiarity at a comfortable pace"],
@@ -146,6 +158,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Arabic Letters",
         description: "Recognizing and forming Arabic letters.",
         icon: Languages,
+        color: "accent",
         ageRange: { minYears: 3, maxYears: 6 },
         contentTypes: ["lesson", "worksheet", "activity"],
         learningObjectives: ["Recognize the Arabic alphabet", "Practice letter formation"],
@@ -155,6 +168,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Foundational Quran Reading",
         description: "Harakat, letter combinations, and early reading.",
         icon: BookOpenCheck,
+        color: "secondary",
         ageRange: { minYears: 5, maxYears: 8 },
         contentTypes: ["lesson"],
         learningObjectives: ["Learn harakat and short vowels", "Practice basic letter combinations"],
@@ -169,6 +183,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Educational Activities",
         description: "Hands-on exercises that reinforce learning.",
         icon: ClipboardList,
+        color: "purple",
         ageRange: { minYears: 3, maxYears: 7 },
         contentTypes: ["activity"],
         learningObjectives: ["Reinforce learning through hands-on tasks", "Build focus and follow-through"],
@@ -178,6 +193,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Puzzles",
         description: "Logic and problem-solving through play.",
         icon: Puzzle,
+        color: "secondary",
         ageRange: { minYears: 3, maxYears: 7 },
         contentTypes: ["puzzle"],
         learningObjectives: ["Develop problem-solving skills", "Build patience and persistence"],
@@ -187,6 +203,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Mazes",
         description: "Focus and fine-motor practice.",
         icon: Route,
+        color: "coral",
         ageRange: { minYears: 4, maxYears: 7 },
         contentTypes: ["maze"],
         learningObjectives: ["Practice visual tracking and focus", "Build fine-motor coordination"],
@@ -196,6 +213,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Coloring",
         description: "Creative, screen-light activity time.",
         icon: Paintbrush,
+        color: "blue",
         ageRange: { minYears: 2, maxYears: 7 },
         contentTypes: ["coloring"],
         learningObjectives: ["Practice color recognition", "Build fine-motor control"],
@@ -205,6 +223,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
         name: "Learning Games",
         description: "Play designed around real learning goals.",
         icon: Gamepad2,
+        color: "green",
         ageRange: { minYears: 3, maxYears: 7 },
         contentTypes: ["game"],
         learningObjectives: ["Reinforce subject learning through play", "Build engagement and motivation"],

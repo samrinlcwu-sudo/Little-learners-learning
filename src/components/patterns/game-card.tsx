@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GAME_TYPE_LABELS, type Game } from "@/lib/games/types";
 import { isGamePlayable } from "@/lib/games/registry";
+import { getLearningCategoryBySlug } from "@/config/learning-categories";
+import { CATEGORY_TONE_TILE } from "@/lib/utils/category-tone";
 
 export interface GameCardProps {
   game: Game;
@@ -24,12 +26,14 @@ const DIFFICULTY_LABELS: Record<Game["difficulty"], string> = {
  */
 function GameCard({ game, categoryName }: GameCardProps) {
   const playable = isGamePlayable(game.slug);
+  const category = game.category ? getLearningCategoryBySlug(game.category) : undefined;
+  const tone = category?.color ?? "primary";
 
   return (
     <Card interactive className="flex h-full flex-col overflow-hidden">
       <div className="flex items-center gap-3 border-b border-neutral-200 bg-surface-sunken px-6 py-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
-          <Gamepad2 className="size-5 text-primary-700" aria-hidden="true" />
+        <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${CATEGORY_TONE_TILE[tone]}`}>
+          <Gamepad2 className="size-5" aria-hidden="true" />
         </div>
         <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
           {GAME_TYPE_LABELS[game.gameType]}
@@ -37,7 +41,7 @@ function GameCard({ game, categoryName }: GameCardProps) {
       </div>
 
       <CardHeader>
-        <Badge variant="primary" className="w-fit">
+        <Badge variant={tone} className="w-fit">
           {categoryName ?? game.skill}
         </Badge>
         <CardTitle className="mt-2">{game.title}</CardTitle>

@@ -12,6 +12,8 @@ import {
   canDownload,
   type Resource,
 } from "@/lib/resources/types";
+import { getLearningCategoryBySlug } from "@/config/learning-categories";
+import { CATEGORY_TONE_TILE } from "@/lib/utils/category-tone";
 
 export interface ResourceCardProps {
   resource: Resource;
@@ -44,6 +46,8 @@ const TIER_BADGE_VARIANT = {
 function ResourceCard({ resource, categoryName, isSample, showAuthor = true }: ResourceCardProps) {
   const downloadable = canDownload(resource);
   const TypeIcon = RESOURCE_TYPE_ICONS[resource.resourceType];
+  const category = resource.category ? getLearningCategoryBySlug(resource.category) : undefined;
+  const tone = category?.color ?? "primary";
   const isTeacherAuthored = resource.author.role === "teacher";
   // Only platform-authored resources have a real /resources/[slug] page
   // today (generateStaticParams only knows SAMPLE_RESOURCES) — a
@@ -54,8 +58,8 @@ function ResourceCard({ resource, categoryName, isSample, showAuthor = true }: R
   return (
     <Card interactive className="flex h-full flex-col overflow-hidden">
       <div className="flex items-center gap-3 border-b border-neutral-200 bg-surface-sunken px-6 py-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-100">
-          <TypeIcon className="size-5 text-primary-700" aria-hidden="true" />
+        <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${CATEGORY_TONE_TILE[tone]}`}>
+          <TypeIcon className="size-5" aria-hidden="true" />
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
@@ -73,7 +77,7 @@ function ResourceCard({ resource, categoryName, isSample, showAuthor = true }: R
       </div>
 
       <CardHeader>
-        <Badge variant="primary" className="w-fit">
+        <Badge variant={tone} className="w-fit">
           {categoryName ?? resource.subject ?? "General"}
         </Badge>
         <CardTitle className="mt-2">{resource.title}</CardTitle>

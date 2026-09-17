@@ -65,6 +65,35 @@
   --color-accent-500: #d6960f;
   --color-accent-800: #714e10;
 
+  /*
+    Learning-category palette — four additional hues (primary/secondary/
+    accent above stay the premium brand foundation; these exist
+    specifically so the 16 subject categories can each have a distinct,
+    coordinated identity — Prompt 91). Same shape as the brand hues
+    (100/200 for tints, 600/700 for icons/text on a light background) so
+    every place that already does `bg-{tone}-100 text-{tone}-700` keeps
+    working unchanged for these too.
+  */
+  --color-cat-blue-100: #dcedfc;
+  --color-cat-blue-200: #b6dafa;
+  --color-cat-blue-600: #1c72c4;
+  --color-cat-blue-700: #175a99;
+
+  --color-cat-green-100: #dcf3e0;
+  --color-cat-green-200: #b6e6bf;
+  --color-cat-green-600: #23945a;
+  --color-cat-green-700: #1c7548;
+
+  --color-cat-purple-100: #ece2fb;
+  --color-cat-purple-200: #d5c1f5;
+  --color-cat-purple-600: #7c3fc4;
+  --color-cat-purple-700: #62319c;
+
+  --color-cat-coral-100: #fde3e3;
+  --color-cat-coral-200: #fac2c2;
+  --color-cat-coral-600: #d94f56;
+  --color-cat-coral-700: #af3d44;
+
   /* Semantic */
   --color-success-100: #def3e7;
   --color-success-600: #217a4c;
@@ -133,6 +162,26 @@
   --color-accent-500: var(--color-accent-500);
   --color-accent-800: var(--color-accent-800);
 
+  --color-cat-blue-100: var(--color-cat-blue-100);
+  --color-cat-blue-200: var(--color-cat-blue-200);
+  --color-cat-blue-600: var(--color-cat-blue-600);
+  --color-cat-blue-700: var(--color-cat-blue-700);
+
+  --color-cat-green-100: var(--color-cat-green-100);
+  --color-cat-green-200: var(--color-cat-green-200);
+  --color-cat-green-600: var(--color-cat-green-600);
+  --color-cat-green-700: var(--color-cat-green-700);
+
+  --color-cat-purple-100: var(--color-cat-purple-100);
+  --color-cat-purple-200: var(--color-cat-purple-200);
+  --color-cat-purple-600: var(--color-cat-purple-600);
+  --color-cat-purple-700: var(--color-cat-purple-700);
+
+  --color-cat-coral-100: var(--color-cat-coral-100);
+  --color-cat-coral-200: var(--color-cat-coral-200);
+  --color-cat-coral-600: var(--color-cat-coral-600);
+  --color-cat-coral-700: var(--color-cat-coral-700);
+
   --color-success-100: var(--color-success-100);
   --color-success-600: var(--color-success-600);
   --color-success-800: var(--color-success-800);
@@ -183,6 +232,28 @@
   line-height: 1.65;
   @media (width >= 40rem) {
     font-size: 1.1875rem;
+  }
+}
+
+/*
+  A single, very gentle float — the one "illustration movement" this
+  codebase uses (Prompt 91), for a small handful of decorative shapes
+  near a hero, never for content or controls. Always paired with the
+  `motion-safe:` variant at the call site (same convention Prompt 81
+  established for dialog transitions), so anyone with
+  prefers-reduced-motion set sees the shape sit still instead.
+*/
+@utility animate-float {
+  animation: ll-float 6s ease-in-out infinite;
+}
+
+@keyframes ll-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 

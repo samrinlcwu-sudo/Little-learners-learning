@@ -10,6 +10,9 @@ import {
   Accessibility,
   Gamepad2,
   ArrowRight,
+  Star,
+  BookOpen,
+  PenLine,
 } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
@@ -21,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DecorativeBlob } from "@/components/ui/decorative-blob";
 import { IconFeature } from "@/components/patterns/icon-feature";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
+import { CATEGORY_TONE_TILE, type CategoryTone } from "@/lib/utils/category-tone";
 import { parentValuePoints, teacherValuePoints } from "@/config/audience-value-points";
 import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
 import { isResourcePublished, type ResourceType } from "@/lib/resources/types";
@@ -38,24 +42,33 @@ export const metadata: Metadata = {
   ...buildSocialMetadata(siteConfig.name, description),
 };
 
-const resourceFormats: { name: string; description: string; icon: typeof FileText; resourceType: ResourceType }[] = [
+const resourceFormats: {
+  name: string;
+  description: string;
+  icon: typeof FileText;
+  resourceType: ResourceType;
+  tone: CategoryTone;
+}[] = [
   {
     name: "Worksheets",
     description: "Printable practice sheets for hands-on learning at home or in the classroom.",
     icon: FileText,
     resourceType: "worksheet",
+    tone: "blue",
   },
   {
     name: "Activities",
     description: "Guided exercises that reinforce a subject through doing, not just reading.",
     icon: NotebookPen,
     resourceType: "activity",
+    tone: "green",
   },
   {
     name: "Ebooks",
     description: "Age-appropriate reading material for early learners.",
     icon: Library,
     resourceType: "ebook",
+    tone: "purple",
   },
 ];
 
@@ -70,17 +83,6 @@ const FEATURED_CATEGORY_SLUGS = [
   "learning-games",
   "puzzles",
 ] as const;
-
-const FEATURED_CATEGORY_TONE: Record<string, "primary" | "secondary" | "accent"> = {
-  "english-early-literacy": "primary",
-  mathematics: "primary",
-  "life-skills": "primary",
-  creativity: "primary",
-  "quran-nazra": "secondary",
-  "arabic-letters": "secondary",
-  "learning-games": "accent",
-  puzzles: "accent",
-};
 
 const whyPillars = [
   {
@@ -133,6 +135,37 @@ export default function Home() {
           tone="secondary"
           className="pointer-events-none absolute -bottom-32 -left-16 size-80 opacity-20"
         />
+        <DecorativeBlob
+          tone="coral"
+          className="pointer-events-none absolute -bottom-16 right-8 size-40 opacity-20 hidden sm:block"
+        />
+
+        {/* A small handful of learning motifs, not a mascot — the same
+            restrained illustration language DecorativeBlob already
+            establishes, just with a recognizable shape inside. Hidden below
+            the tablet breakpoint so a small screen keeps its full width for
+            the headline instead of crowding it. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 hidden overflow-hidden md:block"
+        >
+          <div className="motion-safe:animate-float absolute left-[8%] top-[18%] flex size-12 items-center justify-center rounded-2xl bg-cat-blue-100 text-cat-blue-700 shadow-sm">
+            <BookOpen className="size-6" aria-hidden="true" />
+          </div>
+          <div
+            className="motion-safe:animate-float absolute right-[12%] top-[28%] flex size-10 items-center justify-center rounded-full bg-accent-100 text-accent-800 shadow-sm"
+            style={{ animationDelay: "1.5s" }}
+          >
+            <Star className="size-5" aria-hidden="true" />
+          </div>
+          <div
+            className="motion-safe:animate-float absolute bottom-[15%] left-[16%] flex size-10 items-center justify-center rounded-xl bg-cat-coral-100 text-cat-coral-700 shadow-sm"
+            style={{ animationDelay: "3s" }}
+          >
+            <PenLine className="size-5" aria-hidden="true" />
+          </div>
+        </div>
+
         <Container className="relative max-w-3xl text-center">
           <Badge variant="primary">Early-Years Learning Platform</Badge>
           <Heading level="display" as="h1" className="mt-5">
@@ -185,7 +218,7 @@ export default function Home() {
                     title={category.name}
                     description={category.description}
                     headingAs="h3"
-                    tone={FEATURED_CATEGORY_TONE[category.slug] ?? "primary"}
+                    tone={category.color}
                   />
                 </Card>
               </Link>
@@ -220,8 +253,8 @@ export default function Home() {
             {resourceFormats.map((format) => {
               const count = publishedResources.filter((r) => r.resourceType === format.resourceType).length;
               return (
-                <Card key={format.name} className="p-6">
-                  <div className="flex size-11 items-center justify-center rounded-xl bg-secondary-100 text-secondary-700">
+                <Card key={format.name} interactive className="p-6">
+                  <div className={`flex size-11 items-center justify-center rounded-xl ${CATEGORY_TONE_TILE[format.tone]}`}>
                     <format.icon className="size-5" aria-hidden="true" />
                   </div>
                   <CardContent className="flex flex-col gap-3 p-0 pt-4">

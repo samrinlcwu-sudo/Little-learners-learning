@@ -12,6 +12,7 @@ import { LearningContentBrowser } from "@/components/patterns/learning-content-b
 import { SAMPLE_CONTENT } from "@/lib/content/sample-content";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { CATEGORY_TONE_TILE } from "@/lib/utils/category-tone";
 
 const description =
   "Browse Little Learners Learning's subject areas — English & literacy, math, life skills, creativity, and foundational Qur'an & Arabic learning.";
@@ -26,18 +27,6 @@ export const metadata: Metadata = {
 const categoryNameBySlug = new Map(
   getAllLearningCategories().map((c) => [c.slug, c.name] as const),
 );
-
-const GROUP_TONE: Record<string, "primary" | "secondary" | "accent"> = {
-  "Core Subjects": "primary",
-  "Qur'an & Arabic": "secondary",
-  "Activities & Play": "accent",
-};
-
-const TONE_ICON_STYLES: Record<"primary" | "secondary" | "accent", string> = {
-  primary: "bg-primary-100 text-primary-700",
-  secondary: "bg-secondary-100 text-secondary-700",
-  accent: "bg-accent-100 text-accent-800",
-};
 
 export default function LearnPage() {
   const featured = SAMPLE_CONTENT.filter((item) => item.featured);
@@ -76,40 +65,37 @@ export default function LearnPage() {
           )}
 
           <div className="mt-14 space-y-10">
-            {learningCategoryGroups.map((group) => {
-              const tone = GROUP_TONE[group.group] ?? "primary";
-              return (
-                <div key={group.group}>
-                  <Heading level="h4" as="h2" className="text-neutral-500">
-                    {group.group}
-                  </Heading>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {group.categories.map((category) => (
-                      <Link
-                        key={category.slug}
-                        href={`/learn/${category.slug}`}
-                        className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
-                      >
-                        <Card interactive className="flex h-full flex-col gap-3 p-5">
-                          <div
-                            className={`flex size-10 items-center justify-center rounded-lg ${TONE_ICON_STYLES[tone]}`}
-                          >
-                            <category.icon className="size-5" aria-hidden="true" />
-                          </div>
-                          <Heading level="h5" as="h3" className="group-hover:text-primary-700">
-                            {category.name}
-                          </Heading>
-                          <p className="text-sm text-neutral-600">{category.description}</p>
-                          <Badge variant="neutral" className="mt-auto w-fit">
-                            Ages {category.ageRange.minYears}–{category.ageRange.maxYears}
-                          </Badge>
-                        </Card>
-                      </Link>
-                    ))}
-                  </div>
+            {learningCategoryGroups.map((group) => (
+              <div key={group.group}>
+                <Heading level="h4" as="h2" className="text-neutral-500">
+                  {group.group}
+                </Heading>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {group.categories.map((category) => (
+                    <Link
+                      key={category.slug}
+                      href={`/learn/${category.slug}`}
+                      className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30"
+                    >
+                      <Card interactive className="flex h-full flex-col gap-3 p-5">
+                        <div
+                          className={`flex size-10 items-center justify-center rounded-lg ${CATEGORY_TONE_TILE[category.color]}`}
+                        >
+                          <category.icon className="size-5" aria-hidden="true" />
+                        </div>
+                        <Heading level="h5" as="h3" className="group-hover:text-primary-700">
+                          {category.name}
+                        </Heading>
+                        <p className="text-sm text-neutral-600">{category.description}</p>
+                        <Badge variant={category.color} className="mt-auto w-fit">
+                          Ages {category.ageRange.minYears}–{category.ageRange.maxYears}
+                        </Badge>
+                      </Card>
+                    </Link>
+                  ))}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
 
           <div className="mt-14">

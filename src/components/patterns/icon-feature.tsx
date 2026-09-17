@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Heading } from "@/components/ui/heading";
 import { cn } from "@/lib/utils/cn";
+import { CATEGORY_TONE_TILE, type CategoryTone } from "@/lib/utils/category-tone";
 
 export interface IconFeatureProps {
   icon: LucideIcon;
@@ -8,15 +9,13 @@ export interface IconFeatureProps {
   description: string;
   /** Semantic heading tag — set to keep the document outline non-skipping wherever this is used. */
   headingAs?: "h2" | "h3" | "h4";
-  /** Which brand color tints the icon tile. Pick the tone that reads best against the section it sits on. */
-  tone?: "primary" | "secondary" | "accent" | "neutral";
+  /** Which color tints the icon tile. Pick the tone that reads best against the section it sits on. */
+  tone?: CategoryTone | "neutral";
   className?: string;
 }
 
 const toneStyles: Record<NonNullable<IconFeatureProps["tone"]>, string> = {
-  primary: "bg-primary-100 text-primary-700",
-  secondary: "bg-secondary-100 text-secondary-700",
-  accent: "bg-accent-100 text-accent-800",
+  ...CATEGORY_TONE_TILE,
   neutral: "bg-neutral-100 text-neutral-600",
 };
 

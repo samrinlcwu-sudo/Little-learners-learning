@@ -6,6 +6,10 @@ import { footerNav } from "@/config/nav";
 function SiteFooter() {
   return (
     <footer className="bg-neutral-950 text-neutral-300">
+      <div
+        aria-hidden="true"
+        className="h-1 bg-[linear-gradient(90deg,var(--color-primary-500)_0%,var(--color-cat-blue-600)_25%,var(--color-cat-coral-600)_50%,var(--color-accent-400)_75%,var(--color-cat-green-600)_100%)]"
+      />
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
           <div className="flex flex-col items-start gap-3">

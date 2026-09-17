@@ -127,16 +127,23 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
 
           <nav aria-label="Primary" className="hidden lg:block">
             <ul className="flex items-center gap-7">
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm font-medium text-neutral-700 transition-colors hover:text-ink"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {links.map((link) => {
+                const isActive = pathname === link.href || (link.href !== "/" && pathname?.startsWith(`${link.href}/`));
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      aria-current={isActive ? "page" : undefined}
+                      className={cn(
+                        "relative py-1 text-sm font-medium transition-colors after:absolute after:-bottom-[3px] after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-primary-600 after:transition-transform after:duration-200 after:content-[''] motion-reduce:after:transition-none hover:text-ink hover:after:scale-x-100",
+                        isActive ? "text-ink after:scale-x-100" : "text-neutral-700",
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
@@ -206,17 +213,24 @@ function SiteHeader({ links = primaryNav }: SiteHeaderProps) {
                 </NotificationCenterTrigger>
               </div>
               <ul className="flex flex-col px-4 py-2">
-                {links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="block py-3 text-base font-medium text-neutral-700 hover:text-ink"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                {links.map((link) => {
+                  const isActive = pathname === link.href || (link.href !== "/" && pathname?.startsWith(`${link.href}/`));
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        aria-current={isActive ? "page" : undefined}
+                        className={cn(
+                          "block py-3 text-base font-medium hover:text-ink",
+                          isActive ? "text-primary-700" : "text-neutral-700",
+                        )}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
               <div className="flex flex-col gap-2 border-t border-neutral-200 px-4 py-4">
                 <Button variant="outline" asChild className="w-full" onClick={() => setMobileOpen(false)}>

@@ -22,6 +22,7 @@ import { TrackPageView } from "@/components/patterns/track-page-view";
 import { LearningAreaStructuredData } from "@/components/patterns/learning-area-structured-data";
 import { CONTENT_TYPE_LABELS } from "@/lib/content/types";
 import { getCategoryJourney } from "@/lib/learning-journey";
+import { CATEGORY_TONE_TILE } from "@/lib/utils/category-tone";
 import { getLearningAreaKnowledge } from "@/lib/ai/knowledge/public-knowledge";
 import { getAllBlogTopics } from "@/config/blog-topics";
 import { SAMPLE_ARTICLES } from "@/lib/blog/sample-articles";
@@ -118,7 +119,7 @@ export default async function LearnCategoryPage({
             ]}
           />
           <div className="mt-4 flex items-center gap-4">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-700">
+            <div className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${CATEGORY_TONE_TILE[category.color]}`}>
               <category.icon className="size-6" aria-hidden="true" />
             </div>
             <Heading level="h1">{category.name}</Heading>
@@ -126,7 +127,7 @@ export default async function LearnCategoryPage({
           <p className="mt-3 text-neutral-600">{category.description}</p>
 
           <div className="mt-5 flex flex-wrap gap-2">
-            <Badge variant="primary">
+            <Badge variant={category.color}>
               Ages {category.ageRange.minYears}–{category.ageRange.maxYears}
             </Badge>
             {category.contentTypes.map((type) => (

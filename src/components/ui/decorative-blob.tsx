@@ -1,15 +1,12 @@
 import * as React from "react";
 import { cn } from "@/lib/utils/cn";
+import { CATEGORY_TONE_SOFT, type CategoryTone } from "@/lib/utils/category-tone";
 
 export interface DecorativeBlobProps extends React.SVGAttributes<SVGSVGElement> {
-  tone?: "primary" | "secondary" | "accent";
+  tone?: CategoryTone;
 }
 
-const tones = {
-  primary: "text-primary-200",
-  secondary: "text-secondary-200",
-  accent: "text-accent-200",
-} as const;
+const tones = CATEGORY_TONE_SOFT;
 
 /**
  * A single soft, abstract shape — a restrained stand-in for illustration.

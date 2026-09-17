@@ -8,6 +8,7 @@ const category: LearningCategory = {
   name: "Mathematics",
   description: "Numbers, counting, and early problem-solving.",
   icon: BookOpen,
+  color: "purple",
   ageRange: { minYears: 3, maxYears: 6 },
   contentTypes: ["lesson", "worksheet", "activity", "game"],
   learningObjectives: ["Understand numbers and counting", "Recognize shapes and simple patterns"],
