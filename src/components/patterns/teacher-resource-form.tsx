@@ -209,14 +209,14 @@ function TeacherResourceForm({ resource, onSave, onCancel }: TeacherResourceForm
             <ImagePlus className="size-6" aria-hidden="true" />
           )}
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <Label htmlFor="resource-thumbnail">Thumbnail (optional)</Label>
           <input
             id="resource-thumbnail"
             type="file"
             accept="image/*"
             onChange={handleThumbnailChange}
-            className="text-sm text-neutral-600 file:mr-3 file:rounded-md file:border file:border-neutral-300 file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink hover:file:bg-neutral-100"
+            className="w-full max-w-full text-sm text-neutral-600 file:mr-3 file:rounded-md file:border file:border-neutral-300 file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink hover:file:bg-neutral-100"
           />
           {thumbnailError && <p className="mt-1.5 text-sm text-error-600">{thumbnailError}</p>}
           <p className="mt-1 text-xs text-neutral-500">Stored on this device only for now.</p>

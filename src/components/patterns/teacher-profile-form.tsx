@@ -150,14 +150,14 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
                 <ImagePlus className="size-6" aria-hidden="true" />
               )}
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <Label htmlFor="teacher-photo">Profile photo</Label>
               <input
                 id="teacher-photo"
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoChange}
-                className="text-sm text-neutral-600 file:mr-3 file:rounded-md file:border file:border-neutral-300 file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink hover:file:bg-neutral-100"
+                className="w-full max-w-full text-sm text-neutral-600 file:mr-3 file:rounded-md file:border file:border-neutral-300 file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink hover:file:bg-neutral-100"
               />
               {photoError && <p className="mt-1.5 text-sm text-error-600">{photoError}</p>}
               <p className="mt-1 text-xs text-neutral-500">Optional. Stored on this device only for now.</p>
