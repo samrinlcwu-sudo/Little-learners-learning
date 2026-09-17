@@ -88,4 +88,14 @@ describe("canDownload", () => {
     const resource = makeResource({ downloadFile: "/files/test.pdf" });
     expect(canDownload(resource)).toBe(true);
   });
+
+  it("is false for a draft resource even when free with a real file — an unpublished download can't be reached merely by knowing its URL", () => {
+    const resource = makeResource({ publicationStatus: "draft", downloadFile: "/files/test.pdf" });
+    expect(canDownload(resource)).toBe(false);
+  });
+
+  it("is false for a membership-tier resource even with a downloadFile", () => {
+    const resource = makeResource({ accessTier: "membership", downloadFile: "/files/test.pdf" });
+    expect(canDownload(resource)).toBe(false);
+  });
 });

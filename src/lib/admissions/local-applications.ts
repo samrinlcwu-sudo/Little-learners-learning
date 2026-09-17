@@ -1,18 +1,24 @@
 import type { Application, ApplicationStatus } from "./types";
+import { LOCAL_PARENT_ID } from "@/lib/accounts/local-children";
 
 /**
  * This browser's own applications, stored locally — same architecture and
  * reasoning as src/lib/accounts/local-children.ts and
  * src/lib/resources/local-teacher-resources.ts: no backend is connected,
  * so there's no shared table to write these rows into yet. A browser holds
- * at most one local parent (matching local-children.ts's own
- * "local-browser-only" placeholder), so this is simply "this browser's
+ * at most one local parent, so this is simply "this browser's
  * applications" — ownership is enforced by construction, not a runtime
  * check, the same guarantee every other local-first store in this app
  * relies on.
+ *
+ * Imports `LOCAL_PARENT_ID` from local-children.ts rather than declaring
+ * its own copy of the same literal — a child profile's `parentAccountId`
+ * and an application's `parentAccountId` must always resolve to the exact
+ * same "this browser's one parent" value for the account model to hold
+ * together; two independently-typed string literals that happen to match
+ * today could silently drift apart later.
  */
 const STORAGE_KEY = "little-learners-learning:applications";
-const LOCAL_PARENT_ID = "local-browser-only";
 
 const EMPTY_SNAPSHOT: Application[] = [];
 
