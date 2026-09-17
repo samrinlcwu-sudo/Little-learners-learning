@@ -74,7 +74,12 @@ export function paginateResources<T>(
   pageSize: number = DEFAULT_PAGE_SIZE,
 ): PaginatedResult<T> {
   const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
-  const safePage = Math.min(Math.max(1, page), pageCount);
+  // `page` traces back to a URL query param a caller could send as anything
+  // — non-numeric, negative, `Infinity`. `Number.isFinite` rejects NaN and
+  // +/-Infinity before the clamp below ever sees them, so a malformed
+  // request always resolves to a real, in-range page instead of NaN.
+  const requestedPage = Number.isFinite(page) ? page : 1;
+  const safePage = Math.min(Math.max(1, requestedPage), pageCount);
   const start = (safePage - 1) * pageSize;
 
   return {

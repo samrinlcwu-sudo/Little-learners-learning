@@ -77,4 +77,8 @@ describe("paginateGames", () => {
   it("clamps an out-of-range page", () => {
     expect(paginateGames([1, 2, 3], 99, 2).page).toBe(2);
   });
+
+  it("clamps a NaN page (e.g. a non-numeric query param) instead of producing NaN paging state", () => {
+    expect(Number.isNaN(paginateGames([1, 2, 3], Number("bad"), 2).page)).toBe(false);
+  });
 });

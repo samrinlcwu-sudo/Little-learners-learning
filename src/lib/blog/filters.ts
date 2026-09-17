@@ -59,7 +59,11 @@ export function paginateArticles<T>(
   pageSize: number = DEFAULT_ARTICLE_PAGE_SIZE,
 ): PaginatedArticles<T> {
   const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
-  const safePage = Math.min(Math.max(1, page), pageCount);
+  // See paginateResources (src/lib/resources/filters.ts) for why this
+  // guards against non-finite input rather than trusting every caller to
+  // have already sanitized a URL query param.
+  const requestedPage = Number.isFinite(page) ? page : 1;
+  const safePage = Math.min(Math.max(1, requestedPage), pageCount);
   const start = (safePage - 1) * pageSize;
 
   return {

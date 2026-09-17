@@ -78,4 +78,8 @@ describe("paginateArticles", () => {
   it("handles an empty list", () => {
     expect(paginateArticles([], 1)).toEqual({ items: [], page: 1, pageCount: 1, totalCount: 0 });
   });
+
+  it("clamps a NaN page (e.g. a non-numeric query param) instead of producing NaN paging state", () => {
+    expect(Number.isNaN(paginateArticles([1, 2, 3], Number("bad"), 2).page)).toBe(false);
+  });
 });
