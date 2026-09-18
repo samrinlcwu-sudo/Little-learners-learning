@@ -361,7 +361,7 @@ export default function Home() {
           <div className="grid gap-4 sm:grid-cols-2">
             {teacherValuePoints.map((point) => (
               <Card key={point.title} className="p-5">
-                <IconFeature {...point} tone="secondary" />
+                <IconFeature {...point} />
               </Card>
             ))}
           </div>
