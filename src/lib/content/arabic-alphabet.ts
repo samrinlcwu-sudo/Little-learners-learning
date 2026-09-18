@@ -1,5 +1,5 @@
 /**
- * Reference data for the "Arabic Letters" and "Foundational Quran Reading"
+ * Reference data for the "Arabic Letters" and "Foundational Qur'an Reading"
  * categories. This file contains only objective linguistic facts — the
  * standard Arabic alphabet and its three short-vowel diacritics (harakat).
  *

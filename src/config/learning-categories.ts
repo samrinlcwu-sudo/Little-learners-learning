@@ -145,7 +145,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
     categories: [
       {
         slug: "quran-nazra",
-        name: "Quran Learning — Nazra",
+        name: "Qur'an Learning — Nazra",
         description: "Foundational Qur'an reading practice.",
         icon: BookMarked,
         color: "primary",
@@ -165,7 +165,7 @@ export const learningCategoryGroups: LearningCategoryGroup[] = [
       },
       {
         slug: "foundational-quran-reading",
-        name: "Foundational Quran Reading",
+        name: "Foundational Qur'an Reading",
         description: "Harakat, letter combinations, and early reading.",
         icon: BookOpenCheck,
         color: "secondary",

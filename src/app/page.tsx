@@ -72,15 +72,20 @@ const resourceFormats: {
   },
 ];
 
-/** A representative spread across all three subject groups — the full set of 16 stays on /learn, linked below. */
+/**
+ * Only the subjects that actually have a real, published resource, game,
+ * or Learning Hub item behind them today (Prompt 96) — the homepage
+ * teaser is a preview of what's genuinely there to explore, not the full
+ * 16-subject map. The complete subject list, including the ones still
+ * being filled in, stays honestly presented on /learn.
+ */
 const FEATURED_CATEGORY_SLUGS = [
   "english-early-literacy",
   "mathematics",
+  "early-writing",
   "life-skills",
   "creativity",
-  "quran-nazra",
   "arabic-letters",
-  "learning-games",
   "puzzles",
 ] as const;
 
@@ -171,7 +176,10 @@ export default function Home() {
           <Heading level="display" as="h1" className="mt-5">
             One place to guide how your child learns.
           </Heading>
-          <p className="text-lead mx-auto mt-5 max-w-xl text-neutral-600">
+          <p className="mx-auto mt-4 max-w-xl font-medium text-ink">
+            Inspiring young minds through fun, interactive learning for ages 2–8.
+          </p>
+          <p className="text-lead mx-auto mt-3 max-w-xl text-neutral-600">
             Little Learners Learning brings early literacy, math, life skills,
             creativity, and foundational Qur&apos;an learning together —
             built for parents and teachers, not just kids.
