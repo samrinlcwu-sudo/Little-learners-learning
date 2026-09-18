@@ -8,9 +8,23 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",
   },
+  // Only takes effect over a real HTTPS connection (browsers ignore it on
+  // plain HTTP, e.g. this local dev/prod server) — no `preload` directive,
+  // since submitting to browsers' built-in preload list is close to
+  // irreversible and is a deliberate choice for whoever controls the real
+  // production domain to make, not something to opt this project into by
+  // default. Production deployment audit, Prompt 98.
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains",
+  },
 ];
 
 const nextConfig: NextConfig = {
+  // Removes the `X-Powered-By: Next.js` response header — a small,
+  // standard hardening step (don't advertise the framework for free) with
+  // no functional effect. Production deployment audit, Prompt 98.
+  poweredByHeader: false,
   // Next's default is WebP only. AVIF is added ahead of it (the optimizer
   // picks the first format the requesting browser supports) because it
   // compresses this site's one real photographic/gradient-heavy asset
