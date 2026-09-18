@@ -44,7 +44,11 @@ export const footerNav: { title: string; links: NavLink[] }[] = [
   {
     title: "Support",
     links: [
-      { label: "Support", href: "/support" },
+      // Labeled to match the page's own eyebrow ("Contact & Support") —
+      // a visitor scanning the footer for how to reach the business should
+      // find it under a word they're actually looking for. Business
+      // presentation review, Prompt 102.
+      { label: "Contact & Support", href: "/support" },
       { label: "FAQ", href: "/faq" },
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
