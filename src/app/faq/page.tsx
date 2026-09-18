@@ -153,9 +153,19 @@ const faqGroups: FaqGroup[] = [
     title: "General Questions",
     items: [
       {
+        question: "What is Little Learners Learning?",
+        answer:
+          "An early-years learning platform for children roughly ages 2 to 8, bringing early literacy, math, life skills, creativity, and foundational Qur'an learning together in one place — built as a shared tool for the parents and teachers guiding that learning, not just something handed to a child alone.",
+      },
+      {
         question: "Who is Little Learners Learning for?",
         answer:
           "Parents and teachers guiding early-years learning, roughly ages 2 to 8 — the platform is built as a shared tool for the adults involved, not just something handed to a child alone.",
+      },
+      {
+        question: "What learning categories are available?",
+        answer:
+          "16 subjects across three areas: core early-learning subjects (English & Early Literacy, Mathematics, Early Writing, World Around Us, Science & Discovery, Life Skills, Social & Emotional Learning, and Creativity), Qur'an & Arabic foundations (Qur'an Learning — Nazra, Arabic Letters, and Foundational Qur'an Reading), and activities & play (Educational Activities, Puzzles, Mazes, Coloring, and Learning Games). Every subject has its own page on the Learn hub — some already have real resources and games, others are still being filled in.",
       },
       {
         question: "How is Qur'an and Arabic content handled?",

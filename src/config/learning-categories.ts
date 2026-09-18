@@ -247,3 +247,17 @@ export function getRelatedCategories(slug: string, limit = 3): LearningCategory[
   if (!group) return [];
   return group.categories.filter((c) => c.slug !== slug).slice(0, limit);
 }
+
+/**
+ * A fuller meta description than `category.description` alone (Prompt
+ * 99, SEO/AEO audit) — built entirely from fields this category record
+ * already carries (age range, real learning objectives), never invented
+ * copy. Answers "what age is this for" and "what will my child learn"
+ * directly in the search snippet, which the one-line description alone
+ * didn't.
+ */
+export function buildCategoryMetaDescription(category: LearningCategory): string {
+  const ages = `ages ${category.ageRange.minYears}–${category.ageRange.maxYears}`;
+  const objectives = category.learningObjectives.join("; ");
+  return `${category.description} For ${ages}. Learning goals: ${objectives}.`;
+}

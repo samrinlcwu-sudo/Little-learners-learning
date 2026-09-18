@@ -12,6 +12,7 @@ import {
   getAllLearningCategories,
   getLearningCategoryBySlug,
   getRelatedCategories,
+  buildCategoryMetaDescription,
 } from "@/config/learning-categories";
 import { LearningContentBrowser } from "@/components/patterns/learning-content-browser";
 import { LearningJourneySteps } from "@/components/patterns/learning-journey-steps";
@@ -45,11 +46,12 @@ export async function generateMetadata({
   const category = getLearningCategoryBySlug(slug);
   if (!category) return {};
 
+  const description = buildCategoryMetaDescription(category);
   return {
     title: category.name,
-    description: category.description,
+    description,
     alternates: { canonical: `${siteConfig.url}/learn/${category.slug}` },
-    ...buildSocialMetadata(`${category.name} — ${siteConfig.name}`, category.description, `/learn/${category.slug}`),
+    ...buildSocialMetadata(`${category.name} — ${siteConfig.name}`, description, `/learn/${category.slug}`),
   };
 }
 
