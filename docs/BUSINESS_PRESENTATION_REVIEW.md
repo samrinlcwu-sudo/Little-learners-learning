@@ -151,3 +151,64 @@ not a UX or trust defect.
 3. Continue treating content growth (more subjects, resources, games) as
    the main lever for making the platform feel more "complete" to a
    business visitor comparing it against established competitors.
+
+## Issues Fixed
+
+Re-verified against a fresh pass of every page and flow named for this
+follow-up (Home, About, Learn, Resources, Games, Life Skills, Qur'an
+Nazra, Blog, Contact, plus the Parent registration→login→dashboard,
+Teacher registration→expertise→profile/dashboard, and Applications
+submit→confirmation→tracking journeys). One issue from this review was
+carried forward and is now confirmed fixed:
+
+- **MEDIUM — Contact findability.** The footer's "Support" section link
+  didn't contain the word "Contact," even though the Support page's own
+  on-page eyebrow already reads "Contact & Support." Root cause: a
+  one-word label mismatch in `src/config/nav.ts`, nothing structural.
+  Fix: relabeled the link to **"Contact & Support"** so it matches the
+  page's own framing and is findable by the word a visitor actually
+  scans for. Re-verified live this pass: the footer renders "Contact &
+  Support" linking to `/support`, present on every page, at both desktop
+  and 375px mobile widths, with no horizontal overflow introduced.
+
+No other issue in this document rose to CRITICAL, HIGH, or MEDIUM
+priority — everything else previously logged was either already-correct
+intentional behavior (e.g. the teacher-profile visibility tiers, the
+forgiving game-scoring rule, the memory-game's always-top-tier reward)
+or the one LOW-priority, non-actionable item captured below. Per this
+follow-up's scope ("only fix issues that materially improve
+functionality, UX, trust, professional presentation, mobile usability,
+security, or SEO/AEO"), no cosmetic-only changes were made.
+
+## Issues Remaining
+
+- **LOW — Content breadth.** 9 of the 16 learning categories
+  (`src/config/learning-categories.ts`) don't yet have real resources or
+  games behind them; the homepage and `/learn` page already limit their
+  featured/highlighted lists to the 7 categories that do, so a visitor
+  is never routed into an empty subject, but the platform's full subject
+  list is still narrower than its long-term catalog.
+
+No CRITICAL, HIGH, or MEDIUM issues remain open as of this pass.
+
+## Reason Remaining Issues Were Not Blocking
+
+The content-breadth gap is a business/content decision, not a code
+defect, UX flaw, or trust problem:
+
+- It doesn't create a broken or misleading experience — the site never
+  advertises a subject it can't deliver; unpopulated categories are
+  simply absent from the featured/highlighted lists rather than shown
+  as broken links or empty pages a visitor could stumble into.
+- It doesn't block any of the verified user journeys — parent
+  registration, teacher registration, and application submission/
+  tracking all complete successfully today using only the categories
+  and features that already exist.
+- Closing it means writing and reviewing real educational content for
+  9 more subjects (and, for religious categories, completing the
+  required content review), which is ongoing product work measured in
+  weeks, not a fix that belongs in a single engineering pass.
+- Every prior audit in this project's history (Prompts 89, 93, 94, 97,
+  99) reached the same conclusion independently: the codebase itself is
+  sound and honest about its limitations; what's missing is content
+  volume, which is a roadmap item, not a launch blocker.
