@@ -29,51 +29,45 @@ import type { ChildProfile } from "@/lib/accounts/types";
 import { LOCAL_PARENT_ID } from "@/lib/accounts/local-children";
 import { getAllMemberships } from "@/lib/memberships/memberships";
 import { hasActiveMembership } from "@/lib/memberships/access";
+import { CATEGORY_TONE_TILE, type CategoryTone } from "@/lib/utils/category-tone";
 
-const quickLinks = [
+const quickLinks: { icon: typeof BookOpen; title: string; description: string; href: string; tone: CategoryTone }[] = [
   {
     icon: BookOpen,
     title: "Explore Learning",
     description: "Browse subjects, ages 2 to 8.",
     href: "/learn",
-    tone: "primary" as const,
+    tone: "blue",
   },
   {
     icon: Library,
     title: "Resources",
     description: "Worksheets, activities, and ebooks.",
     href: "/resources",
-    tone: "secondary" as const,
+    tone: "green",
   },
   {
     icon: Gamepad2,
     title: "Games",
     description: "Free games built around one skill each.",
     href: "/games",
-    tone: "accent" as const,
+    tone: "accent",
   },
   {
     icon: ClipboardList,
     title: "Applications",
     description: "Start or track an application for your child.",
     href: "/dashboard/applications",
-    tone: "neutral" as const,
+    tone: "purple",
   },
   {
     icon: Bell,
     title: "Notifications",
     description: "Real updates about your applications and account.",
     href: "/dashboard/notifications",
-    tone: "neutral" as const,
+    tone: "coral",
   },
 ];
-
-const TONE_STYLES = {
-  primary: "bg-primary-100 text-primary-700",
-  secondary: "bg-secondary-100 text-secondary-700",
-  accent: "bg-accent-100 text-accent-800",
-  neutral: "bg-neutral-100 text-neutral-600",
-};
 
 /**
  * The parent dashboard reads and writes child profiles from this browser's
@@ -201,7 +195,7 @@ function ParentDashboard() {
               {quickLinks.map((link) => (
                 <Link key={link.href} href={link.href} className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
                   <Card interactive className="flex h-full flex-col gap-3 p-5">
-                    <div className={`flex size-11 items-center justify-center rounded-xl ${TONE_STYLES[link.tone]}`}>
+                    <div className={`flex size-11 items-center justify-center rounded-xl ${CATEGORY_TONE_TILE[link.tone]}`}>
                       <link.icon className="size-5" aria-hidden="true" />
                     </div>
                     <div>

@@ -38,6 +38,7 @@ import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import { calculateProfileCompletion } from "@/lib/accounts/teacher-profile-completion";
 import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 import { getAllLearningCategories } from "@/config/learning-categories";
+import { CATEGORY_TONE_TILE, type CategoryTone } from "@/lib/utils/category-tone";
 import {
   getAllTeacherAgeGroupOptions,
   getAllTeacherLanguageOptions,
@@ -85,15 +86,13 @@ interface QuickAction {
   /** Exactly one of href/onClick — a real destination link, or an in-page action like opening a modal. */
   href?: string;
   onClick?: () => void;
-  tone: "primary" | "secondary" | "accent" | "neutral";
+  tone: CategoryTone | "neutral";
   /** e.g. "Development preview" for the assistant entry — never implies a finished feature when it isn't one. */
   badge?: string;
 }
 
 const QUICK_ACTION_TONE_STYLES: Record<QuickAction["tone"], string> = {
-  primary: "bg-primary-100 text-primary-700",
-  secondary: "bg-secondary-100 text-secondary-700",
-  accent: "bg-accent-100 text-accent-800",
+  ...CATEGORY_TONE_TILE,
   neutral: "bg-neutral-100 text-neutral-600",
 };
 
@@ -194,7 +193,7 @@ function TeacherDashboard() {
       title: "Edit profile",
       description: "Update your bio, expertise, and photo.",
       href: "/teachers/register/profile",
-      tone: "primary",
+      tone: "blue",
     },
     ...(teacher.visibility === "public"
       ? [
@@ -203,7 +202,7 @@ function TeacherDashboard() {
             title: "View public profile",
             description: "See exactly what families see.",
             href: `/teachers/p/${teacher.slug}`,
-            tone: "secondary" as const,
+            tone: "purple" as const,
           },
         ]
       : []),
@@ -212,14 +211,14 @@ function TeacherDashboard() {
       title: "Create resource",
       description: "Add a worksheet, activity, or ebook of your own.",
       onClick: openCreateResourceModal,
-      tone: "primary",
+      tone: "green",
     },
     {
       icon: GraduationCap,
       title: "Browse teacher resources",
       description: "Classroom-ready material from the platform.",
       href: "/resources?type=teacher-resource",
-      tone: "accent",
+      tone: "primary",
     },
     {
       icon: Library,
@@ -233,7 +232,7 @@ function TeacherDashboard() {
       title: "Notifications",
       description: "Real updates about your account and resources.",
       href: "/dashboard/notifications",
-      tone: "neutral",
+      tone: "coral",
     },
     {
       icon: Settings,
