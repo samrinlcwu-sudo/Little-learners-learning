@@ -74,19 +74,29 @@ const resourceFormats: {
 
 /**
  * Only the subjects that actually have a real, published resource, game,
- * or Learning Hub item behind them today (Prompt 96) — the homepage
- * teaser is a preview of what's genuinely there to explore, not the full
- * 16-subject map. The complete subject list, including the ones still
- * being filled in, stays honestly presented on /learn.
+ * or Learning Hub item behind them today (Prompt 96, expanded Prompt
+ * 111) — the homepage teaser is a preview of what's genuinely there to
+ * explore, not the full 16-subject map. Qur'an Learning — Nazra and
+ * Foundational Qur'an Reading are the two still excluded: both remain
+ * without real content pending qualified human religious review (see
+ * docs/LEARNING_CONTENT_COMPLETION.md) — never filled with invented
+ * verses, Arabic text, or pronunciation rules just to complete this list.
  */
 const FEATURED_CATEGORY_SLUGS = [
   "english-early-literacy",
   "mathematics",
   "early-writing",
+  "world-around-us",
+  "science-discovery",
   "life-skills",
+  "social-emotional-learning",
   "creativity",
   "arabic-letters",
+  "educational-activities",
   "puzzles",
+  "mazes",
+  "coloring",
+  "learning-games",
 ] as const;
 
 const whyPillars = [

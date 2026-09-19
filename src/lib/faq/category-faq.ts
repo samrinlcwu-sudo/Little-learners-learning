@@ -22,7 +22,7 @@ import { joinWithAnd } from "@/lib/utils/join-with-and";
  */
 export function buildCategoryFaq(
   category: LearningCategory,
-  journey: Pick<CategoryJourney, "resources" | "games"> | null,
+  journey: Pick<CategoryJourney, "content" | "resources" | "games"> | null,
   articleCount: number,
 ): FaqItem[] {
   const objectives = category.learningObjectives;
@@ -44,12 +44,14 @@ export function buildCategoryFaq(
     },
   ];
 
+  const contentCount = journey?.content.length ?? 0;
   const resourceCount = journey?.resources.length ?? 0;
   const gameCount = journey?.games.length ?? 0;
-  const totalCount = resourceCount + gameCount + articleCount;
+  const totalCount = contentCount + resourceCount + gameCount + articleCount;
 
   if (totalCount > 0) {
     const parts: string[] = [];
+    if (contentCount > 0) parts.push(`${contentCount} lesson${contentCount === 1 ? "" : "s"}`);
     if (resourceCount > 0) parts.push(`${resourceCount} resource${resourceCount === 1 ? "" : "s"}`);
     if (gameCount > 0) parts.push(`${gameCount} game${gameCount === 1 ? "" : "s"}`);
     if (articleCount > 0) parts.push(`${articleCount} article${articleCount === 1 ? "" : "s"}`);
@@ -61,7 +63,7 @@ export function buildCategoryFaq(
   } else {
     items.push({
       question: `Is there content available for ${category.name} yet?`,
-      answer: `Not yet — ${category.name} is a defined subject on the platform, but no resource, game, or article for it has been published today. Check back as the library grows.`,
+      answer: `Not yet — ${category.name} is a defined subject on the platform, but no lesson, resource, game, or article for it has been published today. Check back as the library grows.`,
     });
   }
 

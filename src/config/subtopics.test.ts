@@ -9,7 +9,11 @@ describe("getSubtopicsForCategory", () => {
   });
 
   it("returns an empty list for a category with no real tagged content yet", () => {
-    expect(getSubtopicsForCategory("science-discovery")).toEqual([]);
+    // Qur'an Learning — Nazra has no real content yet, deliberately: it
+    // requires qualified human religious review before any content is
+    // added (see docs/LEARNING_CONTENT_COMPLETION.md), unlike every other
+    // category, which Prompt 111 populated with real, non-religious content.
+    expect(getSubtopicsForCategory("quran-nazra")).toEqual([]);
   });
 
   it("every subtopic references a real, existing learning category slug", () => {

@@ -30,7 +30,11 @@ describe("getCategoryJourney", () => {
   });
 
   it("marks every step unavailable for a category with no published content yet", () => {
-    const journey = getCategoryJourney("science-discovery");
+    // Qur'an Learning — Nazra deliberately has no content yet, pending
+    // qualified human religious review (see
+    // docs/LEARNING_CONTENT_COMPLETION.md) — unlike every other category,
+    // which Prompt 111 populated with real, non-religious content.
+    const journey = getCategoryJourney("quran-nazra");
     expect(journey).not.toBeNull();
     expect(journey?.steps.every((s) => !s.available && s.count === 0)).toBe(true);
   });

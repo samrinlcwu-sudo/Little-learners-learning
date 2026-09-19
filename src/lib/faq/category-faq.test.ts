@@ -25,20 +25,21 @@ describe("buildCategoryFaq", () => {
   });
 
   it("honestly states when nothing is published yet, rather than skipping the question", () => {
-    const faq = buildCategoryFaq(category, { resources: [], games: [] }, 0);
+    const faq = buildCategoryFaq(category, { content: [], resources: [], games: [] }, 0);
     expect(faq).toHaveLength(3);
     expect(faq[2].question).toBe("Is there content available for Mathematics yet?");
     expect(faq[2].answer).toContain("Not yet");
   });
 
-  it("counts real published resources, games, and articles when they exist", () => {
+  it("counts real published lessons, resources, games, and articles when they exist", () => {
     const faq = buildCategoryFaq(
       category,
-      { resources: [{}, {}] as never, games: [{}] as never },
+      { content: [{}] as never, resources: [{}, {}] as never, games: [{}] as never },
       1,
     );
     const availability = faq.find((item) => item.question.startsWith("What resources, games, or activities"));
     expect(availability).toBeDefined();
+    expect(availability!.answer).toContain("1 lesson");
     expect(availability!.answer).toContain("2 resources");
     expect(availability!.answer).toContain("1 game");
     expect(availability!.answer).toContain("1 article");
