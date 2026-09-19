@@ -13,6 +13,7 @@ import { ResourceCard } from "@/components/patterns/resource-card";
 import { GameCard } from "@/components/patterns/game-card";
 import { BlogArticleCard } from "@/components/patterns/blog-article-card";
 import { TrackPageView } from "@/components/patterns/track-page-view";
+import { TrackAnalyticsEvent } from "@/components/patterns/track-analytics-event";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { getAllBlogTopics } from "@/config/blog-topics";
 import { SAMPLE_RESOURCES } from "@/lib/resources/sample-resources";
@@ -155,6 +156,10 @@ export default async function ResourceDetailPage({
           topic={resource.category}
           activityLabel={resource.title}
           activityHref={`/resources/${resource.slug}`}
+        />
+        <TrackAnalyticsEvent
+          name="resource_viewed"
+          properties={resource.category ? { slug: resource.slug, category: resource.category } : { slug: resource.slug }}
         />
 
         <div className="max-w-3xl">

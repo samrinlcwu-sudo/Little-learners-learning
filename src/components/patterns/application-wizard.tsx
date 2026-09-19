@@ -29,6 +29,7 @@ import {
 } from "@/lib/validations/application";
 import type { Application } from "@/lib/admissions/types";
 import { cn } from "@/lib/utils/cn";
+import { trackEvent } from "@/lib/analytics/track";
 
 const STEPS = [
   { key: "applicant", title: "Applicant information", description: "Who we should keep in touch with about this application." },
@@ -132,6 +133,7 @@ function ApplicationWizard({ initialApplicationId }: ApplicationWizardProps) {
     createdRef.current = true;
     const created = createApplication();
     setApplicationId(created.id);
+    trackEvent("application_started");
     router.replace(`/dashboard/applications/new?id=${created.id}`);
   }, [existingId, ready, createApplication, router]);
 
@@ -191,7 +193,10 @@ function ApplicationWizard({ initialApplicationId }: ApplicationWizardProps) {
       message: values.message,
     });
     const result = submit(applicationId);
-    if (result) setSubmittedApplication(result);
+    if (result) {
+      trackEvent("application_completed");
+      setSubmittedApplication(result);
+    }
   }
 
   if (!childrenReady || !ready) {

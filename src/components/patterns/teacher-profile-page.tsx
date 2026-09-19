@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/patterns/page-header";
 import { TeacherProfileForm } from "@/components/patterns/teacher-profile-form";
 import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import type { TeacherProfileValues } from "@/lib/validations/teacher";
+import { trackEvent } from "@/lib/analytics/track";
 
 /**
  * Step 2's page shell — also reused for every later "edit my profile" visit
@@ -49,7 +50,10 @@ function TeacherProfilePage() {
     // inline "Profile updated" banner instead (see TeacherProfileForm),
     // since navigating someone away right after they asked to save a
     // small change would read as if it hadn't worked.
-    if (isFirstTime) router.push("/teachers/dashboard");
+    if (isFirstTime) {
+      trackEvent("teacher_registration_completed");
+      router.push("/teachers/dashboard");
+    }
   }
 
   return (

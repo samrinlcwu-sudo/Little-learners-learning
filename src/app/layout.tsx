@@ -41,6 +41,13 @@ export const metadata: Metadata = {
   // into it; every page that doesn't still gets a real, professional
   // preview instead of a blank one. See src/lib/seo/social-metadata.ts.
   ...buildSocialMetadata(siteConfig.name, siteConfig.description),
+  // Renders <meta name="google-site-verification" content="..."> only
+  // once a real Search Console property exists and its code is set here —
+  // omitted (not a fake/placeholder value) until then. See
+  // docs/SEARCH_MONITORING_PLAN.md, "Search Console setup."
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

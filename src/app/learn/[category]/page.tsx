@@ -20,6 +20,7 @@ import { GameCard } from "@/components/patterns/game-card";
 import { ResourceCard } from "@/components/patterns/resource-card";
 import { BlogArticleCard } from "@/components/patterns/blog-article-card";
 import { TrackPageView } from "@/components/patterns/track-page-view";
+import { TrackAnalyticsEvent } from "@/components/patterns/track-analytics-event";
 import { LearningAreaStructuredData } from "@/components/patterns/learning-area-structured-data";
 import { CONTENT_TYPE_LABELS } from "@/lib/content/types";
 import { getCategoryJourney } from "@/lib/learning-journey";
@@ -112,6 +113,7 @@ export default async function LearnCategoryPage({
           activityLabel={category.name}
           activityHref={`/learn/${category.slug}`}
         />
+        <TrackAnalyticsEvent name="learning_category_viewed" properties={{ category: category.slug }} />
         <div className="max-w-3xl">
           <Breadcrumb
             items={[

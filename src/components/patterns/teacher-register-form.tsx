@@ -14,6 +14,7 @@ import { AuthFormShell } from "@/components/patterns/auth-form-shell";
 import { teacherAccountSchema, type TeacherAccountValues } from "@/lib/validations/teacher";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
+import { trackEvent } from "@/lib/analytics/track";
 
 /**
  * Step 1 of teacher registration: just enough to create an account. Real
@@ -44,6 +45,7 @@ function TeacherRegisterForm() {
     // the next step, exactly as the real flow would after a successful
     // sign-up.
     createAccount({ name: values.name, email: values.email, countryRegion: values.countryRegion });
+    trackEvent("teacher_registration_started");
     router.push("/teachers/register/verify");
   }
 

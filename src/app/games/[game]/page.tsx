@@ -12,6 +12,7 @@ import { GameCard } from "@/components/patterns/game-card";
 import { ResourceCard } from "@/components/patterns/resource-card";
 import { BlogArticleCard } from "@/components/patterns/blog-article-card";
 import { GamePlayer } from "@/components/games/game-player";
+import { TrackAnalyticsEvent } from "@/components/patterns/track-analytics-event";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { getAllBlogTopics } from "@/config/blog-topics";
 import { SAMPLE_GAMES } from "@/lib/games/sample-games";
@@ -176,7 +177,10 @@ export default async function GameDetailPage({
 
         <div className="mt-8 max-w-2xl">
           {playable ? (
-            <GamePlayer slug={game.slug} skill={game.skill} title={game.title} category={game.category} />
+            <>
+              <TrackAnalyticsEvent name="game_opened" properties={{ slug: game.slug }} />
+              <GamePlayer slug={game.slug} skill={game.skill} title={game.title} category={game.category} />
+            </>
           ) : (
             <EmptyState
               title="This game is coming soon"
