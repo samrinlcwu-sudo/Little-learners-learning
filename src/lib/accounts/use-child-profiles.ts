@@ -1,46 +1,76 @@
 "use client";
 
 import * as React from "react";
-import {
-  addLocalChild,
-  getLocalChildrenSnapshot,
-  getServerChildrenSnapshot,
-  setLocalChildAccountStatus,
-  subscribeLocalChildren,
-  updateLocalChild,
-  type NewChildProfile,
-} from "./local-children";
+import { addChildProfile, fetchChildProfiles, updateChildProfile, type NewChildProfile } from "./remote-children";
+import { useSupabaseUser } from "@/lib/supabase/use-supabase-user";
 import type { ChildProfile } from "./types";
 
 /**
- * `useSyncExternalStore` reads localStorage (an external data source, not
- * React state) the correct way: the server and the client's first paint
- * both get the same empty snapshot (see `local-children.ts`), so there's
- * no hydration mismatch, and every component using this hook re-renders
- * automatically the moment `addChild`/`updateChild` writes something —
- * even in the same tab. `ready` is just "does this snapshot differ from
- * the server's placeholder," so callers can show a brief loading state
- * instead of a flash of "no children yet" for someone who actually has some.
+ * The real, Supabase-backed replacement for the old `useSyncExternalStore`
+ * + `localStorage` version (Prompt 110 — see
+ * docs/AUTHENTICATION_BACKEND_AUDIT.md). Every read/write is scoped to the
+ * signed-in parent by Postgres Row Level Security on `child_profiles`, not
+ * by anything in this hook — a query simply returns nothing for another
+ * parent's rows. `ready` now means "we know who's signed in and have
+ * fetched their children," not just "localStorage has been read."
+ *
+ * The admin panel does NOT use this hook — see
+ * `use-admin-local-children.ts` for why it stays on the old local-only
+ * source.
  */
 export function useChildProfiles() {
-  const children = React.useSyncExternalStore(
-    subscribeLocalChildren,
-    getLocalChildrenSnapshot,
-    getServerChildrenSnapshot,
+  const { user, ready: userReady } = useSupabaseUser();
+  const [children, setChildren] = React.useState<ChildProfile[]>([]);
+  const [dataReady, setDataReady] = React.useState(false);
+
+  // Effect body fetches directly rather than delegating to `refresh` below
+  // — calling a function that itself calls setState from inside an effect
+  // is exactly the pattern react-hooks' set-state-in-effect rule flags, so
+  // the initial load and the exposed manual-refresh action are kept as two
+  // separate (if similar) code paths rather than one shared callback.
+  React.useEffect(() => {
+    if (!userReady) return;
+    let active = true;
+    const promise = user ? fetchChildProfiles() : Promise.resolve<ChildProfile[]>([]);
+    promise.then((rows) => {
+      if (!active) return;
+      setChildren(rows);
+      setDataReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [userReady, user]);
+
+  const refresh = React.useCallback(async () => {
+    if (!user) {
+      setChildren([]);
+      setDataReady(true);
+      return;
+    }
+    setDataReady(false);
+    try {
+      const rows = await fetchChildProfiles();
+      setChildren(rows);
+    } finally {
+      setDataReady(true);
+    }
+  }, [user]);
+
+  const addChild = React.useCallback(
+    async (child: NewChildProfile) => {
+      const created = await addChildProfile(child);
+      setChildren((current) => [...current, created]);
+      return created;
+    },
+    [],
   );
-  const ready = children !== getServerChildrenSnapshot();
 
-  const addChild = React.useCallback((child: NewChildProfile) => {
-    addLocalChild(child);
+  const updateChild = React.useCallback(async (id: string, updates: NewChildProfile) => {
+    const updated = await updateChildProfile(id, updates);
+    setChildren((current) => current.map((child) => (child.id === id ? updated : child)));
+    return updated;
   }, []);
 
-  const updateChild = React.useCallback((id: string, updates: NewChildProfile) => {
-    updateLocalChild(id, updates);
-  }, []);
-
-  const setAccountStatus = React.useCallback((id: string, accountStatus: ChildProfile["accountStatus"]) => {
-    setLocalChildAccountStatus(id, accountStatus);
-  }, []);
-
-  return { children, ready, addChild, updateChild, setAccountStatus };
+  return { children, ready: userReady && dataReady, addChild, updateChild, refresh };
 }

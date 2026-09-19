@@ -47,8 +47,7 @@ function ApplicationDetail() {
         <Container className="max-w-md text-center">
           <Heading level="h1">We couldn&apos;t find that application</Heading>
           <p className="mt-3 text-neutral-600">
-            Applications are only saved on the device they were created on — this link may be from a different
-            browser, or the application may have been removed.
+            This application doesn&apos;t exist, isn&apos;t yours, or may have been removed.
           </p>
           <Button className="mt-6" asChild>
             <Link href="/dashboard/applications">Back to your applications</Link>

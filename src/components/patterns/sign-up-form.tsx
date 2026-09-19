@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
@@ -12,30 +13,66 @@ import { Alert } from "@/components/ui/alert";
 import { AuthFormShell } from "@/components/patterns/auth-form-shell";
 import { signUpSchema, type SignUpValues } from "@/lib/validations/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { createClient } from "@/lib/supabase/client";
 
 /**
- * Fully real validation (see src/lib/validations/auth.ts) — every error
- * shown here is genuine. What isn't real yet is the account itself: no
- * Supabase project is connected (see src/lib/supabase/is-configured.ts),
- * so submitting never creates one. It never pretends otherwise.
+ * Real account creation (Prompt 110, see
+ * docs/AUTHENTICATION_BACKEND_AUDIT.md). Whether this redirects straight
+ * to the dashboard or shows a "check your email" step depends on whether
+ * this Supabase project requires email confirmation — both outcomes are
+ * handled honestly rather than assuming either.
  *
  * Parent-only: a teacher wants the richer, dedicated flow at
  * /teachers/register (professional profile, country, etc.), not this
  * generic form with a role picker bolted on — see the footer link below.
  */
 function SignUpForm() {
-  const [submitted, setSubmitted] = React.useState(false);
+  const router = useRouter();
+  const [formError, setFormError] = React.useState<string | null>(null);
+  const [needsConfirmation, setNeedsConfirmation] = React.useState(false);
+  const [resent, setResent] = React.useState(false);
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<SignUpValues>({ resolver: zodResolver(signUpSchema) });
 
-  function onSubmit() {
-    // Once a Supabase project is connected, this branch calls
-    // supabase.auth.signUp({ email, password, options: { data: { name, role: "parent" } } })
-    // and redirects on success. Until then, every submission ends here.
-    setSubmitted(true);
+  async function onSubmit(values: SignUpValues) {
+    setFormError(null);
+    const supabase = createClient();
+
+    const { data, error } = await supabase.auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: { data: { name: values.name, role: "parent" } },
+    });
+
+    if (error) {
+      setFormError(
+        error.message.toLowerCase().includes("already registered")
+          ? "An account with that email already exists. Try signing in instead."
+          : "We couldn't create your account. Please check your details and try again.",
+      );
+      return;
+    }
+
+    if (data.session) {
+      router.push("/dashboard");
+      router.refresh();
+      return;
+    }
+
+    // No session yet means this project requires email confirmation.
+    setNeedsConfirmation(true);
+  }
+
+  async function handleResend() {
+    const email = getValues("email");
+    if (!email) return;
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    if (!error) setResent(true);
   }
 
   return (
@@ -57,17 +94,33 @@ function SignUpForm() {
       }
     >
       {!isSupabaseConfigured && (
-        <Alert variant="info" className="mb-5">
-          Accounts aren&apos;t connected to a live backend yet. Feel free to
-          fill this in — nothing is created or stored.
+        <Alert variant="warning" className="mb-5">
+          Accounts aren&apos;t connected on this deployment right now, so
+          registration isn&apos;t available. Please try again later.
         </Alert>
       )}
 
-      {submitted ? (
-        <Alert variant="success" title="Looks good">
-          Everything you entered passed every check. Account creation itself
-          isn&apos;t connected yet, so nothing was actually created — check
-          back once it is.
+      {formError && (
+        <Alert variant="error" className="mb-5">
+          {formError}
+        </Alert>
+      )}
+
+      {needsConfirmation ? (
+        <Alert variant="success" title="Check your email">
+          We sent a confirmation link to <strong>{getValues("email")}</strong>. Click it, then come back and
+          sign in.
+          {resent ? (
+            <p className="mt-2 font-medium">Sent again — give it a minute to arrive.</p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleResend}
+              className="mt-2 block font-medium text-primary-700 hover:underline"
+            >
+              Resend confirmation email
+            </button>
+          )}
         </Alert>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -120,7 +173,7 @@ function SignUpForm() {
             )}
           </div>
 
-          <Button type="submit" className="w-full" isLoading={isSubmitting}>
+          <Button type="submit" className="w-full" isLoading={isSubmitting} disabled={!isSupabaseConfigured}>
             Create account
           </Button>
         </form>

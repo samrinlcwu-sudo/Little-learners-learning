@@ -1,6 +1,8 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { MailCheck } from "lucide-react";
 import { Section } from "@/components/ui/section";
 import { Container } from "@/components/ui/container";
@@ -8,38 +10,56 @@ import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
+import { useSupabaseUser } from "@/lib/supabase/use-supabase-user";
+import { createClient } from "@/lib/supabase/client";
 
 /**
  * The "Verify Account" step between account creation and profile
- * completion. Honest about the same gap as every other auth screen: no
- * email service is connected yet, so there's no real verification link to
- * send. Rather than skip the step (the requested flow explicitly includes
- * it) or fake a "verified!" state, this explains the gap plainly and lets
- * the teacher continue — matching the same "prepared, not simulated" rule
- * every other not-yet-connected feature on this site follows.
+ * completion — real since Prompt 110 (see
+ * docs/AUTHENTICATION_BACKEND_AUDIT.md). Whether a visitor lands here
+ * already signed in (this Supabase project doesn't require email
+ * confirmation) or genuinely needs to click a real link Supabase just
+ * sent depends entirely on this project's own auth settings — this
+ * component handles both outcomes honestly rather than assuming either.
  */
 function TeacherVerifyNotice() {
-  const { teacher, ready } = useTeacherProfile();
+  const { user, ready } = useSupabaseUser();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
+  const [resent, setResent] = React.useState(false);
+  const [resendError, setResendError] = React.useState<string | null>(null);
+  const [resending, setResending] = React.useState(false);
 
   if (!ready) {
     return <Section className="min-h-[50vh]" />;
   }
 
-  if (!teacher) {
+  if (!user && !email) {
     return (
       <Section surface="sunken" className="flex flex-1 flex-col justify-center">
         <Container className="max-w-md text-center">
           <Heading level="h1">Let&apos;s create your account first</Heading>
-          <p className="mt-3 text-neutral-600">
-            We couldn&apos;t find a teacher account on this device yet.
-          </p>
+          <p className="mt-3 text-neutral-600">We couldn&apos;t find an account to verify yet.</p>
           <Button className="mt-6" asChild>
             <Link href="/teachers/register">Create teacher account</Link>
           </Button>
         </Container>
       </Section>
     );
+  }
+
+  async function handleResend() {
+    if (!email) return;
+    setResending(true);
+    setResendError(null);
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    setResending(false);
+    if (error) {
+      setResendError("We couldn't resend the confirmation email right now. Please try again shortly.");
+      return;
+    }
+    setResent(true);
   }
 
   return (
@@ -53,20 +73,48 @@ function TeacherVerifyNotice() {
           <Heading level="h3" as="h1">
             Verify your email
           </Heading>
-          <p className="mt-2 text-sm text-neutral-600">
-            We&apos;d send a confirmation link to <strong className="text-ink">{teacher.email}</strong>.
-          </p>
 
-          <Alert variant="info" className="mt-5 text-left">
-            Email verification isn&apos;t connected to a live backend yet,
-            so no email was actually sent. Once it is, this step becomes a
-            real confirmation link — for now, you can continue straight to
-            your professional profile.
-          </Alert>
+          {user ? (
+            <>
+              <p className="mt-2 text-sm text-neutral-600">
+                Your account is ready — you can continue straight to your professional profile.
+              </p>
+              <Button className="mt-6 w-full" asChild>
+                <Link href="/teachers/register/profile">Continue to your profile</Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="mt-2 text-sm text-neutral-600">
+                We sent a confirmation link to <strong className="text-ink">{email}</strong>. Click it to
+                activate your account, then come back here and sign in.
+              </p>
 
-          <Button className="mt-6 w-full" asChild>
-            <Link href="/teachers/register/profile">Continue to your profile</Link>
-          </Button>
+              <Alert variant="info" className="mt-5 text-left">
+                Didn&apos;t get it? Check your spam folder, or resend it below.
+              </Alert>
+
+              {resendError && (
+                <Alert variant="error" className="mt-3 text-left">
+                  {resendError}
+                </Alert>
+              )}
+
+              {resent ? (
+                <Alert variant="success" className="mt-3 text-left">
+                  Sent again — give it a minute to arrive.
+                </Alert>
+              ) : (
+                <Button variant="outline" className="mt-6 w-full" onClick={handleResend} isLoading={resending}>
+                  Resend confirmation email
+                </Button>
+              )}
+
+              <Button className="mt-3 w-full" asChild>
+                <Link href="/sign-in">I&apos;ve confirmed — sign in</Link>
+              </Button>
+            </>
+          )}
         </Card>
       </Container>
     </Section>

@@ -13,8 +13,10 @@ import {
   ExternalLink,
   Plus,
   Bell,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -36,6 +38,7 @@ import { TeacherResourceList } from "@/components/patterns/teacher-resource-list
 import { useOpenAiAssistant } from "@/components/patterns/ai-assistant";
 import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
 import { calculateProfileCompletion } from "@/lib/accounts/teacher-profile-completion";
+import { signOut } from "@/lib/supabase/use-supabase-user";
 import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import { CATEGORY_TONE_TILE, type CategoryTone } from "@/lib/utils/category-tone";
@@ -109,6 +112,13 @@ function TeacherDashboard() {
   const [resourceModalOpen, setResourceModalOpen] = React.useState(false);
   const [editingResource, setEditingResource] = React.useState<Resource | null>(null);
   const openAssistant = useOpenAiAssistant();
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await signOut();
+    router.push("/sign-in");
+    router.refresh();
+  }
 
   if (!ready) {
     return <Section className="min-h-[60vh]" />;
@@ -120,8 +130,7 @@ function TeacherDashboard() {
         <Container className="max-w-md text-center">
           <Heading level="h1">No teacher account yet</Heading>
           <p className="mt-3 text-neutral-600">
-            We couldn&apos;t find one on this device — registration only
-            saves to the browser it was created in.
+            We couldn&apos;t find a teacher profile for your account yet.
           </p>
           <Button className="mt-6" asChild>
             <Link href="/teachers/register">Create teacher account</Link>
@@ -241,6 +250,13 @@ function TeacherDashboard() {
       href: "/account",
       tone: "neutral",
     },
+    {
+      icon: LogOut,
+      title: "Sign out",
+      description: "End your session on this device.",
+      onClick: handleSignOut,
+      tone: "neutral",
+    },
   ];
 
   return (
@@ -255,10 +271,9 @@ function TeacherDashboard() {
 
       <Section className="pt-10 sm:pt-12 lg:pt-14">
         <Container className="max-w-4xl">
-          <Alert variant="info" className="mb-10">
-            This dashboard works in your browser only right now — it
-            isn&apos;t connected to a real account yet. Everything you add
-            stays on this device.
+          <Alert variant="success" className="mb-10">
+            Signed in as {teacher.email}. Your profile and resources are
+            saved to your account.
           </Alert>
 
           <div>

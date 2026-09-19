@@ -32,7 +32,7 @@ const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 
 export interface TeacherProfileFormProps {
   teacher: TeacherProfile;
-  onSave: (values: TeacherProfileValues & { photo?: string }) => void;
+  onSave: (values: TeacherProfileValues & { photo?: string }) => Promise<void> | void;
   /** First-time completion (right after registration) gets "Skip for now" + a redirect on save; every later edit gets Cancel + an inline "saved" confirmation instead. */
   isFirstTime?: boolean;
   skipHref?: string;
@@ -60,6 +60,7 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
   const [photoError, setPhotoError] = React.useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = React.useState(false);
   const [justSaved, setJustSaved] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
   const [interestFilter, setInterestFilter] = React.useState("");
 
   const filteredInterestOptions = React.useMemo(() => {
@@ -111,9 +112,14 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
     reader.readAsDataURL(file);
   }
 
-  function onSubmit(values: TeacherProfileValues) {
-    onSave({ ...values, photo });
-    if (!isFirstTime) setJustSaved(true);
+  async function onSubmit(values: TeacherProfileValues) {
+    setSaveError(null);
+    try {
+      await onSave({ ...values, photo });
+      if (!isFirstTime) setJustSaved(true);
+    } catch {
+      setSaveError("Something went wrong saving your profile — please try again.");
+    }
   }
 
   /** Reuses the real validation/transform pipeline so the preview can never diverge from what Save would actually produce. */
@@ -135,6 +141,8 @@ function TeacherProfileForm({ teacher, onSave, isFirstTime, skipHref = "/teacher
           <span>Profile updated.</span>
         </Alert>
       )}
+
+      {saveError && <Alert variant="error">{saveError}</Alert>}
 
       <section>
         <Heading level="h4" as="h2">

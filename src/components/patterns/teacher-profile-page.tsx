@@ -43,8 +43,8 @@ function TeacherProfilePage() {
 
   const isFirstTime = !teacher.bio && !teacher.education && teacher.subjects.length === 0;
 
-  function handleSave(values: TeacherProfileValues & { photo?: string }) {
-    updateProfile(values);
+  async function handleSave(values: TeacherProfileValues & { photo?: string }) {
+    await updateProfile(values);
     // First-time completion continues straight to the dashboard — that's
     // the confirmation. A later edit stays on this page and shows an
     // inline "Profile updated" banner instead (see TeacherProfileForm),

@@ -39,9 +39,9 @@ function ApplicationsDashboard() {
       <Section className="pt-10 sm:pt-12 lg:pt-14">
         <Container className="max-w-4xl">
           <Alert variant="info" className="mb-10">
-            There&apos;s no live admissions review connected yet — an application saved or submitted here stays on
-            this device only, and its status can&apos;t move beyond &ldquo;Submitted&rdquo; until a real review
-            process exists.
+            There&apos;s no live admissions review connected yet — an application saved or submitted here is safely
+            attached to your account, but its status can&apos;t move beyond &ldquo;Submitted&rdquo; until a real
+            review process exists.
           </Alert>
 
           <div className="flex items-center justify-between gap-4">

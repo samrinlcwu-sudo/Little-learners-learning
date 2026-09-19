@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, BookOpen, Library, Gamepad2, ClipboardList, Bell, Settings, ShieldCheck, Sparkles, Crown } from "lucide-react";
+import { Plus, BookOpen, Library, Gamepad2, ClipboardList, Bell, Settings, ShieldCheck, Sparkles, Crown, LogOut } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Heading } from "@/components/ui/heading";
@@ -29,6 +29,8 @@ import type { ChildProfile } from "@/lib/accounts/types";
 import { LOCAL_PARENT_ID } from "@/lib/accounts/local-children";
 import { getAllMemberships } from "@/lib/memberships/memberships";
 import { hasActiveMembership } from "@/lib/memberships/access";
+import { useSupabaseUser, signOut } from "@/lib/supabase/use-supabase-user";
+import { useRouter } from "next/navigation";
 import { CATEGORY_TONE_TILE, type CategoryTone } from "@/lib/utils/category-tone";
 
 const quickLinks: { icon: typeof BookOpen; title: string; description: string; href: string; tone: CategoryTone }[] = [
@@ -83,8 +85,12 @@ const quickLinks: { icon: typeof BookOpen; title: string; description: string; h
 function ParentDashboard() {
   const { children, ready, addChild, updateChild } = useChildProfiles();
   const { events, ready: progressReady } = useProgressEvents();
+  const { user } = useSupabaseUser();
+  const router = useRouter();
   const [modalOpen, setModalOpen] = React.useState(false);
   const [editingChild, setEditingChild] = React.useState<ChildProfile | null>(null);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+  const [signingOut, setSigningOut] = React.useState(false);
 
   // Always false today — getAllMemberships() returns [] because no
   // checkout flow anywhere in this codebase can create one (see
@@ -94,21 +100,38 @@ function ParentDashboard() {
 
   function openAddModal() {
     setEditingChild(null);
+    setSaveError(null);
     setModalOpen(true);
   }
 
   function openEditModal(child: ChildProfile) {
     setEditingChild(child);
+    setSaveError(null);
     setModalOpen(true);
   }
 
-  function handleSave(values: ChildProfileValues) {
-    if (editingChild) {
-      updateChild(editingChild.id, values);
-    } else {
-      addChild(values);
+  async function handleSave(values: ChildProfileValues) {
+    setSaveError(null);
+    try {
+      if (editingChild) {
+        await updateChild(editingChild.id, values);
+      } else {
+        await addChild(values);
+      }
+      setModalOpen(false);
+    } catch {
+      // Never surface the real Postgres/Supabase error text — a child
+      // profile save failing is either a network hiccup or a genuine
+      // server issue, neither of which a parent needs internal detail on.
+      setSaveError("Something went wrong saving this — please try again.");
     }
-    setModalOpen(false);
+  }
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    await signOut();
+    router.push("/sign-in");
+    router.refresh();
   }
 
   return (
@@ -123,11 +146,12 @@ function ParentDashboard() {
 
       <Section className="pt-10 sm:pt-12 lg:pt-14">
         <Container className="max-w-4xl">
-          <Alert variant="info" className="mb-10">
-            This dashboard works in your browser only right now — it
-            isn&apos;t connected to an account yet. Anything you add here
-            stays on this device.
-          </Alert>
+          {user && (
+            <Alert variant="success" className="mb-10">
+              Signed in as {user.email}. Your children and application
+              information are saved to your account, not just this device.
+            </Alert>
+          )}
 
           <AiAssistantTrigger asChild>
             <button type="button" className="mb-10 block w-full rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600/30">
@@ -257,6 +281,20 @@ function ParentDashboard() {
                   <Link href="/offerings">See what&apos;s planned</Link>
                 </Button>
               </div>
+              <div className="flex items-center justify-between gap-4 rounded-xl border border-neutral-200 p-5 sm:col-span-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-11 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
+                    <LogOut className="size-5" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-ink">Sign out</p>
+                    <p className="text-sm text-neutral-600">End your session on this device.</p>
+                  </div>
+                </div>
+                <Button variant="outline" onClick={handleSignOut} isLoading={signingOut}>
+                  Sign out
+                </Button>
+              </div>
             </div>
           </div>
         </Container>
@@ -272,6 +310,11 @@ function ParentDashboard() {
                 : "Just enough to personalize their learning — nothing else."}
             </ModalDescription>
           </ModalHeader>
+          {saveError && (
+            <Alert variant="error" className="mb-4">
+              {saveError}
+            </Alert>
+          )}
           <ChildProfileForm
             initialValues={editingChild ?? undefined}
             onSave={handleSave}

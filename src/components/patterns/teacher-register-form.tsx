@@ -13,40 +13,76 @@ import { Alert } from "@/components/ui/alert";
 import { AuthFormShell } from "@/components/patterns/auth-form-shell";
 import { teacherAccountSchema, type TeacherAccountValues } from "@/lib/validations/teacher";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
+import { createClient } from "@/lib/supabase/client";
+import { createTeacherProfileRow } from "@/lib/accounts/remote-teacher";
 import { trackEvent } from "@/lib/analytics/track";
 
 /**
- * Step 1 of teacher registration: just enough to create an account. Real
- * validation throughout (src/lib/validations/teacher.ts). What isn't real
- * yet is the account itself — no Supabase project is connected (see
- * src/lib/supabase/is-configured.ts) — but unlike the generic /sign-up
- * form, this one *does* save something real: name, email, and country are
- * written to this browser's local teacher record so the rest of the
- * flow (verify → complete profile → dashboard) has something to work
- * with. The password is validated for format and then discarded — it
- * never reaches localStorage or any variable outside this function. See
- * docs/TEACHER_ARCHITECTURE.md for the full reasoning.
+ * Step 1 of teacher registration — real account creation (Prompt 110, see
+ * docs/AUTHENTICATION_BACKEND_AUDIT.md). `supabase.auth.signUp()` creates
+ * the real, password-protected account (the password itself is sent
+ * straight to Supabase over HTTPS and never touches this codebase's own
+ * storage or logs — see docs/TEACHER_ARCHITECTURE.md); the teacher's
+ * profile row is created immediately after with the returned user's real
+ * id. Whether the next screen is a real "check your email" step or goes
+ * straight through depends on whether this Supabase project requires
+ * email confirmation — `teacher-verify-notice.tsx` handles both outcomes.
  */
 function TeacherRegisterForm() {
   const router = useRouter();
-  const { createAccount } = useTeacherProfile();
+  const [formError, setFormError] = React.useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<TeacherAccountValues>({ resolver: zodResolver(teacherAccountSchema) });
 
-  function onSubmit(values: TeacherAccountValues) {
-    // Once a Supabase project is connected, this branch calls
-    // supabase.auth.signUp({ email, password, options: { data: { name, role: "teacher" } } })
-    // instead. Until then: save the non-sensitive identity fields locally
-    // (never the password — see the component note above) and move on to
-    // the next step, exactly as the real flow would after a successful
-    // sign-up.
-    createAccount({ name: values.name, email: values.email, countryRegion: values.countryRegion });
+  async function onSubmit(values: TeacherAccountValues) {
+    setFormError(null);
+    const supabase = createClient();
+
+    const { data, error } = await supabase.auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: { data: { name: values.name, role: "teacher", countryRegion: values.countryRegion } },
+    });
+
+    if (error) {
+      // Supabase's own message for this case is already clear and safe to
+      // show verbatim; anything else gets a generic, non-leaking fallback.
+      setFormError(
+        error.message.toLowerCase().includes("already registered")
+          ? "An account with that email already exists. Try signing in instead."
+          : "We couldn't create your account. Please check your details and try again.",
+      );
+      return;
+    }
+
+    if (!data.user) {
+      setFormError("We couldn't create your account. Please try again.");
+      return;
+    }
+
+    // Only possible when this project doesn't require email confirmation
+    // — otherwise there's no session yet to satisfy the profile table's
+    // RLS insert policy. When confirmation is required, the profile is
+    // created lazily on first real sign-in instead (see
+    // `ensureOwnTeacherProfileExists`, remote-teacher.ts) — never here.
+    if (data.session) {
+      try {
+        await createTeacherProfileRow(data.user.id, {
+          name: values.name,
+          email: values.email,
+          countryRegion: values.countryRegion,
+        });
+      } catch {
+        setFormError("Your account was created, but we couldn't set up your profile. Please try signing in.");
+        return;
+      }
+    }
+
     trackEvent("teacher_registration_started");
-    router.push("/teachers/register/verify");
+    router.push(`/teachers/register/verify?email=${encodeURIComponent(values.email)}`);
   }
 
   return (
@@ -63,11 +99,15 @@ function TeacherRegisterForm() {
       }
     >
       {!isSupabaseConfigured && (
-        <Alert variant="info" className="mb-5">
-          Accounts aren&apos;t connected to a live backend yet, so this
-          won&apos;t create a real sign-in. Your name, email, and country
-          are saved on this device only so you can try the rest of the
-          registration flow.
+        <Alert variant="warning" className="mb-5">
+          Accounts aren&apos;t connected on this deployment right now, so
+          registration isn&apos;t available. Please try again later.
+        </Alert>
+      )}
+
+      {formError && (
+        <Alert variant="error" className="mb-5">
+          {formError}
         </Alert>
       )}
 
@@ -138,7 +178,7 @@ function TeacherRegisterForm() {
           )}
         </div>
 
-        <Button type="submit" className="w-full" isLoading={isSubmitting}>
+        <Button type="submit" className="w-full" isLoading={isSubmitting} disabled={!isSupabaseConfigured}>
           Create teacher account
         </Button>
       </form>

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/patterns/page-header";
 import { ChildAvatar } from "@/components/patterns/child-avatar";
-import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
+import { useAdminLocalChildProfiles } from "@/lib/accounts/use-admin-local-children";
 import { getLearningCategoryBySlug } from "@/config/learning-categories";
 import { ACCOUNT_STATUS_LABELS } from "@/lib/accounts/types";
 
@@ -29,7 +29,7 @@ import { ACCOUNT_STATUS_LABELS } from "@/lib/accounts/types";
  */
 function AdminChildDetail() {
   const params = useParams<{ childId: string }>();
-  const { children, ready, setAccountStatus } = useChildProfiles();
+  const { children, ready, setAccountStatus } = useAdminLocalChildProfiles();
 
   if (!ready) {
     return <Section className="min-h-[60vh]" />;

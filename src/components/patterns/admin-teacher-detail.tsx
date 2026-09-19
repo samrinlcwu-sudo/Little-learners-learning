@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/patterns/page-header";
 import { useAdminTeacherAccounts } from "@/lib/accounts/admin-teacher-directory";
-import { useTeacherProfile } from "@/lib/accounts/use-teacher-profile";
+import { useAdminLocalTeacherProfile } from "@/lib/accounts/use-admin-local-teacher";
 import { useTeacherResources } from "@/lib/resources/use-teacher-resources";
 import { canViewTeacherProfile } from "@/lib/accounts/teacher-visibility";
 import { getAllLearningCategories } from "@/config/learning-categories";
@@ -47,7 +47,7 @@ const interestLabelById = new Map(getAllTeachingInterestOptions().map((o) => [o.
 function AdminTeacherDetail() {
   const params = useParams<{ teacherId: string }>();
   const { teachers, ready } = useAdminTeacherAccounts();
-  const { setModerationStatus, setVerified, setAccountStatus } = useTeacherProfile();
+  const { setModerationStatus, setVerified, setAccountStatus } = useAdminLocalTeacherProfile();
   const { resources, ready: resourcesReady, setReviewStatus } = useTeacherResources();
 
   if (!ready || !resourcesReady) {

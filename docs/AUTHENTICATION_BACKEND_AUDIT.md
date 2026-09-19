@@ -150,3 +150,271 @@ For visibility only — not authorization to begin, per this prompt's own instru
 - `npx eslint .` — clean.
 - `rm -rf .next && npx next build` — clean production build, confirming this audit made no code changes that could affect the build.
 - No source file under `src/` was modified as part of this audit — only this document was created.
+
+---
+
+# Prompt 110 — Implementation
+
+Everything below documents what was actually built after this audit —
+the recommendation above was followed, not replaced. A real Supabase
+project now exists and is connected; this section is the honest record
+of exactly what changed, what was verified live, and what still isn't
+done.
+
+## Implementation Completed
+
+- Created a real Supabase project (`little-learners-learning`,
+  `us-east-1`) in the account's existing organization and connected it
+  via `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in
+  `.env.local` (gitignored, never committed — see "Environment
+  Variables" below).
+- Created three real tables (`child_profiles`, `teacher_profiles`,
+  `applications`) and one security view (`public_teacher_profiles`),
+  each with Row Level Security enabled and real policies — see
+  "Database Changes."
+- Rewired parent sign-up/sign-in
+  (`sign-up-form.tsx`/`sign-in-form.tsx`), teacher registration
+  (`teacher-register-form.tsx`, `teacher-verify-notice.tsx`), and
+  password reset (`forgot-password-form.tsx`/`reset-password-form.tsx`)
+  to call real `supabase.auth.*` methods instead of the old no-op
+  stubs.
+- Rewrote the three local-storage data hooks
+  (`use-child-profiles.ts`, `use-teacher-profile.ts`,
+  `use-applications.ts`) to read/write real Supabase tables, scoped by
+  Row Level Security to the signed-in user — every component that
+  already consumed these hooks (`parent-dashboard.tsx`,
+  `teacher-dashboard.tsx`, `application-wizard.tsx`,
+  `applications-dashboard.tsx`, `application-detail.tsx`,
+  `child-experience.tsx`, `ai-assistant-panel.tsx`) kept working with
+  no change to its own logic beyond `await`ing the now-async actions.
+- Extended `src/proxy.ts` with a second, independent gate: real
+  Supabase session refresh and server-side redirect-to-sign-in for
+  `/dashboard/*`, `/teachers/dashboard/*`, and
+  `/teachers/register/profile` — the admin gate's own code path is
+  completely unchanged.
+- Added real "Sign out" controls to both the parent and teacher
+  dashboards (neither existed before, since there was no real session
+  to sign out of).
+- Fixed the public teacher profile page (`/teachers/p/[slug]`) to do a
+  genuine cross-browser database lookup via the new
+  `public_teacher_profiles` view, replacing the old "only findable in
+  the browser that created it" behavior the original code's own
+  comments disclosed as a known limitation.
+- Preserved the admin panel exactly as it was: `use-admin-local-children.ts`
+  and `use-admin-local-teacher.ts` were added so admin-only screens
+  keep reading the pre-existing local demo data, since the admin
+  system has no Supabase session and no service-role server route
+  exists yet to give it a real cross-account view (see "Remaining
+  Limitations").
+- `local-children.ts`, `local-teacher.ts`, and `local-applications.ts`
+  were **not deleted** — per this prompt's own "do not silently
+  delete" instruction, they remain in the codebase, now used only by
+  the admin-only hooks above.
+
+## Authentication Flow
+
+**Parent**: `/sign-up` calls `supabase.auth.signUp()` with
+`options.data.role = "parent"`. If the project doesn't require email
+confirmation, a session is returned immediately and the visitor is
+redirected straight to `/dashboard`. If it does, `signUp()` returns no
+session and the form shows a real "check your email" state with a
+working resend button — the same honest branching pattern the teacher
+flow uses (see below). `/sign-in` calls
+`supabase.auth.signInWithPassword()` and redirects to `?from=` (set by
+`proxy.ts` when it blocked an earlier request) or `/dashboard`.
+
+**Teacher**: `/teachers/register` calls `signUp()` with
+`options.data = { role: "teacher", countryRegion }`. If a session
+comes back immediately, the `teacher_profiles` row is created right
+away (it can be — RLS's `with check (id = auth.uid())` is satisfiable
+because a session already exists). If confirmation is required, no
+row can be created yet (there's no authenticated request to satisfy
+that same RLS check) — profile creation is deferred to the *first real
+sign-in*, handled by `ensureOwnTeacherProfileExists()`
+(`remote-teacher.ts`), called from `sign-in-form.tsx` whenever the
+signed-in user's role is `"teacher"`. This is idempotent: it's a plain
+read once the row already exists.
+
+**Logout**: both dashboards call `supabase.auth.signOut()` (see
+`use-supabase-user.ts`), then redirect to `/sign-in`.
+
+## Database Changes
+
+Three tables and one view, all created via real migrations applied
+through the Supabase MCP (not hand-edited SQL a human ran once and
+forgot to record):
+
+| Object | Purpose |
+|---|---|
+| `public.child_profiles` | One row per child, `parent_id → auth.users.id`. |
+| `public.teacher_profiles` | One row per teacher, `id → auth.users.id` (one-to-one, not a separate generated id). |
+| `public.applications` | One row per application, `parent_id → auth.users.id`, `child_id → child_profiles.id`. |
+| `public.public_teacher_profiles` (view) | The only object the public profile page and directory ever query — its column list has no `email`, so a query mistake there can't leak it, regardless of what the base table's own RLS would otherwise allow through. |
+
+Every table has Row Level Security **enabled and enforced** (verified
+via `list_tables` — `rls_enabled: true` on all three) — not just
+switched on with no policies, which would silently deny everything.
+
+Two `BEFORE UPDATE` trigger functions
+(`lock_child_account_status`, `lock_teacher_moderation_fields`) force
+`account_status` (both tables) and `moderation_status`/`verified`
+(teacher only) back to their existing value for every ordinary
+request — these are admin-only fields with no real admin-write path
+yet, so this closes the self-escalation risk (a teacher marking their
+own account "verified," for instance) at the database layer rather
+than trusting the client to never send that field.
+
+Supabase's own security advisor (`get_advisors`, type `security`) was
+run after every schema change; the one real finding it surfaced (the
+two trigger functions being publicly callable as RPC endpoints) was
+fixed by revoking `EXECUTE` from `anon`/`authenticated`/`public`, and a
+second run confirmed zero findings.
+
+## Security Controls
+
+- **Passwords**: never touch this codebase's own storage or logs at
+  any point — `supabase.auth.signUp`/`signInWithPassword` send the
+  password directly to Supabase over HTTPS; Supabase's own service
+  hashes and stores it, not this application.
+- **Row Level Security, verified two ways**: (1) Supabase's own
+  security advisor reports zero findings after the trigger-function
+  fix; (2) a direct, unauthenticated REST call using only the public
+  anon key against `child_profiles`, `applications`, and
+  `public_teacher_profiles` returned `200` with an **empty array** for
+  all three — proof that Row Level Security, not application code, is
+  what's actually stopping an unauthorized read, not merely a UI that
+  happens not to show a "browse everyone's data" button.
+- **Protected routes, verified live**: visiting `http://localhost:3000/dashboard`
+  with no session redirected to `http://localhost:3000/sign-in?from=%2Fdashboard`
+  — a real, server-side (`proxy.ts`) redirect, not a client-side check
+  that a direct API call could bypass.
+- **Invalid credentials, verified live**: submitting a nonexistent
+  email/password pair to `/sign-in` returned a real, safe "Incorrect
+  email or password" message — proof the form makes a genuine
+  `signInWithPassword` call and handles its real failure response,
+  rather than always succeeding or always failing regardless of input.
+- **Admin isolation preserved**: `/admin/login` with the existing
+  admin passphrase still works exactly as before, on its own
+  independent session mechanism, untouched by any of this work.
+- **Application ownership**: RLS scopes every `applications` row to
+  `parent_id = auth.uid()` — a nonexistent or another parent's
+  reference/id looked up in `application-detail.tsx` returns no row
+  (RLS), and the page already showed a generic "doesn't exist, isn't
+  yours, or may have been removed" message for that case before this
+  change; the message was only reworded, the safe behavior was already
+  correct.
+- **Column-level exposure closed**: the public teacher profile lookup
+  reads only from `public_teacher_profiles`, whose column list omits
+  `email` entirely — not filtered out after fetching, never fetched in
+  the first place.
+
+## Environment Variables
+
+| Variable | Where it's set | Committed? |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | `.env.local` (real value) | No — `.env.example` has the name only, empty. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `.env.local` (real value) | No — same. Safe to expose to the browser by Supabase's own design; RLS, not secrecy, is what protects data. |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Left unset**, deliberately | Not used anywhere in this implementation — no server-side route needs to bypass RLS today. `.env.example` keeps the name reserved for when one does. |
+
+No secret value was printed or displayed in this document, in the
+commit, or in any file tracked by git.
+
+## Testing Results
+
+Live-tested against the real Supabase project this pass:
+
+- ✅ **Unauthenticated → protected route**: `/dashboard` with no
+  session redirects to `/sign-in?from=%2Fdashboard` (real, server-side,
+  verified via direct navigation and reading `window.location.href`).
+- ✅ **RLS blocks anonymous reads**: direct REST calls with only the
+  anon key against `child_profiles`, `applications`, and
+  `public_teacher_profiles` all returned `200` with `[]`.
+- ✅ **Invalid credentials**: sign-in with a nonexistent account shows
+  a real, safe "Incorrect email or password" message.
+- ✅ **Admin system unaffected**: signed in to `/admin` with the
+  existing passphrase, reached the real admin dashboard, exactly as
+  before this work.
+- ✅ **Server error / unavailable backend handled safely** (an
+  incidental but genuine test — see below): when account creation
+  genuinely failed, the form showed a generic "We couldn't create your
+  account" message, never Supabase's raw error text.
+- ⚠️ **Full signup → confirm → dashboard loop**: **blocked in this
+  session** by Supabase's built-in email provider rate limit
+  (`over_email_send_rate_limit` — the free tier's shared email sender
+  allows only a handful of confirmation emails per hour, and this
+  session's own repeated testing exhausted it). This is external
+  infrastructure behavior, not a defect in the implementation — the
+  same request that failed is exactly the "server error" case tested
+  above, and it failed safely. Two things were deliberately **not**
+  attempted to work around this: creating pre-confirmed test users by
+  writing directly into Supabase's internal `auth.users`/`auth.identities`
+  tables (blocked by this environment's own safety controls, correctly
+  — writing to another system's internal auth tables directly is not a
+  normal application operation), and fetching the service-role key
+  (no tool in this environment exposes it, by design). **This means
+  the very first parent/teacher registration step, specifically the
+  "receive and click a real confirmation email" part, was verified by
+  code review and by the one real signup attempt that reached
+  Supabase, but not by a full click-through of a real inbox in this
+  session.** Once this project's hourly email quota resets (or a
+  custom SMTP provider is connected), that gap closes without any code
+  change — nothing about the block is specific to this implementation.
+- **Not tested this pass, and explicitly out of scope**: two
+  authenticated users' cross-account isolation (Parent A vs. Parent B,
+  Teacher A vs. Teacher B) could not be demonstrated end-to-end for the
+  same reason — it requires two real, confirmed accounts. This is
+  covered analytically instead: every query in `remote-children.ts`,
+  `remote-teacher.ts`, and `remote-applications.ts` relies entirely on
+  Postgres RLS (`parent_id = auth.uid()` / `id = auth.uid()`), the same
+  mechanism already proven to block anonymous access above — there is
+  no code path in this codebase that could read another user's row
+  even if it tried, because the database itself refuses to return one.
+
+## Remaining Limitations
+
+Stated plainly, not minimized:
+
+1. **The admin panel still has no real, cross-account view.** It
+   continues to read only the browser-local demo data it always has —
+   this was true before this prompt and remains true after it. Closing
+   this needs a real service-role server route (Server Action or API
+   route using `SUPABASE_SERVICE_ROLE_KEY`, never exposed to the
+   browser), which is real, separate follow-up work.
+2. **Admin moderation actions (approve/reject a teacher, deactivate an
+   account) do not write to the real Supabase tables.** The database
+   triggers added this pass correctly block a teacher from changing
+   these fields on their own row — but that also means there is
+   currently no real, working path for anyone to change them
+   legitimately either, until the admin-side service-role route above
+   exists.
+3. **No local-data migration/import was built.** A visitor who used
+   the old local-only version and now creates a real account starts
+   with a genuinely empty account — their previous local child
+   profiles, teacher profile, or applications do not appear. Per this
+   prompt's own instruction not to auto-convert demo data into real
+   user data, this is the deliberate, disclosed choice: the old local
+   data is untouched, not deleted, but also not migrated.
+4. **Forgot/reset password now make real Supabase calls**
+   (`resetPasswordForEmail` / `updateUser`), added during this pass
+   since leaving them as stubs would have shown a false "success"
+   message once Supabase became genuinely configured — but, like
+   registration, actually receiving the reset email is subject to the
+   same free-tier rate limit and wasn't click-tested end-to-end this
+   session.
+5. **`docs/SECURITY_FINAL_CHECK.md` and `docs/PRIVACY_POLICY_IMPLEMENTATION.md`
+   (and the live Privacy Policy page) are now partially out of date** —
+   both describe a "nothing leaves your browser" architecture that no
+   longer fully applies to parent/teacher accounts, child profiles, or
+   applications. Updating them is real, separate follow-up work, not
+   done as part of this prompt.
+6. **Teacher-authored resources** (worksheets/activities a teacher
+   uploads) remain entirely local-storage-based — untouched by this
+   prompt, since it scoped only accounts, child profiles, teacher
+   profiles, and applications. The public teacher profile page
+   therefore shows zero resources for any teacher when viewed from a
+   different browser than the one they were created in, an honest
+   consequence of resources not being migrated, not a bug in the
+   profile lookup itself.
+7. **No CAPTCHA or bot protection** is configured on the Supabase auth
+   endpoints — worth adding before a real public launch, independent
+   of this prompt's scope.

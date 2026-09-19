@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTeacherProfile } from "./use-teacher-profile";
+import { useAdminLocalTeacherProfile } from "./use-admin-local-teacher";
 import type { TeacherProfile } from "./types";
 
 /**
@@ -23,7 +23,7 @@ import type { TeacherProfile } from "./types";
  * result, so nothing calling this hook needs to change later.
  */
 export function useAdminTeacherAccounts(): { teachers: TeacherProfile[]; ready: boolean } {
-  const { teacher, ready } = useTeacherProfile();
+  const { teacher, ready } = useAdminLocalTeacherProfile();
   const teachers = React.useMemo(() => (teacher ? [teacher] : []), [teacher]);
   return { teachers, ready };
 }

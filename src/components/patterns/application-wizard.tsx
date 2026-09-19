@@ -131,10 +131,11 @@ function ApplicationWizard({ initialApplicationId }: ApplicationWizardProps) {
   React.useEffect(() => {
     if (existingId || createdRef.current || !ready) return;
     createdRef.current = true;
-    const created = createApplication();
-    setApplicationId(created.id);
-    trackEvent("application_started");
-    router.replace(`/dashboard/applications/new?id=${created.id}`);
+    createApplication().then((created) => {
+      setApplicationId(created.id);
+      trackEvent("application_started");
+      router.replace(`/dashboard/applications/new?id=${created.id}`);
+    });
   }, [existingId, ready, createApplication, router]);
 
   // Load an existing draft's values into the form once, the first time it's available — not on every later store update, which would fight the family's own in-progress typing.
@@ -153,11 +154,11 @@ function ApplicationWizard({ initialApplicationId }: ApplicationWizardProps) {
     });
   }, [applicationId, applications, reset]);
 
-  function persistCurrentValues() {
+  async function persistCurrentValues() {
     if (!applicationId) return;
     const values = getValues();
     const hasApplicantInfo = values.name.trim() || values.email.trim();
-    updateApplication(applicationId, {
+    await updateApplication(applicationId, {
       applicant: hasApplicantInfo ? { name: values.name, email: values.email, phone: values.phone || undefined } : undefined,
       childId: values.childId || undefined,
       learningInterests: values.learningInterests ?? [],
@@ -170,29 +171,29 @@ function ApplicationWizard({ initialApplicationId }: ApplicationWizardProps) {
     const fields = key === "review" ? [] : APPLICATION_STEP_FIELDS[key as Exclude<StepKey, "review">];
     const valid = fields.length === 0 || (await trigger(fields as (keyof ApplicationWizardInput)[]));
     if (!valid) return;
-    persistCurrentValues();
+    await persistCurrentValues();
     setStepIndex((index) => Math.min(index + 1, STEPS.length - 1));
   }
 
-  function goBack() {
-    persistCurrentValues();
+  async function goBack() {
+    await persistCurrentValues();
     setStepIndex((index) => Math.max(index - 1, 0));
   }
 
-  function handleSaveAndExit() {
-    persistCurrentValues();
+  async function handleSaveAndExit() {
+    await persistCurrentValues();
     router.push("/dashboard/applications");
   }
 
-  function onSubmitFinal(values: ApplicationWizardValues) {
+  async function onSubmitFinal(values: ApplicationWizardValues) {
     if (!applicationId) return;
-    updateApplication(applicationId, {
+    await updateApplication(applicationId, {
       applicant: { name: values.name, email: values.email, phone: values.phone || undefined },
       childId: values.childId,
       learningInterests: values.learningInterests,
       message: values.message,
     });
-    const result = submit(applicationId);
+    const result = await submit(applicationId);
     if (result) {
       trackEvent("application_completed");
       setSubmittedApplication(result);

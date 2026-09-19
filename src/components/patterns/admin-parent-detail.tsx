@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/patterns/page-header";
 import { ChildAvatar } from "@/components/patterns/child-avatar";
-import { useChildProfiles } from "@/lib/accounts/use-child-profiles";
+import { useAdminLocalChildProfiles } from "@/lib/accounts/use-admin-local-children";
 import { useProgressEvents } from "@/lib/progress/use-progress-events";
 import { buildParentRows } from "@/lib/accounts/admin-user-rows";
 import { getFamilyActivitySummary } from "@/lib/accounts/admin-parent-activity";
@@ -33,7 +33,7 @@ import { ACCOUNT_STATUS_LABELS } from "@/lib/accounts/types";
  */
 function AdminParentDetail() {
   const params = useParams<{ parentId: string }>();
-  const { children, ready } = useChildProfiles();
+  const { children, ready } = useAdminLocalChildProfiles();
   const { events, ready: eventsReady } = useProgressEvents();
 
   if (!ready || !eventsReady) {

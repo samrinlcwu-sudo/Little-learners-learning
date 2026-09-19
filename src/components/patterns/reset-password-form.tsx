@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
@@ -11,8 +12,18 @@ import { Alert } from "@/components/ui/alert";
 import { AuthFormShell } from "@/components/patterns/auth-form-shell";
 import { resetPasswordSchema, type ResetPasswordValues } from "@/lib/validations/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { createClient } from "@/lib/supabase/client";
 
+/**
+ * Real password update (Prompt 110). Works only when arrived at via the
+ * real link `resetPasswordForEmail` sends (`forgot-password-form.tsx`) —
+ * that link's own token is what establishes the temporary recovery
+ * session `supabase.auth.updateUser` needs; visiting this page directly
+ * with no such session correctly fails with a real, honest error.
+ */
 function ResetPasswordForm() {
+  const router = useRouter();
+  const [formError, setFormError] = React.useState<string | null>(null);
   const [submitted, setSubmitted] = React.useState(false);
   const {
     register,
@@ -20,12 +31,16 @@ function ResetPasswordForm() {
     formState: { errors, isSubmitting },
   } = useForm<ResetPasswordValues>({ resolver: zodResolver(resetPasswordSchema) });
 
-  function onSubmit() {
-    // Once a Supabase project is connected, this branch calls
-    // supabase.auth.updateUser({ password }) using the session Supabase
-    // establishes from the reset-link token in the URL. Until then, there's
-    // no token to act on and no password to actually change.
+  async function onSubmit(values: ResetPasswordValues) {
+    setFormError(null);
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password: values.password });
+    if (error) {
+      setFormError("That reset link has expired or is invalid. Please request a new one.");
+      return;
+    }
     setSubmitted(true);
+    setTimeout(() => router.push("/sign-in"), 2000);
   }
 
   return (
@@ -42,16 +57,21 @@ function ResetPasswordForm() {
       }
     >
       {!isSupabaseConfigured && (
-        <Alert variant="info" className="mb-5">
-          Accounts aren&apos;t connected to a live backend yet, so no
-          password can actually be changed today.
+        <Alert variant="warning" className="mb-5">
+          Accounts aren&apos;t connected on this deployment right now, so no
+          password can be changed today.
+        </Alert>
+      )}
+
+      {formError && (
+        <Alert variant="error" className="mb-5">
+          {formError}
         </Alert>
       )}
 
       {submitted ? (
-        <Alert variant="success" title="Looks good">
-          That password passed every check. Changing it isn&apos;t connected
-          yet, so nothing was actually updated — check back once it is.
+        <Alert variant="success" title="Password updated">
+          Taking you to sign in&hellip;
         </Alert>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -71,7 +91,7 @@ function ResetPasswordForm() {
             )}
           </div>
 
-          <Button type="submit" className="w-full" isLoading={isSubmitting}>
+          <Button type="submit" className="w-full" isLoading={isSubmitting} disabled={!isSupabaseConfigured}>
             Update password
           </Button>
         </form>

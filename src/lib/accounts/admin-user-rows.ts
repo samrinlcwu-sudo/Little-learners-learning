@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useAdminTeacherAccounts } from "./admin-teacher-directory";
-import { useChildProfiles } from "./use-child-profiles";
+import { useAdminLocalChildProfiles } from "./use-admin-local-children";
 import { LOCAL_PARENT_ID } from "./local-children";
 import type { AccountStatus, ChildProfile } from "./types";
 
@@ -80,7 +80,7 @@ export function buildParentRows(children: ChildProfile[]): AdminUserRow[] {
 
 export function useAdminUserRows(): { rows: AdminUserRow[]; ready: boolean } {
   const { teachers, ready: teachersReady } = useAdminTeacherAccounts();
-  const { children, ready: childrenReady } = useChildProfiles();
+  const { children, ready: childrenReady } = useAdminLocalChildProfiles();
 
   const rows = React.useMemo<AdminUserRow[]>(() => {
     const teacherRows: AdminUserRow[] = teachers.map((teacher) => ({

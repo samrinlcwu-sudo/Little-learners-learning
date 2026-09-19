@@ -11,6 +11,7 @@ import { Alert } from "@/components/ui/alert";
 import { AuthFormShell } from "@/components/patterns/auth-form-shell";
 import { forgotPasswordSchema, type ForgotPasswordValues } from "@/lib/validations/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { createClient } from "@/lib/supabase/client";
 
 function ForgotPasswordForm() {
   const [submitted, setSubmitted] = React.useState(false);
@@ -20,10 +21,15 @@ function ForgotPasswordForm() {
     formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordValues>({ resolver: zodResolver(forgotPasswordSchema) });
 
-  function onSubmit() {
-    // Once a Supabase project is connected, this branch calls
-    // supabase.auth.resetPasswordForEmail(email, { redirectTo: `${origin}/reset-password` }).
-    // Until then, no email can actually be sent.
+  async function onSubmit(values: ForgotPasswordValues) {
+    const supabase = createClient();
+    // Deliberately ignores the result either way (Supabase itself never
+    // reveals whether an email is registered) — always showing the same
+    // "check your email" outcome is what prevents this form from being
+    // usable to test which emails have an account.
+    await supabase.auth.resetPasswordForEmail(values.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
     setSubmitted(true);
   }
 
@@ -41,17 +47,15 @@ function ForgotPasswordForm() {
       }
     >
       {!isSupabaseConfigured && (
-        <Alert variant="info" className="mb-5">
-          Accounts aren&apos;t connected to a live backend yet, so no reset
-          email can be sent today.
+        <Alert variant="warning" className="mb-5">
+          Accounts aren&apos;t connected on this deployment right now, so no
+          reset email can be sent today.
         </Alert>
       )}
 
       {submitted ? (
-        <Alert variant="success" title="Looks good">
-          That email passed every check. Sending a reset link isn&apos;t
-          connected yet, so no email was actually sent — check back once it
-          is.
+        <Alert variant="success" title="Check your email">
+          If an account exists for that address, a reset link is on its way.
         </Alert>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -72,7 +76,7 @@ function ForgotPasswordForm() {
             )}
           </div>
 
-          <Button type="submit" className="w-full" isLoading={isSubmitting}>
+          <Button type="submit" className="w-full" isLoading={isSubmitting} disabled={!isSupabaseConfigured}>
             Send reset link
           </Button>
         </form>
