@@ -23,13 +23,20 @@ export const metadata: Metadata = {
 };
 
 /**
- * Every claim in this content array was checked against the actual
- * implementation as of Prompt 108 (see docs/PRIVACY_POLICY_IMPLEMENTATION.md
- * for the full source-by-source inspection) — nothing here describes a
- * service, data flow, or right that doesn't currently exist in this
- * codebase. When a real backend, analytics provider, or payment
- * processor is connected in the future, the relevant section below
- * needs a real update, not just a compliance-label change.
+ * Originally written as of Prompt 108
+ * (see docs/PRIVACY_POLICY_IMPLEMENTATION.md for the full
+ * source-by-source inspection), before the real Supabase backend
+ * (Prompt 110) existed. Corrected during Vercel deployment prep to
+ * reflect that accounts, child profiles, teacher profiles, and
+ * applications are now stored in a real, Supabase-backed account —
+ * not only in the visitor's own browser — per
+ * docs/FINAL_LAUNCH_REPORT.md's finding that this page had drifted out
+ * of sync with the Terms of Service on that exact point. Nothing here
+ * describes a service, data flow, or right that doesn't currently
+ * exist in this codebase, and no compliance label (GDPR/COPPA/etc.) or
+ * legal/jurisdiction detail was added. When an analytics provider or
+ * payment processor is connected in the future, the relevant section
+ * below still needs a real update, not just a compliance-label change.
  */
 interface PolicySection {
   heading: string;
@@ -42,13 +49,13 @@ const SECTIONS: PolicySection[] = [
     heading: "Introduction",
     paragraphs: [
       "Little Learners Learning (\"we,\" \"us\") is an early-years learning platform for parents, teachers, and children ages 2–8. This policy explains what information the platform actually collects today, why, and how it's handled — based on how the site is genuinely built, not a generic template.",
-      "This policy describes the platform's current practices as implemented. It has not been reviewed by a lawyer, and it may need review by a qualified legal professional for the specific jurisdictions this platform ultimately operates in, especially as real user accounts, payments, or additional third-party services are connected in the future.",
+      "This policy describes the platform's current practices as implemented. It has not been reviewed by a lawyer, and it may need review by a qualified legal professional for the specific jurisdictions this platform ultimately operates in, especially as payments or additional third-party services are connected in the future.",
     ],
   },
   {
     heading: "Information We Collect",
     paragraphs: [
-      "Little Learners Learning is built to collect only what a specific feature you use actually needs. Most of what you enter on this site today is stored only in your own browser, not on a server we control — this is explained in more detail in \"Account and Application Information\" below.",
+      "Little Learners Learning is built to collect only what a specific feature you use actually needs. Account, profile, and application information is stored in your real account with our authentication and database provider, Supabase; a smaller set of purely on-device information (such as a child's recorded learning activity) stays only in your own browser — this is explained in more detail in \"Account and Application Information\" below.",
     ],
   },
   {
@@ -58,7 +65,7 @@ const SECTIONS: PolicySection[] = [
     ],
     list: [
       "A child's first name, age, a chosen avatar icon, and optionally a favorite subject, if you add a child profile from the parent dashboard.",
-      "Your name and email address, if you start creating a parent account, register as a teacher, or submit an application — sign-in itself isn't connected to a live account system yet (see \"Account and Application Information\"), so this information stays on your device rather than being sent to us, with one exception: if you complete and submit an application through the admissions wizard, the applicant name, email, phone number (optional), the child it's for, chosen learning interests, and any optional message you add are all stored, currently in your own browser only, the same as everything else described here.",
+      "Your name and email address, if you create a parent account or register as a teacher — this information is sent securely to Supabase, our authentication and database provider, and stored in your real account (see \"Account and Application Information\"). If you complete and submit an application through the admissions wizard, the applicant name, email, phone number (optional), the child it's for, chosen learning interests, and any optional message you add are stored the same way, in your account.",
       "Professional details you choose to add to a teacher profile — a headline, bio, education, certifications, years of experience, age groups and subjects taught, languages, teaching interests, areas of expertise, and an optional profile photo.",
       "A message, name, and email if you use the site's contact address directly (see \"Contact Information\") — this goes through your own email provider, not through this website.",
       "Anything you type into the \"Ask about learning\" assistant — this runs entirely in your browser, does not save your conversation, and is never sent to us or to any third party (see \"Third-Party Services\").",
@@ -79,9 +86,9 @@ const SECTIONS: PolicySection[] = [
     list: [
       "A child profile stores only a first name, age, a chosen avatar icon, and an optional favorite subject — never a photo, contact detail, school, or other identifying information about the child themselves.",
       "Learning activity (which games or resources a child has opened, and real scores where a game produces one) is recorded only to power the \"what to try next\" feature on that child's own profile. It is stored on the parent's own device, never transmitted to us, and never displayed anywhere outside that browser.",
-      "A child's information is only ever visible to whoever is using the same browser and device the profile was created on — there is no server-side account system today that would let this information be accessed from another device, by us, or by anyone else.",
+      "A child's profile is stored in your account with Supabase, our database provider, protected by database-level access rules that restrict it to your own account — it is accessible to you from any device you sign in from, and is not visible to another parent's account.",
       "The site does not knowingly collect information directly from a child, and there is no public page, directory, or feature anywhere on this site that displays a child's name or profile to other visitors.",
-      "A parent can remove a child's information at any time by deleting it from the dashboard, or by clearing this site's data in their own browser (see \"Your Rights and Choices\").",
+      "A parent can remove a child's profile at any time by deleting it from the dashboard, which removes it from your account. A child's on-device learning activity (see above) can separately be cleared by clearing this site's data in your own browser (see \"Your Rights and Choices\").",
     ],
   },
   {
@@ -102,17 +109,18 @@ const SECTIONS: PolicySection[] = [
       "Reasonable technical and organizational safeguards are used, appropriate to what the platform actually stores and where. We do not claim that any system is completely secure, 100% secure, or immune to every possible risk — no online service can honestly make that guarantee.",
     ],
     list: [
-      "The one real account system on this platform, the administrative area used by our own team, is protected by a signed, time-limited session credential, a login attempt limit, and a server-side access check that runs before any administrative page is served.",
-      "Because most information described in this policy is stored in your own browser rather than on a server we operate, it is not exposed by a data breach of our infrastructure in the way a centrally stored database would be — though it remains only as secure as the device and browser it's stored in.",
-      "Uploaded files (such as a teacher profile photo) are checked against a file type and size allow-list before being accepted, and are stored the same way as other profile information — on your own device, not on a server.",
+      "The administrative area used by our own team is protected by a signed, time-limited session credential, a login attempt limit, and a server-side access check that runs before any administrative page is served.",
+      "Your account password is never stored, logged, or visible to this application's own code at any point — when you sign up or sign in, it is sent directly to Supabase, our authentication provider, over an encrypted connection, and Supabase's own service is what stores and verifies it.",
+      "Every account-linked record (a child profile, a teacher profile, an application) is protected by database-level access rules (Row Level Security) that restrict it to the account that owns it, enforced by the database itself rather than by this application's own code alone.",
+      "Uploaded files (such as a teacher profile photo) are checked against a file type and size allow-list before being accepted, and are stored the same way as other profile information described above.",
     ],
   },
   {
     heading: "When Information May Be Shared",
     paragraphs: [
-      "We do not sell information collected through this site. Because most information described in this policy never reaches a server we control, there is currently very little for us to share even if we wanted to.",
+      "We do not sell information collected through this site. Account, profile, and application information is stored with Supabase, our authentication and database provider, which processes it only on our behalf and under our instructions — it is not an independent third party we share your information with for its own purposes.",
       "The one exception is a submitted application or a message sent to our contact email address, both of which are reviewed by whoever administers this platform in order to respond to you. We do not share this information with unrelated third parties.",
-      "If a real, server-backed account system, admissions review process, or payment feature is connected in the future, this section will need to be updated to reflect exactly who can access what at that point.",
+      "If a real, automated admissions review process or a payment feature is connected in the future, this section will need to be updated to reflect exactly who can access what at that point.",
     ],
   },
   {
@@ -123,50 +131,50 @@ const SECTIONS: PolicySection[] = [
     list: [
       "No analytics provider is connected. A generic analytics measurement system exists in the codebase, but it is inactive and sends no data until a specific provider is deliberately configured — this policy will be updated to name the provider if and when that happens.",
       "No payment processor is connected. There is no checkout, billing, or payment feature anywhere on this site today.",
-      "No database or authentication service is actively storing your data. A connection to a backend authentication provider exists in the codebase in scaffold form only, is not configured, and is not used by any live feature — every sign-in and sign-up form on this site says so directly.",
+      "Supabase is our real, connected authentication and database provider. It's what makes account sign-up, sign-in, child profiles, teacher profiles, and applications work — your account credentials, profile information, and application details are stored in Supabase's infrastructure on our behalf, protected by database-level access rules that restrict every record to the account that owns it.",
       "The site's typefaces are served by Next.js's own font system, which downloads and hosts font files as part of the site itself rather than loading them from Google's servers at the time you visit — your browser does not make a separate request to a font provider when you view this site.",
     ],
   },
   {
     heading: "Cookies and Similar Technologies",
     paragraphs: [
-      "This site uses one real cookie: a session cookie set only when someone signs in to the administrative area, used solely to keep that session signed in. It is not used for advertising or tracking, is not readable by page scripts, and is not set for ordinary visitors browsing the public site.",
-      "The site also uses your browser's own local storage (a standard browser feature, technically distinct from a cookie) to remember information you enter — such as a child profile, a teacher profile, or an application draft — directly on your device between visits. This is what allows features like the parent dashboard to work without a live account system. You can clear this at any time through your browser's own settings, which will remove it completely.",
+      "This site uses cookies for two real, functional purposes — never for advertising or tracking: one set only when someone signs in to the administrative area, used solely to keep that session signed in; and one or more set by Supabase, our authentication provider, when a parent or teacher signs in, used to keep that account session signed in. Neither is readable by page scripts, and neither is set for a visitor who never signs in.",
+      "Once you're signed in, your child profiles, teacher profile, and applications are stored in your Supabase-backed account, not in your browser's local storage — clearing your browser's site data will not delete this information, since it's kept by our authentication provider, scoped to your account (see \"Data Retention\" and \"Your Rights and Choices\"). Your browser's local storage may still be used for a small number of non-account conveniences, such as a child's recorded learning activity on that device (see \"Children's Information\").",
       "No advertising, cross-site tracking, or third-party cookie is set by this site today.",
     ],
   },
   {
     heading: "Data Retention",
     paragraphs: [
-      "Information stored in your browser (child profiles, teacher profiles, applications, and similar records) remains there until you remove it yourself or clear your browser's site data — this platform has no server-side copy to separately delete or retain.",
+      "Child profiles, teacher profiles, and applications are stored in your account with Supabase, our database provider, and remain there until you remove them yourself from the relevant dashboard or ask us to delete your account (see \"Your Rights and Choices\") — clearing your browser's local site data does not delete this information.",
       "The administrative activity log our own team can see is capped at a limited number of recent entries and is not kept as a permanent archive.",
     ],
   },
   {
     heading: "Your Rights and Choices",
     paragraphs: [
-      "Because most of your information is stored on your own device rather than on a server we control, you already hold direct, immediate control over most of it:",
+      "You have direct control over most of your account information, and a manual option for anything you can't change yourself:",
     ],
     list: [
-      "You can view, edit, or delete a child profile, teacher profile, or application draft at any time directly from the relevant dashboard.",
-      "You can remove everything this site has stored by clearing this site's data in your browser's settings.",
-      "For anything not covered by the above — for example, a question about a submitted application, or a request related to information you've sent to our contact email — please write to us using the contact information below. Because there is no automated request-handling system connected to this site today, any such request is currently reviewed and handled manually rather than through an automated deletion, correction, or export tool.",
+      "You can view, edit, or delete a child profile or teacher profile at any time directly from the relevant dashboard — these changes are saved to your real account.",
+      "To delete your account, or to request a copy of what's stored in it, contact us using the information below. There is no automated self-service deletion or export tool today, so this is currently handled manually rather than instantly.",
+      "For anything else — for example, a question about a submitted application, or a request related to information you've sent to our contact email — please write to us using the contact information below. Because there is no automated request-handling system connected to this site today, any such request is currently reviewed and handled manually rather than through an automated deletion, correction, or export tool.",
     ],
   },
   {
     heading: "Account and Application Information",
     paragraphs: [
-      "Parent and teacher \"accounts\" on this platform work differently than on most sites, and it's worth being direct about it: signing up or signing in does not currently create a real, server-side account. Every sign-in and sign-up page on this site tells you this before you submit anything.",
-      "What is real: once you're on a dashboard, adding a child profile, building a teacher profile, or filling out an application genuinely saves that information — in your own browser's local storage, tied to that browser and device, not to a login you can use elsewhere. Submitting an application does generate a real, unique reference number you can use to look up that same application again later, in the same browser.",
-      "Because there is no live account system, there is currently no password to protect on our end for a parent or teacher account, and no cross-device sign-in to secure — the security considerations that matter today are the same ones that matter for any information stored on your own device.",
+      "Parent and teacher accounts on this platform are real: signing up creates a genuine account with Supabase, our authentication and database provider, and signing in establishes a real, secure session tied to that account.",
+      "Once you're signed in, adding a child profile, building a teacher profile, or filling out an application genuinely saves that information to your account — accessible from any device you sign in from, not just the one you created it on. Submitting an application generates a real, unique reference number you can use to look up that same application again later, from your account.",
+      "Your account password is sent directly to Supabase and is never stored, logged, or visible to this application's own code at any point — Supabase's own service is what stores and verifies it. A database-level access rule (Row Level Security) restricts every child profile, teacher profile, and application record to the account that owns it, enforced by the database itself.",
     ],
   },
   {
     heading: "Teacher Information",
     paragraphs: [
-      "A teacher profile you build (name, email, country/region, and any professional details you choose to add) is stored on your own device, the same as other account-related information described above.",
-      "Whether a profile is visible to other visitors is controlled by a visibility setting you choose yourself, and a profile is only ever listed in the public teacher directory after it has also passed a moderation check. A profile that hasn't opted into visibility, or hasn't been through moderation, is not shown publicly.",
-      "Your account password, entered during teacher registration, is checked for basic format requirements and then discarded — it is never saved, by this site or anywhere else, because there is no live account system yet for it to authenticate against.",
+      "A teacher profile you build (name, email, country/region, and any professional details you choose to add) is stored in your account with Supabase, our database provider, the same as other account-related information described above.",
+      "Whether a profile is visible to other visitors is controlled by a visibility setting you choose yourself, and a profile is only ever listed in the public teacher directory after it has also passed a moderation check. A profile that hasn't opted into visibility, or hasn't been through moderation, is not shown publicly — and the public directory never displays your email address.",
+      "Your account password, entered during teacher registration, is sent directly to Supabase, our authentication provider — it is never stored, logged, or visible to this application's own code; Supabase's own service is what stores and verifies it for future sign-ins.",
     ],
   },
   {
@@ -178,12 +186,12 @@ const SECTIONS: PolicySection[] = [
   {
     heading: "Changes to This Privacy Policy",
     paragraphs: [
-      "This policy will be updated whenever a real change to what this platform collects or how it's handled actually happens — for example, if a real account backend, analytics provider, or payment processor is connected. The effective date below reflects the most recent update.",
+      "This policy will be updated whenever a real change to what this platform collects or how it's handled actually happens — for example, if an analytics provider or payment processor is connected. The effective date below reflects the most recent update.",
     ],
   },
 ];
 
-const EFFECTIVE_DATE = "September 19, 2026";
+const EFFECTIVE_DATE = "September 20, 2026";
 
 function PrivacyPage() {
   return (
