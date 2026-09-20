@@ -36,7 +36,7 @@ function ForgotPasswordForm() {
   return (
     <AuthFormShell
       title="Reset your password"
-      description="Enter your email and we'll send you a reset link — once this is connected."
+      description="Enter your email and we'll send you a reset link."
       footer={
         <>
           Remembered it?{" "}
