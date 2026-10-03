@@ -6,6 +6,10 @@ import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/patterns/page-header";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { isAssistantEnabled } from "@/lib/ai/assistant-config";
+
+// Build-time, like the Privacy Policy: this static page's assistant wording matches the build that produced it.
+const ASSISTANT_LIVE = isAssistantEnabled();
 
 const description =
   "The terms for using Little Learners Learning, based on the platform's current functionality.";
@@ -140,6 +144,11 @@ const SECTIONS: TermsSection[] = [
     paragraphs: [
       "Real accounts, sign-in, and the data behind child profiles, teacher profiles, and applications are handled through Supabase, a backend service provider — this is the one real third-party service this platform's core account features depend on today.",
       "No payment processor is connected to this platform, and no purchase, subscription, or payment can currently be made here. No analytics or advertising service is actively collecting data on this site today (a dormant, unconfigured measurement system exists in the codebase but sends no data — see the Privacy Policy for the full explanation).",
+      ...(ASSISTANT_LIVE
+        ? [
+            "The Little Learners Assistant is powered by AI from Anthropic. Its answers are generated automatically, can be incomplete or wrong, and are not professional, educational, medical, or legal advice — please check anything important yourself. Please don't share personal information with it; the Privacy Policy explains what is sent to Anthropic.",
+          ]
+        : []),
       "Where this site links to an external page (for example, a mailto link to our contact address), we aren't responsible for the content or practices of sites we don't operate.",
     ],
   },
@@ -176,7 +185,7 @@ const SECTIONS: TermsSection[] = [
   },
 ];
 
-const EFFECTIVE_DATE = "September 19, 2026";
+const EFFECTIVE_DATE = "October 3, 2026";
 
 function TermsPage() {
   return (

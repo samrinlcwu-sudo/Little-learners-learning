@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAiAudience } from "@/lib/ai/use-ai-audience";
 import { useAiConversation } from "@/lib/ai/use-ai-conversation";
-import { AI_DISCLOSURE_TEXT } from "@/lib/ai/guardrails";
+import { AI_DISCLOSURE_TEXT, AI_LIVE_DISCLOSURE_TEXT } from "@/lib/ai/guardrails";
+import { linkifyInternalPaths } from "@/lib/ai/linkify";
 import type { AiAudience } from "@/lib/ai/types";
 import { getAllLearningCategories } from "@/config/learning-categories";
 import { getAllTeacherAgeGroupOptions } from "@/config/teacher-options";
@@ -35,7 +36,7 @@ const AUDIENCE_PROMPTS: Record<AiAudience, string[]> = {
     "What should we try next?",
     "Show me literacy resources",
     "What games are available?",
-    "How is my child doing?",
+    "Where can I see my child's progress?",
   ],
   teacher: [
     "Find resources for preschool",
@@ -235,7 +236,7 @@ function AiAssistantPanel({ open, onOpenChange }: AiAssistantPanelProps) {
                 <DialogPrimitive.Title className="font-display text-base font-semibold text-ink">
                   Little Learners Assistant
                 </DialogPrimitive.Title>
-                <Badge variant="warning">Development preview</Badge>
+                {isDevelopmentPlaceholder ? <Badge variant="warning">Development preview</Badge> : <Badge variant="primary">AI</Badge>}
               </div>
               <DialogPrimitive.Description className="mt-1 text-sm text-neutral-500">
                 {AUDIENCE_GREETING[audience]}
@@ -276,14 +277,34 @@ function AiAssistantPanel({ open, onOpenChange }: AiAssistantPanelProps) {
                 <div key={message.id} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
                   <p
                     className={cn(
-                      "max-w-[85%] rounded-2xl px-4 py-2 text-sm",
+                      "max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-4 py-2 text-sm",
                       message.role === "user" ? "bg-primary-600 text-white" : "bg-neutral-100 text-ink",
                     )}
                   >
-                    {message.content}
+                    {message.role === "assistant"
+                      ? linkifyInternalPaths(message.content).map((segment, index) =>
+                          segment.type === "link" ? (
+                            <Link
+                              key={index}
+                              href={segment.value}
+                              onClick={() => onOpenChange(false)}
+                              className="font-medium text-primary-700 underline underline-offset-2"
+                            >
+                              {segment.value}
+                            </Link>
+                          ) : (
+                            <React.Fragment key={index}>{segment.value}</React.Fragment>
+                          ),
+                        )
+                      : message.content}
                   </p>
                 </div>
               ))
+            )}
+            {sending && messages.length > 0 && (
+              <div className="flex justify-start">
+                <p className="rounded-2xl bg-neutral-100 px-4 py-2 text-sm text-neutral-500">Thinking…</p>
+              </div>
             )}
           </div>
 
@@ -304,7 +325,9 @@ function AiAssistantPanel({ open, onOpenChange }: AiAssistantPanelProps) {
                 Send
               </Button>
             </form>
-            {isDevelopmentPlaceholder && <p className="mt-3 text-xs text-neutral-500">{AI_DISCLOSURE_TEXT}</p>}
+            <p className="mt-3 text-xs text-neutral-500">
+              {isDevelopmentPlaceholder ? AI_DISCLOSURE_TEXT : AI_LIVE_DISCLOSURE_TEXT}
+            </p>
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

@@ -19,3 +19,13 @@ export const AI_SAFETY_GUIDELINES: readonly string[] = [
  */
 export const AI_DISCLOSURE_TEXT =
   "This assistant is an AI feature still in development. It doesn't save your conversation, isn't a substitute for a teacher or other professional, and will never ask for personal information.";
+
+/**
+ * Shown instead whenever the real provider answers (always visible, not
+ * just a badge). States what actually happens: the question goes to the AI
+ * vendor to generate a reply, our own servers don't keep it, and it can be
+ * wrong. Must stay in sync with the Privacy Policy's assistant wording
+ * (src/app/privacy/page.tsx).
+ */
+export const AI_LIVE_DISCLOSURE_TEXT =
+  "Answers are written by AI (Anthropic's Claude) and can be incomplete or wrong — double-check anything important. What you type is sent to Anthropic to generate a reply; we don't store your conversation. Please don't share personal information.";

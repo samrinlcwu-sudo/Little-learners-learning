@@ -1,6 +1,7 @@
 # AI Assistant Architecture
 
-Introduced in Prompt 46 as architecture and UI foundation only — no
+Introduced in Prompt 46 as architecture and UI foundation; a real Claude-backed
+provider was added afterwards (see "Real provider" at the end). Originally: no
 external AI provider is connected. Read this before building the real
 assistant on top of it; the goal is that connecting a provider later
 changes exactly one function (`getAiAssistantProvider` below) and nothing
@@ -190,3 +191,75 @@ Conversation content lives only in React state for the current tab and is
 never rendered into the page's initial HTML, so there's nothing here for a
 crawler to see either way. All previously shipped SEO/AEO work
 (`docs/SEO_ARCHITECTURE.md`) is unchanged.
+
+## Real provider (Claude) — added October 2026
+
+The seam described under "Service layer" above has now been used exactly
+as designed: a real provider was added without changing any caller
+(`use-ai-conversation.ts`, the panel's hooks, permissions, audience).
+Everything below is what was actually built.
+
+**Switch.** `NEXT_PUBLIC_AI_ASSISTANT_ENABLED=true` (public; changing it
+needs a redeploy) selects the real provider in `getAiAssistantProvider()`.
+Anything else keeps the honest placeholder. The server route *also*
+requires this flag **and** `ANTHROPIC_API_KEY` (server-only, never
+`NEXT_PUBLIC_`) — with either missing it returns `503 unavailable` and the
+visitor sees a plain, honest fallback message. There is no state in which
+a missing key produces a fake answer.
+
+**Flow.** `claude-provider.ts` (browser) → `POST /api/assistant`
+(`src/app/api/assistant/route.ts`, the first API route in this codebase) →
+Anthropic Messages API (`claude-sonnet-5`, `assistant-config.ts`). The
+browser never sees the key and never talks to Anthropic directly, so the
+existing CSP (`connect-src 'self'`) needed no change.
+
+**What is sent to Anthropic.** Only the visitor's own typed question, up to
+six earlier turns of that same conversation (role + text only), and a
+server-built system prompt (`system-prompt.ts`) made entirely of public,
+already-published site content plus a short list of platform facts. The
+request schema (`assistant-request.ts`) has no field for a child id,
+account id, or progress data, so none can be sent; the parent/teacher home
+sections in the panel (child progress, a teacher's own resource counts)
+remain plain read-only UI that never goes through the provider. The
+system prompt's catalog is built through the same
+`getAllLearningAreaKnowledge()` the site uses, plus any published item not
+tied to one subject — so unpublished and religious-review-pending content
+(for example the Arabic Letter Match game) can never appear in it;
+`system-prompt.test.ts` asserts this.
+
+**Safety.** `AI_SAFETY_GUIDELINES` (`guardrails.ts`) — previously a written
+requirement — is now injected verbatim into every system prompt, with
+instructions to treat user text as untrusted, refuse off-topic requests,
+never claim to be human, and never write Qur'an/Arabic-letter teaching
+content (only point to the platform's human-reviewed material). Replies
+are plain text; `linkify.ts` turns only this site's own section paths into
+links (never external URLs). The child and admin audiences remain refused
+by the route itself (`mayAccessAssistant`).
+
+**Abuse and cost controls.** Same-origin check, 20 requests per 10 minutes
+per network address (`rate-limit.ts`), message/history/body size caps,
+500-token replies, one SDK retry, 25s timeout. The rate limiter is
+per-server-instance memory — it blunts one client but is **not** a global
+quota (no external store exists; same trade-off as the admin login
+throttle). The real spend ceiling is the monthly limit set in the
+Anthropic console, which must be set by the account owner.
+
+**Privacy.** Nothing about a conversation is stored or logged by this
+application; on upstream failure only an HTTP status code is logged, never
+a message. Because question text now does reach a third party, the Privacy
+Policy and Terms wording about the assistant is built from the same flag at
+build time (`src/app/privacy/page.tsx`, `src/app/terms/page.tsx`), so the
+published text always matches whether the assistant was enabled in that
+build. Anthropic's own retention is governed by its terms; this document
+makes no claim about it.
+
+**Superseded statements elsewhere.** Earlier audits state that this
+codebase has no API routes (`docs/SECURITY_FINAL_CHECK.md`,
+`docs/FINAL_DEPLOYMENT_GUIDE.md`) and that the assistant never sends data
+to a third party (`docs/PRIVACY_POLICY_IMPLEMENTATION.md`). Both were true
+when written and are no longer true once the assistant is enabled; this
+section is the current record.
+
+**Not built (deliberately).** Streaming replies, persistent conversation
+history, any use of child or teacher data, and a child-facing surface — each
+needs its own privacy and safety review first.

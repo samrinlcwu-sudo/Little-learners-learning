@@ -6,6 +6,12 @@ import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/patterns/page-header";
 import { siteConfig } from "@/config/site";
 import { buildSocialMetadata } from "@/lib/seo/social-metadata";
+import { isAssistantEnabled } from "@/lib/ai/assistant-config";
+
+// Read once at build time: this page is statically generated, so its
+// assistant wording always matches whether the real assistant was enabled
+// in the build that produced it (NEXT_PUBLIC_AI_ASSISTANT_ENABLED).
+const ASSISTANT_LIVE = isAssistantEnabled();
 
 const description =
   "How Little Learners Learning collects, uses, and protects information, based on the platform's current functionality.";
@@ -68,7 +74,9 @@ const SECTIONS: PolicySection[] = [
       "Your name and email address, if you create a parent account or register as a teacher — this information is sent securely to Supabase, our authentication and database provider, and stored in your real account (see \"Account and Application Information\"). If you complete and submit an application through the admissions wizard, the applicant name, email, phone number (optional), the child it's for, chosen learning interests, and any optional message you add are stored the same way, in your account.",
       "Professional details you choose to add to a teacher profile — a headline, bio, education, certifications, years of experience, age groups and subjects taught, languages, teaching interests, areas of expertise, and an optional profile photo.",
       "A message, name, and email if you use the site's contact address directly (see \"Contact Information\") — this goes through your own email provider, not through this website.",
-      "Anything you type into the \"Ask about learning\" assistant — this runs entirely in your browser, does not save your conversation, and is never sent to us or to any third party (see \"Third-Party Services\").",
+      ASSISTANT_LIVE
+        ? "Anything you type into the Little Learners Assistant — your question and the earlier messages in that conversation are sent to Anthropic, the AI provider, to generate a reply (see \"Third-Party Services\"). We don't store your conversation, and the assistant is never given a child's profile, progress, or other account information — so please don't type personal information into it."
+        : "Anything you type into the \"Ask about learning\" assistant — this runs entirely in your browser, does not save your conversation, and is never sent to us or to any third party (see \"Third-Party Services\").",
     ],
   },
   {
@@ -132,6 +140,11 @@ const SECTIONS: PolicySection[] = [
       "No analytics provider is connected. A generic analytics measurement system exists in the codebase, but it is inactive and sends no data until a specific provider is deliberately configured — this policy will be updated to name the provider if and when that happens.",
       "No payment processor is connected. There is no checkout, billing, or payment feature anywhere on this site today.",
       "Supabase is our real, connected authentication and database provider. It's what makes account sign-up, sign-in, child profiles, teacher profiles, and applications work — your account credentials, profile information, and application details are stored in Supabase's infrastructure on our behalf, protected by database-level access rules that restrict every record to the account that owns it.",
+      ...(ASSISTANT_LIVE
+        ? [
+            "Anthropic provides the AI model behind the Little Learners Assistant. When you use the assistant, the question you type and the recent messages in that conversation are sent to Anthropic over an encrypted connection to generate a reply, and Anthropic handles that text under its own terms and privacy policy. To limit abuse, our server briefly counts requests per network address in memory; this count is not stored permanently, and the text of your conversation is not stored by us.",
+          ]
+        : []),
       "The site's typefaces are served by Next.js's own font system, which downloads and hosts font files as part of the site itself rather than loading them from Google's servers at the time you visit — your browser does not make a separate request to a font provider when you view this site.",
     ],
   },
@@ -191,7 +204,7 @@ const SECTIONS: PolicySection[] = [
   },
 ];
 
-const EFFECTIVE_DATE = "September 20, 2026";
+const EFFECTIVE_DATE = "October 3, 2026";
 
 function PrivacyPage() {
   return (
